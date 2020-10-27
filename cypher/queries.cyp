@@ -39,9 +39,10 @@ CALL n10s.rdf.stream.fetch("https://github.com/neo4j-labs/neosemantics/raw/3.5/d
 yield subject as s, predicate  as p, object as o
 
 ### Set unique constraint on a node property
-CREATE CONSTRAINT gene_id_constraint ON (h:Human_gene) ASSERT h.gene_id IS UNIQUE
+CREATE CONSTRAINT gene_id_constraint ON (h:Human_gene) ASSERT h.gene_id IS UNIQUE;
 
-
+#### Look at all indexes and constraints ###
+:schema
 
 #### Preview the headers of your dataset
 load csv with headers from 'file:///test.csv' as row with row limit 1 return keys(row);
