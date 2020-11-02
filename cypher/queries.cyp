@@ -19,11 +19,12 @@ LOAD CSV WITH HEADERS FROM
 
 
 #### Loadng a human gene list with multiple properties #####
-LOAD CSV WITH HEADERS FROM "file:///Users/stearb/downloads/mygene_human_select_fields-2.csv" AS row 
+LOAD CSV WITH HEADERS FROM 
+"file:///Users/stearb/desktop/neo4j_data/mygene_human_select_fields.csv" AS row 
 with  row
-MERGE (h:Human_gene {gene_id: row.symbol, gene_name:row.name, ensembl_gene_id:row.`ensembl.gene`,
-ensembl_protein_id:row.`ensembl.protein`, ensembl_transcript_id:row.ensembl.transcript,
-gene_type:row.`ensembl.type_of_gene`})
+CREATE (h:Human_gene {gene_id: row.symbol, gene_name:row.name, ensembl_gene_id:row.`ensembl.gene`,
+ensembl_protein_id:row.`ensembl.protein`, gene_type:toUPPER(row.`ensembl.type_of_gene`)})
+set h.MIM = CASE row.MIM when null then false else toInteger(row.MIM) END
 
 
 ### Dealing with missing/empty fields in the dataset in specific columns ####
@@ -41,8 +42,15 @@ yield subject as s, predicate  as p, object as o
 ### Set unique constraint on a node property
 CREATE CONSTRAINT gene_id_constraint ON (h:Human_gene) ASSERT h.gene_id IS UNIQUE;
 
+### Create index 
+CREATE INDEX ON :Album(Name)
+
+### Drop all index and constraints #####
+CALL apoc.schema.assert({}, {})
+
 #### Look at all indexes and constraints ###
 :schema
+
 
 #### Preview the headers of your dataset
 load csv with headers from 'file:///test.csv' as row with row limit 1 return keys(row);
@@ -64,12 +72,52 @@ load csv with headers from 'file:///test.csv' as row with row limit 1 return key
 
 
 
-################ MATCH ############
 
 # Match all human nodes who's Gene ID starts with A and ends with 1
 match (n:Human_gene)
 where n.gene_id starts with 'A' AND n.gene_id ends with '1'
 return n
+
+###### Building gene homology graph model, with extra fields #####
+//  import gene2gene homology
+LOAD CSV WITH HEADERS FROM 
+"file:///Users/stearb/desktop/neo4j_data/homologs_12.csv" AS row
+ MERGE (h:Human_gene {gene_id: row.Human})
+ MERGE (m:Mouse_gene {gene_id: row.Mouse})
+ MERGE (h)-[:HOMOLOGOUS]->(m)
+ MERGE (m)-[:HOMOLOGOUS_mouse]->(h)
+
+// Update human gene nodes  with extra fields
+LOAD CSV WITH HEADERS FROM 
+"file:///Users/stearb/desktop/neo4j_data/mygene_human_select_fields.csv" AS row
+ match (h:Human_gene {gene_id: row.symbol})
+set h.gene_name=row.name, h.ensembl_gene_id=row.`ensembl.gene`,
+h.ensembl_protein_id= row.`ensembl.protein`, h.gene_type=toUPPER(row.`ensembl.type_of_gene`)
+
+// Update mouse gene nodes  with extra fields
+
+
+###### Get homogolous genes  #########
+## First, get list of genes ####
+match (n:Human_gene)
+where n.gene_id starts with 'AA'
+with n
+match (n)-[h:HOMOLOGOUS]-(hn)
+return n.gene_id  as gid, type(h) as relationship, hn.gene_id  as mouse_gid
+
+
+##### Use list to match nodes ######
+match (h:Human_gene)  
+where  h.gene_id in ["AAAS","AACS","AADAC","AADACL2","AADACL3","AADACL4"]
+return h.ensembl_gene_id
+
+
+
+
+
+##### Loading in the cars/owners/boats dataset #######
+
+
 
 
 
