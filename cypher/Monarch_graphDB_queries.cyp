@@ -47,6 +47,17 @@ match (n:`biolink:Gene`) return count(n)    # 1,718,787
 match (h:`organism taxon`)-[r:`biolink:related_to`]-(g:`biolink:Gene`)
 return h.name as organism, count(g) as genes order by genes desc
 
+##### Get human phenotypes
+match (p:`biolink:PhenotypicFeature` {in_taxon:'NCBITaxon:9606'})     # phenotypicfeature, gives clinvar variants like: NM_020919.2(ALS2):c.[3565delG];[3624+5G>C]
+return p limit 5
+
+###### disease, UMLS in xref
+match (d:`biolink:Disease`)
+return d limit 5
+
+
+
+
 
 
 
