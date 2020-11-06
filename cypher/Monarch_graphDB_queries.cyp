@@ -55,9 +55,13 @@ return p limit 5
 match (d:`biolink:Disease`)
 return d limit 5
 
+##### how to make use of umls ^^^?
+
+
+##### Traverse from hpo term to mpo to mouse gene to human gene --> human gene interaction nx?
 
 
 
-
-
-
+match (d)
+where d.id  =~ 'hpo.*'
+return d limit 5
