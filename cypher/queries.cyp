@@ -112,6 +112,17 @@ where  h.gene_id in ["AAAS","AACS","AADAC","AADACL2","AADACL3","AADACL4"]
 return h.ensembl_gene_id
 
 
+####### Load nico's phenotype data
+LOAD CSV WITH HEADERS FROM 
+"file:///Users/stearb/downloads/upheno_mapping_all.csv" AS row 
+with  row
+create(x:label_x {phenotype:row.label_x})
+create(y:label_y {phenotype:row.label_y})
+with x,y
+create (x)-[:CROSS_PHENOTYPE]->(y)
+create (y)-[:X_PHENOTYPE]->(x)
+
+
 
 
 
