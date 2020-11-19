@@ -1,0 +1,12 @@
+# How many Concept nodes are there?    #  4,231,008
+match (c:Concept)
+return count(c)    
+
+# What properties do Concepts have?     #  just a "CUI"
+match (c:Concept)
+return distinct keys(c)     
+
+
+# How many Code nodes are there?
+match (cd:Code)
+return count(cd)
