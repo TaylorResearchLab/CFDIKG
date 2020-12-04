@@ -78,8 +78,6 @@ load csv with headers from 'file:///test.csv' as row with row limit 1 return key
 # with row where row.Gene is not null
 
 
-
-
 # Match all human nodes who's Gene ID starts with A and ends with 1
 match (n:Human_gene)
 where n.gene_id starts with 'A' AND n.gene_id ends with '1'
@@ -131,6 +129,18 @@ create (y)-[:X_PHENOTYPE]->(x)
 
 
 
+#### Get stats/statistics/summary of connections in graph
+MATCH (n) WHERE rand() <= 0.1
+WITH labels(n) as labels, size(keys(n)) as props, size((n)--()) as degree
+RETURN
+DISTINCT labels,
+count(*) AS NumofNodes,
+avg(props) AS AvgNumOfPropPerNode,
+min(props) AS MinNumPropPerNode,
+max(props) AS MaxNumPropPerNode,
+avg(degree) AS AvgNumOfRelationships,
+min(degree) AS MinNumOfRelationships,
+max(degree) AS MaxNumOfRelationships
 
 
 ##### Loading in the cars/owners/boats dataset #######
