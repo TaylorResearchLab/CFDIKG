@@ -7,6 +7,9 @@ MATCH (n) RETURN distinct labels(n)
 CALL apoc.meta.stats() YIELD labels
 RETURN labels;
 
+### View general schema 
+CALL db.schema.visualization
+
 ### Deleting (and detaching) all nodes/relationships from a very large database  
 # Must use apoc.periodic.iterate() instead of the regular query MATCH(n) DETACH DELETE n, to avoid JavaHeap Space error.
 # https://stackoverflow.com/questions/51171928/difference-between-apoc-periodic-iterate-and-apoc-periodic-commit-when-deleting/51172771
