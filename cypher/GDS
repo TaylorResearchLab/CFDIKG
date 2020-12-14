@@ -6,9 +6,9 @@
 You can get it by clicking on install plug-ins in the NEO4j desktop. If you're not 
 using NEO4j desktop you can download the graph data science library from neo4j.com/download-center.
 
-------
-SYNTAX
-------
+----------
+| SYNTAX |
+----------
 
 CALL gds[.<tier>.].<algorithm>.<execution-mode>[.<estimate>](
   graphName: STRING,
@@ -20,4 +20,65 @@ CALL gds[.<tier>.].<algorithm>.<execution-mode>[.<estimate>](
   <execution-mode> - how to run the alg.: write/stream/stats  (stream will return the results  without altering the graph, 
                                                                 write will alter the graph and stats will give stats about algorithm results.)
   <estimate> - estimate the memory requirements of the alg.
+
+
+
+----------------
+| CREATE GRAPH |
+----------------
+
+- must create a graph before running algorithms.
+
+CALL.gds.graph.create('graph-name', 'Node-Type', {
+  relationship-Type: {orientation: 'UNDIRECTED'
+  }
+})
+
+
+----------------
+| RUN ALGORITHM | Example 1 using stream
+----------------
+
+- run pageRank algorithm (a measure of centrality)
+
+CALL gds.pageRank.stream('graph-name') YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score            # gds.util.asNode(nodeId) will givew you each node
+ORDER BY score DESC LIMIT 10
+
+----------------
+| RUN ALGORITHM | Example 2 using stream
+----------------
+
+- run pageRank and return degree and weighted degree as well
+
+CALL gds.pageRank.stream('graph-name') YIELD nodeId, score as pageRank
+gds.util.asNode(nodeId).name AS n, pageRank
+MATCH (n)-[i:INTERACTS]-()
+RETURN n.name  AS name, pageRank, count(i) AS degree,  sum(i.weight) AS weightedDegree
+ORDER BY pageRank DESC LIMIT 10
+
+
+----------------
+| RUN ALGORITHM | Example 1 using write
+----------------
+
+- Give every node it's own pageRank score as a property
+
+CALL gds.pageRank.write('graph-name',  {writeProperty: 'pageRank'})
+
+
+
+----------------
+| RUN ALGORITHM | Example 2 using write
+----------------
+
+- use labelPropogation alg to write an atrribute to every node, called 'community'
+
+CALL gds.labelPropogation.write(
+ 'graph-name',
+ { relationshipWeightProperty: 'weight',
+   maxIterations: 10,
+   writeProperty: 'community' }  )
+
+
 
