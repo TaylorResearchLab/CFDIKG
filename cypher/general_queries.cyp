@@ -61,6 +61,10 @@ CALL apoc.schema.assert({}, {})
 #### Look at all indexes and constraints ###
 :schema
 
+### get nodes that have a specific/certain property/attribute (use not exists for inverse)
+match (n:Term) where exists (n.gene_id) delete n
+
+
 
 #### Preview the headers of your dataset
 load csv with headers from 'file:///test.csv' as row with row limit 1 return keys(row);
@@ -146,7 +150,7 @@ min(degree) AS MinNumOfRelationships,
 max(degree) AS MaxNumOfRelationships
 
 
-##### Loading in the cars/owners/boats dataset #######
+##### Loading in homologies 2nd version (with hgnc ids) #######
 
 
 
