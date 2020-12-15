@@ -6,7 +6,9 @@ return count(c)
 match (c:Concept)
 return distinct keys(c)     
 
-
 # How many Code nodes are there?
 match (cd:Code)
 return count(cd)
+
+# How many HGNC Code nodes are there?
+match(n:Code {SAB:'HGNC'}) return count(n)    # 41,638
