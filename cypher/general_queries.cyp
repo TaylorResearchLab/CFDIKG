@@ -152,6 +152,11 @@ max(degree) AS MaxNumOfRelationships
 
 ##### Loading in homologies 2nd version (with hgnc ids) #######
 
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM 
+"file:///hgnc_2_mouse_homologs.csv" AS row
+CREATE (t:Term  {name: row.mouse_name, gene_id: row.mouse_symbol, SUI:row.SUI})
+
 
 
 
