@@ -15,4 +15,4 @@ match(n:Code {SAB:'HGNC'}) return count(n)    # 41,638
 
 
 # what type of properties do term nodes have?
-match (t:Term) return distinct keys(t)     # ["SUI", "name"]
+match (t:Term) return distinct keys(t)     # ["SUI", "name"]   ex. SUI:S11842225   name:17-ketogenic steroid
