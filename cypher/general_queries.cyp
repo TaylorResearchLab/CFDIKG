@@ -64,8 +64,6 @@ CALL apoc.schema.assert({}, {})
 ### get nodes that have a specific/certain property/attribute (use not exists for inverse)
 match (n:Term) where exists (n.gene_id) delete n
 
-
-
 #### Preview the headers of your dataset
 load csv with headers from 'file:///test.csv' as row with row limit 1 return keys(row);
 
@@ -149,8 +147,10 @@ avg(degree) AS AvgNumOfRelationships,
 min(degree) AS MinNumOfRelationships,
 max(degree) AS MaxNumOfRelationships
 
-
+###############################################################
 ##### Loading in homologies 2nd version (with hgnc ids) #######
+###############################################################
+
 // Create new Term nodes representing (homologous) mouse genes 
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 
@@ -158,8 +158,8 @@ LOAD CSV WITH HEADERS FROM
 CREATE (t:Term {gene_id: row.mouse_symbol, name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id } )
 
 // Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship, so the next query doesnt take forever
-CREATE INDEX ON :Term(gene_id) 
-CREATE INDEX ON :Code(CODE)
+CREATE INDEX FOR (t:Term) ON (t.gene_id);
+CREATE INDEX FOR (c:Code) ON (c.CODE);
 
 // Connect HGNC Code nodes to its corresponding mouse gene Term node with a :MOUSE_HOMOLOG relationship
 :auto USING PERIODIC COMMIT 10000
@@ -167,8 +167,13 @@ LOAD CSV WITH HEADERS FROM
 "file:///hgnc_2_mouse_homologs.csv" AS row
 MERGE (n:Code {SAB:'HGNC', CODE:row.hgnc_id})-[:MOUSE_HOMOLOG]->(t:Term {gene_id:row.mouse_symbol})
 
-
-
 match (n:Code {SAB:'HGNC'})-[m:MOUSE_HOMOLOG]->(t:Term) RETURN n,m,t limit 5
 
+###############################################################
+##### Loading in genotype-phenotype data #######
+###############################################################
 
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM 
+"file:///geno2pheno_mapping.csv" AS row
+CREATE (mp:MP {name: row.mp_term_name, mp_term_id: row.mp_term_id, parameter_name:row.parameter_name})
