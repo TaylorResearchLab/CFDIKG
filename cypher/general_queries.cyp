@@ -186,3 +186,17 @@ LOAD CSV WITH HEADERS FROM
 "file:///geno2pheno_mapping.csv" AS row
 MATCH (mp:MP {gene_id:row.marker_symbol}), (t:Term {gene_id:row.marker_symbol})
 MERGE (t)-[:HAS_PHENOTYPE]->(mp)
+
+
+###############################################################
+##### Loading IMPC triples/turtle or .owl files with neosemantics plugin #######
+###############################################################
+
+
+CREATE CONSTRAINT n10s_unique_uri ON (r:Resource) ASSERT r.uri IS UNIQUE;
+CALL n10s.graphconfig.init();
+CALL n10s.onto.import.fetch("file:///Users/stearb/desktop/R03_local/data/impc.ttl",
+                        "Turtle",{addResourceLabels : TRUE})
+
+
+
