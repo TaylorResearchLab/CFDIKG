@@ -176,4 +176,13 @@ match (n:Code {SAB:'HGNC'})-[m:MOUSE_HOMOLOG]->(t:Term) RETURN n,m,t limit 5
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 
 "file:///geno2pheno_mapping.csv" AS row
-CREATE (mp:MP {name: row.mp_term_name, mp_term_id: row.mp_term_id, parameter_name:row.parameter_name})
+CREATE (mp:MP {name: row.mp_term_name, mp_term_id: row.mp_term_id, parameter_name:row.parameter_name,gene_id:row.marker_symbol})
+
+CREATE INDEX FOR (mp:MP) ON (mp.gene_id);
+
+// Connect MP nodes to mouse gene Term nodes, must make MP nodes of type :Concept/:Code?
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM 
+"file:///geno2pheno_mapping.csv" AS row
+MATCH (mp:MP {gene_id:row.marker_symbol}), (t:Term {gene_id:row.marker_symbol})
+MERGE (t)-[:HAS_PHENOTYPE]->(mp)
