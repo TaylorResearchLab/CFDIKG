@@ -192,6 +192,7 @@ MERGE (t)-[:HAS_PHENOTYPE]->(mp)
 ##### Loading IMPC triples/turtle or .owl files with neosemantics plugin #######
 ###############################################################
 
+## From https://archive.monarchinitiative.org/202011/rdf/
 
 CREATE CONSTRAINT n10s_unique_uri ON (r:Resource) ASSERT r.uri IS UNIQUE;
 CALL n10s.graphconfig.init();
