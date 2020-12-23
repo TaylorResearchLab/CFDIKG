@@ -155,7 +155,10 @@ max(degree) AS MaxNumOfRelationships
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 
 "file:///hgnc_2_mouse_homologs.csv" AS row
-CREATE (t:Term {gene_id: row.mouse_symbol, name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id } )
+CREATE (t:Term {gene_id: row.mouse_symbol, gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id } )
+
+~~~ neo4j-admin import --nodes=Term="import/ADMIN-IMPORT-hgnc_2_mouse_homologs.csv"
+
 
 // Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship, so the next query doesnt take forever
 CREATE INDEX FOR (t:Term) ON (t.gene_id);
