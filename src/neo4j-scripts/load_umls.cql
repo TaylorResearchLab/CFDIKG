@@ -1,6 +1,8 @@
-###############################################################
-##### Loading in homologies (with hgnc ids) ################### HGNC Code nodes ----->  Homologous Mouse gene Term nodes
-###############################################################
+
+
+##########################################################################
+##### STEP 1: Loading/connecting homologous genes (with hgnc ids) ########  HGNC Code nodes <----->  Homologous Mouse gene Term nodes
+##########################################################################  
 
 // Create new Term nodes representing (homologous) mouse genes 
 :auto USING PERIODIC COMMIT 10000
@@ -8,7 +10,7 @@ LOAD CSV WITH HEADERS FROM
 "file:///hgnc_2_mouse_homologs.csv" AS row
 CREATE (t:Term {gene_id: row.mouse_symbol, gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id } )   
 
-# Should we make mouse genes Term nodes? what kind of nodes are Human genes? --Concepts and Codes (HGNC)
+# Should we make mouse genes Term nodes? what kind of nodes are Human genes? Human genes are Concepts and Codes (HGNC Code nodes)
 
 // Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship, so the next query doesnt take forever
 CREATE INDEX FOR (t:Term) ON (t.gene_id);
@@ -22,7 +24,7 @@ MERGE (n:Code {SAB:'HGNC', CODE:row.hgnc_id})-[:MOUSE_HOMOLOG]->(t:Term {gene_id
 match (n:Code {SAB:'HGNC'})-[m:MOUSE_HOMOLOG]->(t:Term) RETURN n,m,t limit 5
 
 ############################################################### 
-##### Loading in genotype-phenotype data ###################### 
+##### STEP 2: Loading in genotype-phenotype data ##############
 ############################################################### 
 
 HPO terms are modeled at the Code level, with a corresponding Concept node. There are also several Term nodes 
@@ -42,15 +44,15 @@ Should we connect every MP code node to a MP concepts node...or just the top lev
 Are all HPO Code nodes attached to a HPO Concept node, or are just the top level HPO codes attached to Concept nodes?
 match (n:Code {SAB:'HPO'}) return count(n) # 14,586 HPO Code nodes
 match (n:Code {SAB:'HPO'})--(C:Concept) return count(n) # 16,270    , can't differentiate the Concept nodes so theres no way to tell what Concept node belongs to a HPO Code node
-       
- 
-// Create MP Code nodes
+------------------------------------------------------------------
+
+// Create MP Code nodes. Shouldnt there be multiple gene per phenotype here?, We need to make the name of the phenotype into Term nodes
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 
 "file:///geno2pheno_mapping.csv" AS row
-CREATE (mp:Code {name: row.mp_term_name, mp_term_id: row.mp_term_id, parameter_name:row.parameter_name,gene_id:row.marker_symbol})
+CREATE (mp:Code {name: row.mp_term_name, CODE: row.mp_term_id, parameter_name:row.parameter_name,gene_id:row.marker_symbol, SAB:'MP'})
 
-CREATE INDEX FOR (mp:Code) ON (mp.gene_id);
+CREATE INDEX FOR (mp:Code) ON (mp.CODE);
 
 // Connect MP nodes to mouse gene Term nodes
 :auto USING PERIODIC COMMIT 10000
@@ -60,30 +62,40 @@ MATCH (mp:Code {gene_id:row.marker_symbol}), (t:Term {gene_id:row.marker_symbol}
 MERGE (t)-[:HAS_PHENOTYPE]->(mp)
                                                                                        
                                                                                        
-######################################################
-###### Connect HPO and MP Concept nodes ##############
-#######  with Tiffanys mappings ######################                                
-######################################################      
+##########################################################
+###### STEP 3: Connect HPO and MP Concept nodes ##########   MATCH HPO Concept nodes to MP Concept nodes 
+############## with Tiffanys mappings ####################                              
+##########################################################      
 
-# First mint new MP terms if MP terms in Tiffanys mappings are not present
-                                              
-MATCH HPO Concept nodes to MP Concept nodes    
+                                             
+// First mint new MP terms if MP terms in Tiffanys mappings are not present, using MERGE (index is already set)
+// Do the same thing with the HPO terms.    
                                               
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 
-"file:///tiffs_mappings_ravel.csv" AS row    
-                                              
-MERGE                                                                    # CREATE/MERGE HPO terms in my list first because 
-MATCH (hpo:Concept {ID: row.HP_ID}), (mp:Concept {ID: row.HP_ID}),       # We need to line up HPO terms in UMLS and HPO terms in tiffs file                                    
-MERGE (hpo:Concept)-[r]                                             
-                                              
-                                              
-                                              
- 
+"file:///tiffs_mappings_ravel.csv" AS row                                              
+MERGE (n:Code {SAB:'HPO',CODE:row.HP_ID})
+MERGE (n:Code {SAB: 'MP', CODE: row.MPO_URI})       // This is creating 551 new nodes, bc there are 602 unique MP 
+                                                    // terms in Tiffs list and only 51 of them overlap with the MP terms list from STEP 2
+       
+CREATE INDEX FOR (hpo:Code) ON (hpo.CODE);  // This was already done in step 1
+CREATE INDEX FOR (mp:Code) ON (mp.CODE);    // this was already done in step 2       
+
+// Connect HPO Concept nodes to MP Concept nodes       
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM 
+"file:///tiffs_mappings_ravel.csv" AS row     
+MATCH (hpo:Code {CODE: row.HP_ID}), (mp:Code {CODE: row.MPO_URI}),                                        
+CREATE (hpo)-[r:pheno_crosswalk]->(mp)                
+                                      
+
+                                                     
+# check if every HP term were importing is already in UMLS, use in list[] statement                                        
+                                                                            
+                                      
+                                      
                                          
-                                              
-                                              
-Do we need human genotype to phenotype (HPO terms to human gene/genotype connections)?                                             
+ Do we need human genotype to phenotype (HPO terms to human gene/genotype connections)?                                             
                                               
                                               
                                               
