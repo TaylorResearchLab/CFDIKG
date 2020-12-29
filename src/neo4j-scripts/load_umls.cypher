@@ -117,8 +117,14 @@ CREATE (hpo:Code {CODE: row.HP_ID})-[r:pheno_crosswalk]->(mp:Code {CODE: row.MPO
  ###### STEP 4. Add GTEx data ########
  #####################################
  ...
+ 
  #####################################
- ###### STEP 5. Add Gene-Gene and ####
+ ######  STEP 5. Add MSigDB data #####
+ #####################################
+ ... Gene to pathways
+ 
+ #####################################
+ ##### STEP 6. Add Gene-Gene and #####
  #### Protein-Protein Interaction ####
  #####################################
  ...
