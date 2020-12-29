@@ -86,6 +86,7 @@ MERGE (t:Code {gene_id:row.marker_symbol})-[:HAS_PHENOTYPE]->(mp:Code {gene_id:r
 ############## with Tiffanys mappings ####################                              
 ##########################################################      
 
+# There are multiple HPO nodes with the same name, each connected to a different MP term. None of the HPO term nodes  are the actual HGNC nodes
                                              
 // First mint new MP terms if MP terms in Tiffanys mappings are not present, using MERGE (index is already set)
 // Do the same thing with the HPO terms. 
@@ -103,6 +104,7 @@ MERGE (mp:Code {SAB: 'MP', CODE: row.MPO_URI})
 LOAD CSV WITH HEADERS FROM "file:///tiffs_mappings_ravel.csv" AS row     
 CREATE (hpo:Code {CODE: row.HP_ID})-[r:pheno_crosswalk]->(mp:Code {CODE: row.MPO_URI})                                        
 
+// change this CREATE to MERGE
                                                      
 // check if every HP term we're importing is already in UMLS, use in list[] statement                                        
                                                                             
@@ -145,7 +147,7 @@ GENERAL PATTERN:   (HPO_term)--(MP_term)--(Mouse_gene_list)--(Human_gene_list)
 // Query using a single HPO term, ie. HP:0001234
 _____________________________________________________________________
 MATCH (kf_hpo:Code {CODE: "HP:0001234"})-[hpo2mp:pheno_crosswalk]-(mp:Code {SAB: "MP"})-[pheno2gene:HAS_PHENOTYPE]-(mouse_genes:Code {SAB:"HGNC HCOP"})
--[homolog:HOMOLOGOUS]-(human_genes:Code {SAB: "HGNC"})
+-[homolog:MOUSE_HOMOLOG]-(human_genes:Code {SAB: "HGNC"})
 RETURN kf_hpo,hpo2mp,mp, pheno2gene, mouse_genes, homolog,human_genes
 _____________________________________________________________________
 
