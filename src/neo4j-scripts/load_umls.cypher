@@ -1,22 +1,39 @@
+All UMLS Code nodes have exactly 3 attributes (CODE, CodeID, SAB)
+
+For example a HGNC Code nodes attributes look like this:  CODE:'HGNC:787' 
+                                                          CodeID:'HGNC HGNC:787'  
+                                                          SAB:'HGNC'    
+                                                          (plus a mandatory ID <id>:13381814)
+
+and a HPO Code node looks like:     CODE:'HP:0001928' 
+                                    CodeID: 'HPO HP:0001928' 
+                                    SAB:'HPO'                             
+                                    (plus a mandatory ID <id>:13355342)
+
+
+Do we want to follow this form exactly? If so, where will we put the additional node information like MGI ID, ENSEMBL ID etc,
+Model them as Terms? Or just as additional Codes? Or just as metadata on the nodes?
+
+
+
 
 
 ##########################################################################
-##### STEP 1: Loading/connecting homologous genes (with hgnc ids) ########  HGNC Code nodes <--[:Homologous]-->  Mouse gene Code nodes
+##### STEP 1: Loading/connecting homologous genes (with hgnc ids) ########  HGNC Code nodes <-[:Homologous]->  Mouse gene Code nodes
 ##########################################################################  
-// We should model mouse genes as Code nodes because human genes are Code nodes (HGNC Code nodes)
-
-// Create new Code nodes representing (homologous) mouse genes, this query creates 66,848 new nodes
+-- We should model mouse genes as Code nodes because human genes are Code nodes (HGNC Code nodes)
+-- Create new Code nodes representing (homologous) mouse genes, this query creates 66,848 new nodes
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 
 "file:///hgnc_2_mouse_homologs.csv" AS row
 CREATE (t:Code {gene_id: row.mouse_symbol, gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id, SAB: 'HGNC HCOP' } )   
 
 
-// Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship, so the next query doesnt take forever
+-- Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship, so the next query doesnt take forever
 CREATE INDEX FOR (t:Code) ON (t.gene_id);
 CREATE INDEX FOR (c:Code) ON (c.CODE);
 
-// Connect HGNC Code nodes to its corresponding mouse gene Code node with a :MOUSE_HOMOLOG relationship
+-- Connect HGNC Code nodes to its corresponding mouse gene Code node with a :MOUSE_HOMOLOG relationship
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 
 "file:///hgnc_2_mouse_homologs.csv" AS row
