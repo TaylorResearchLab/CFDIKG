@@ -1,27 +1,27 @@
 
 
 ##########################################################################
-##### STEP 1: Loading/connecting homologous genes (with hgnc ids) ########  HGNC Code nodes <----->  Homologous Mouse gene Term nodes
+##### STEP 1: Loading/connecting homologous genes (with hgnc ids) ########  HGNC Code nodes <--[:Homologous]-->  Mouse gene Code nodes
 ##########################################################################  
+// We should model mouse genes as Code nodes because human genes are Code nodes (HGNC Code nodes)
 
-// Create new Term nodes representing (homologous) mouse genes 
+// Create new Code nodes representing (homologous) mouse genes, this query creates 66,848 new nodes
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 
 "file:///hgnc_2_mouse_homologs.csv" AS row
-CREATE (t:Term {gene_id: row.mouse_symbol, gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id } )   
+CREATE (t:Code {gene_id: row.mouse_symbol, gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id, SAB: 'HGNC HCOP' } )   
 
-# Should we make mouse genes Term nodes? what kind of nodes are Human genes? Human genes are Concepts and Codes (HGNC Code nodes)
 
 // Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship, so the next query doesnt take forever
-CREATE INDEX FOR (t:Term) ON (t.gene_id);
+CREATE INDEX FOR (t:Code) ON (t.gene_id);
 CREATE INDEX FOR (c:Code) ON (c.CODE);
 
-// Connect HGNC Code nodes to its corresponding mouse gene Term node with a :MOUSE_HOMOLOG relationship
+// Connect HGNC Code nodes to its corresponding mouse gene Code node with a :MOUSE_HOMOLOG relationship
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 
 "file:///hgnc_2_mouse_homologs.csv" AS row
-MERGE (n:Code {SAB:'HGNC', CODE:row.hgnc_id})-[:MOUSE_HOMOLOG]->(t:Term {gene_id:row.mouse_symbol})
-match (n:Code {SAB:'HGNC'})-[m:MOUSE_HOMOLOG]->(t:Term) RETURN n,m,t limit 5
+MERGE (n:Code {SAB:'HGNC', CODE:row.hgnc_id})-[:MOUSE_HOMOLOG]->(t:Code {gene_id:row.mouse_symbol, })
+MATCH (n:Code {SAB:'HGNC'})-[m:MOUSE_HOMOLOG]->(t:Code) RETURN n,m,t limit 5
 
 ############################################################### 
 ##### STEP 2: Loading in genotype-phenotype data ##############
