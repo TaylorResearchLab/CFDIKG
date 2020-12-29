@@ -42,6 +42,9 @@ MATCH (n:Code {SAB:'HGNC', CODE:row.hgnc_id})
 MERGE (n)-[:MOUSE_HOMOLOG]->(t:Code {gene_id:row.mouse_symbol, SAB:'HGNC HPOC' })
 
 #  Maybe change gene_id attribute to CODE in mouse gene nodes, to better match HGNC nodes
+# Why is this query creating so many nodes????
+# make sure each query is adding the right number of new nodes
+# make sure attribute signatures match for nodes of the same type 
 
 #  check things look good: MATCH (n:Code {SAB:'HGNC'})-[m:MOUSE_HOMOLOG]->(t:Code) RETURN n,m,t limit 5
 
@@ -76,9 +79,10 @@ Are all HPO Code nodes attached to a HPO Concept node, or are just the top level
 // This query does: Added 60172 labels, created 60172 nodes, set 299110 properties
 :auto USING PERIODIC COMMIT 10000 
 LOAD CSV WITH HEADERS FROM "file:///geno2pheno_mapping.csv" AS row
-CREATE (mp:Code {name: row.mp_term_name, CODE: row.mp_term_id, parameter_name:row.parameter_name,gene_id:row.marker_symbol, SAB:'MP'})
+MERGE (mp:Code {name: row.mp_term_name, CODE: row.mp_term_id, parameter_name:row.parameter_name,gene_id:row.marker_symbol, SAB:'MP'})
 
 #### change create to merge???,,, null value in row 14?
+##### with merge (and  no null vals anymore), Added 36478 labels, created 36478 nodes, set 182390 properties,,, looks better!
 
 
 // Connect MP nodes to mouse gene Term nodes
@@ -109,9 +113,10 @@ MERGE (mp:Code {SAB: 'MP', CODE: row.MPO_URI})
 // This query does: Added 2442 labels, created 2442 nodes, set 2442 properties, created 1221 relationships,
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM "file:///tiffs_mappings_ravel.csv" AS row     
-CREATE (hpo:Code {CODE: row.HP_ID})-[r:pheno_crosswalk]->(mp:Code {CODE: row.MPO_URI})                                        
+MERGE (hpo:Code {CODE: row.HP_ID})-[r:pheno_crosswalk]->(mp:Code {CODE: row.MPO_URI})                                        
 
-// change this CREATE to MERGE
+// change this CREATE to MERGE,, after using merge were still creating 2438 nodes, why??
+                                                     
                                                      
 // check if every HP term we're importing is already in UMLS, use in list[] statement                                        
                                                                             
