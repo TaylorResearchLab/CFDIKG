@@ -17,6 +17,7 @@ Model them as Terms? Or as additional Codes? Or just as attributes on the origin
 
 Maybe just keep them as attributes on the original nodes for now. 
 
+##change merges to match when needed
 
 ##########################################################################
 ##### STEP 1: Loading/connecting homologous genes (with hgnc ids) ########  HGNC Code nodes <-[:Homologous]->  Mouse gene Code nodes
