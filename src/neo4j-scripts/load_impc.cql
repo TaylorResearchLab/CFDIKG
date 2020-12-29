@@ -7,3 +7,6 @@ CREATE CONSTRAINT n10s_unique_uri ON (r:Resource) ASSERT r.uri IS UNIQUE;
 CALL n10s.graphconfig.init();
 CALL n10s.onto.import.fetch("file:///Users/stearb/desktop/R03_local/data/impc.ttl",
                         "Turtle",{addResourceLabels : TRUE})
+                            
+// Must delete Resource node if you want to reimport RDF/Triples/Turtle data with neosemantics
+MATCH (resource:Resource) DETACH DELETE resource;
