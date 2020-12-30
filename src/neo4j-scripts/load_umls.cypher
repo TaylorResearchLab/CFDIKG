@@ -29,18 +29,20 @@ Create new Code nodes representing (homologous) mouse genes
 // Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship
 # CREATE INDEX FOR (t:Code) ON (t.gene_id);
 CREATE INDEX FOR (c:Code) ON (c.CODE);
+CREATE CONSTRAINT Code_CODE
+ON (c:Code) ASSERT c.CODE IS UNIQUE
 
 // This query does (after changing from create to merge): Added 22295 labels, created 22295 nodes, set 111475 properties
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM "file:///hgnc_2_mouse_homologs.csv" AS row
-MERGE (t:Code {gene_id: row.mouse_symbol, gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id, SAB: 'HGNC HCOP' } )   
+MERGE (t:Code {CODE: row.mouse_symbol, SAB: 'HGNC HCOP' } )    // gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id,
 
 // Connect HGNC Code nodes to its corresponding mouse gene Code node with a :MOUSE_HOMOLOG relationship
 // This query does: Added 66754 labels, created 66754 nodes, set 133508 properties, created 66754 relationships
 :auto USING PERIODIC COMMIT 10000 
 LOAD CSV WITH HEADERS FROM "file:///hgnc_2_mouse_homologs.csv" AS row
 MATCH (n:Code {SAB:'HGNC', CODE:row.hgnc_id})
-MERGE (n)-[:MOUSE_HOMOLOG]->(t:Code {gene_id:row.mouse_symbol, SAB:'HGNC HPOC' })
+MERGE (n)-[:MOUSE_HOMOLOG]->(t:Code {SAB:'HGNC HPOC', CODE:row.mouse_symbol})
 
 #  Maybe change gene_id attribute to CODE in mouse gene nodes, to better match HGNC nodes
 # Why is this query creating so many nodes????
