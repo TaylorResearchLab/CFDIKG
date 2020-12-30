@@ -18,6 +18,10 @@ CALL apoc.periodic.iterate(
     "DETACH DELETE n",
     {batchSize:1000}) YIELD batches, total RETURN batches, total 
 
+## Or When deleting the entire graph database, by far the best way is to simply stop the database, 
+## rename/delete the graph store (data/graph.db (pre v3.x) or data/databases/graph.db (3.x forward) 
+## or similar) directory, and start the database. This will build a fresh, empty database for you.
+
 ##### Loading human-mouse homologous Gene IDs and creating a :HOMOLOGOUS relation to and from both lists
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 
