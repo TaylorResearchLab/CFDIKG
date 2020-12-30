@@ -27,7 +27,7 @@ Maybe just keep them as attributes on the original nodes for now.
 Create new Code nodes representing (homologous) mouse genes
 
 // Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship
-CREATE INDEX FOR (t:Code) ON (t.gene_id);
+# CREATE INDEX FOR (t:Code) ON (t.gene_id);
 CREATE INDEX FOR (c:Code) ON (c.CODE);
 
 // This query does (after changing from create to merge): Added 22295 labels, created 22295 nodes, set 111475 properties
@@ -113,10 +113,11 @@ MERGE (mp:Code {SAB: 'MP', CODE: row.MPO_URI})
 // Connect HPO Concept nodes to MP Concept nodes  
 // This query does: Added 2442 labels, created 2442 nodes, set 2442 properties, created 1221 relationships,
 :auto USING PERIODIC COMMIT 10000
-LOAD CSV WITH HEADERS FROM "file:///tiffs_mappings_ravel.csv" AS row     
-MERGE (hpo:Code {CODE: row.HP_ID})-[r:pheno_crosswalk]->(mp:Code {CODE: row.MPO_URI})                                        
+LOAD CSV WITH HEADERS FROM "file:///tiffs_mappings_ravel.csv" AS row  
+MATCH (hpo:Code {CODE: row.HP_ID})
+MERGE (hpo)-[r:pheno_crosswalk]->(mp:Code {CODE: row.MPO_URI})                                        
 
-// change this CREATE to MERGE,, after using merge were still creating 2438 nodes, why??
+// change this CREATE to MERGE,, after using merge were still creating 2438 nodes, why??  , need to MATCH HPO nodes, not MERGE 
                                                      
                                                      
 // check if every HP term we're importing is already in UMLS, use in list[] statement                                        
@@ -157,19 +158,19 @@ GENERAL PATTERN:   (HPO_term)--(MP_term)--(Mouse_gene_list)--(Human_gene_list)
 
 
 
-// Query using a single HPO term, ie. HP:0001234
+// Query using a single HPO term, ie. HP:0000252
 _____________________________________________________________________
-MATCH (kf_hpo:Code {CODE: "HP:0001234"})-[hpo2mp:pheno_crosswalk]-(mp:Code {SAB: "MP"})-[pheno2gene:HAS_PHENOTYPE]-(mouse_genes:Code {SAB:"HGNC HCOP"})
+MATCH (kf_hpo:Code {CODE: "HP:0000252"})-[hpo2mp:pheno_crosswalk]-(mp:Code {SAB: "MP"})-[pheno2gene:HAS_PHENOTYPE]-(mouse_genes:Code {SAB:"HGNC HCOP"})
 -[homolog:MOUSE_HOMOLOG]-(human_genes:Code {SAB: "HGNC"})
 RETURN kf_hpo,hpo2mp,mp, pheno2gene, mouse_genes, homolog,human_genes
 _____________________________________________________________________
 
 
 // Starting with a list of Kids First HPO terms
-// All you have to do is remove the CODE: "HP:0001234" in the first kf_hpo node and replace it with SAB: "HPO"
+// All you have to do is remove the {CODE: "HP:0000252"} in the first kf_hpo node and replace it with {SAB: "HPO"}
 // and then specify that the kf_hpo.CODE value is in your  list of Kids First HPO terms
 _____________________________________________________________________
-kf_hpo_list = []
+kf_hpo_list = ["HP:0000252","HP:0000049","HP:0000011"]
 MATCH (kf_hpo:Code {SAB: "HPO")-[hpo2mp:pheno_crosswalk]-(mp:Code {SAB: "MP"})-[pheno2gene:HAS_PHENOTYPE]-(mouse_genes:Code {SAB:"HGNC HCOP"})
 -[homolog:HOMOLOGOUS]-(human_genes:Code {SAB: "HGNC"})
 WHERE kf_hpo.CODE in kf_hpo_list
