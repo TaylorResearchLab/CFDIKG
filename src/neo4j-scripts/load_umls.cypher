@@ -33,6 +33,8 @@ match (hg:Code {SAB: "HGNC"}) return count(hg) # 41,679
 match (mg:Code {SAB: "HGNC HCOP"}) return count(mg) # 22,295
 
 
+
+####### Create index and unique constraints
 // After UMLS import script is run, run these...
 CREATE CONSTRAINT ON (n:Semantic) ASSERT n.TUI IS UNIQUE;
 CREATE CONSTRAINT ON (n:Semantic) ASSERT n.STN IS UNIQUE;
@@ -144,7 +146,10 @@ MATCH (mouse_gene:Code {CODE:row.marker_symbol, SAB:'HGNC HCOP'})
 MERGE (mouse_gene)-[:HAS_PHENOTYPE]->(mouse_pheno)
 ______________________________________                                                                             
 BEFORE and AFTER query: 740 MP nodes, 22295 mouse gene nodes 
-                                                          
+
+###########################################################
+############# STEP 2.5: Add Allele data (allele terms, ####
+############### allele MGI accession numbers, etc.) #######
                                                           
 ##########################################################
 ###### STEP 3: Connect HPO and MP Concept nodes ##########  HPO Concept nodes <-[pheno_crosswalk]-> MP Concept nodes 
