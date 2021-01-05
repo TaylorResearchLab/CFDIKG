@@ -11,6 +11,7 @@ and a HPO Code node looks like:     CODE:'HP:0001928'
                                     (plus a mandatory ID <id>:13355342)
 
 
+
 Do we want to follow this form exactly? If so, where will we put the additional node information like MGI ID, ENSEMBL ID etc,
 Model them as Terms? Or as additional Codes? Or just as attributes on the original nodes?
 
@@ -63,12 +64,20 @@ Create new Code nodes representing (homologous) mouse genes
 // Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship
 __________________________________________
 # CREATE INDEX FOR (c:Code) ON (c.CODE); // already handled by chucks indexing
-#CREATE CONSTRAINT Code_CODE ON (c:Code) ASSERT c.CODE IS UNIQUE // cant do this... MATCH (s:Code) WHERE s.CODE = '0' RETURN s limit 5
+# CREATE CONSTRAINT Code_CODE ON (c:Code) ASSERT c.CODE IS UNIQUE // cant do this... MATCH (s:Code) WHERE s.CODE = '0' RETURN s limit 5
 
 // This query does : Added 22295 labels, created 22295 nodes, set 111475 properties
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM "file:///hgnc_2_mouse_homologs.csv" AS row
 MERGE (t:Code {CODE: row.mouse_symbol, SAB: 'HGNC HCOP' } )    // gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id,
+
+^^^^
+Replace this with master_genes.csv file, just to create mouse gene nodes. The master_genes.csv covers genes from this step as well as step 2.
+Added 27390 labels, created 27390 nodes, set 54780 properties
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///master_genes.csv" AS row
+MERGE (t:Code {CODE: row.mouse_symbol, SAB: 'HGNC HCOP' } )    // gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id,
+
 
 // Connect HGNC Code nodes to its corresponding mouse gene Code node with a :MOUSE_HOMOLOG relationship
 // This query does: Added 41 labels, created 41 nodes, set 82 properties, created 66848 relationships
@@ -83,6 +92,8 @@ _________________________________________
 # make sure attribute signatures match for nodes of the same type 
 # see how many HGNC and HGNC HCOP nodes there are before and after query
 #  check things look good: MATCH (n:Code {SAB:'HGNC'})-[m:MOUSE_HOMOLOG]->(t:Code) RETURN n,m,t limit 5
+
+# RECHECK THESE QUERIES
 
 LOAD CSV WITH HEADERS FROM "file:///hgnc_2_mouse_homologs.csv" AS row
 MATCH (n:Code {SAB:'HGNC', CODE:row.hgnc_id})
@@ -126,19 +137,19 @@ Are all HPO Code nodes attached to a HPO Concept node, or are just the top level
 
 ____________________________________
 // Cant use the MERGE statement below unless we set a uniqueness constraint, cant put uniqueness constraint
-// on Code.CODE, so make identical attribute mp_term_name and set constraint on that.
+// on Code.CODE because there are multiple UMLS Code nodes that have a CODE attribute value of '0', so make      # Make CODEID attribute !!!!!
+an identical attribute mp_term_name and set constraint on that.
 CREATE CONSTRAINT Code_mp_term ON (c:Code) ASSERT c.mp_term_name IS UNIQUE
 
 // Create MP Code nodes. Shouldnt there be multiple genes per phenotype here? Unless I unraveled the genes column in Python (have to check on this),
 // We might want to make the name of the phenotype into Term nodes
-// This query does: Added 740 labels, created 740 nodes, set 2220 properties
+// This query does: Added 740 labels, created 740 nodes, set 2,220 properties     # Check the overlap between (unique) genes here and (unique) genes in step 1,
 :auto USING PERIODIC COMMIT 10000 
 LOAD CSV WITH HEADERS FROM "file:///geno2pheno_mapping.csv" AS row
 MERGE (mouse_pheno:Code { CODE: row.mp_term_id, mp_term_name: row.mp_term_id,  SAB:'MP'}) // Extra attributes name: row.mp_term_name, parameter_name:row.parameter_name,gene_id:row.marker_symbol,
 
-
 // Connect MP nodes to mouse gene Code nodes
-// This query does: Created 30499 relationships
+// This query does: Created 30753 relationships
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM "file:///geno2pheno_mapping.csv" AS row
 MATCH (mouse_pheno:Code {CODE: row.mp_term_id, SAB:'MP'})
@@ -147,14 +158,18 @@ MERGE (mouse_gene)-[:HAS_PHENOTYPE]->(mouse_pheno)
 ______________________________________                                                                             
 BEFORE and AFTER query: 740 MP nodes, 22295 mouse gene nodes 
 
+
+
 ###########################################################
 ############# STEP 2.5: Add Allele data (allele terms, ####
 ############### allele MGI accession numbers, etc.) #######
-                                                          
+......
+             
+             
 ##########################################################
 ###### STEP 3: Connect HPO and MP Concept nodes ##########  HPO Concept nodes <-[pheno_crosswalk]-> MP Concept nodes 
 ############## with Tiffanys mappings ####################                              
-##########################################################      
+##########################################################      ### Include confidence score and match type from tiffanys mappings data!!
 
 # There are multiple HPO nodes with the same name, each connected to a different MP term. None of the HPO term nodes  are the actual HGNC nodes
                                              
@@ -163,7 +178,7 @@ BEFORE and AFTER query: 740 MP nodes, 22295 mouse gene nodes
 // This query does: Added 551 labels, created 551 nodes, set 1102 properties                                            
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM  "file:///tiffs_mappings_ravel.csv" AS row                                              
-MERGE (hpo:Code {SAB:'HPO',CODE:row.HP_ID})
+MERGE (hpo:Code {SAB:'HPO',CODE:row.HP_ID})  # adds nothing
 MERGE (mp:Code {SAB: 'MP', CODE: row.MPO_URI})        
    
 # BEFORE query: 740 MP nodes and 14,586 HPO nodes
@@ -177,9 +192,9 @@ MATCH (hpo:Code {CODE: row.HP_ID})
 MATCH (mp:Code {CODE: row.MPO_URI}
 MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)                            
 
-// change this CREATE to MERGE,, after using merge were still creating 2438 nodes, why??  , need to MATCH HPO nodes, not MERGE 
                                                                                                     
-// check if every HP term we're importing is already in UMLS, use in list[] statement                                        
+// check if every HP term we're importing is already in UMLS. --They are bc MERGE (hpo:Code {SAB:'HPO',CODE:row.HP_ID})  # adds nothing
+                                   
                                                                             
                                                      
                                                      
@@ -239,6 +254,9 @@ RETURN kf_hpo,hpo2mp,mp, pheno2gene, mouse_genes, homolog,human_genes
 
 _____________________________________________________________________
 
-// should make all relationships in all capital letters
-                                              
+
+
+# Give each of our code nodes a 'parent'  concept node
+# How to tie in allele data
+# How to model GTEx data?
                                               
