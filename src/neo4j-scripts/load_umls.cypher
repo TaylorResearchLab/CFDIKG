@@ -19,21 +19,6 @@ Model them as Terms? Or as additional Codes? Or just as attributes on the origin
 Maybe just keep them as attributes on the original nodes for now. 
 
 
-Statistics for our part (gene homologies,geno-pheno links and hp-mp mappings) of UMLS
-
--How many MP nodes do we have?
-match (mp:Code {SAB: "MP"}) return count(mp)   # 1,291
-
--How many HP nodes do we have?
-match (hp:Code {SAB: "HPO"}) return count(hp)  # 14,586
-
--How many Human gene nodes do we have?
-match (hg:Code {SAB: "HGNC"}) return count(hg) # 41,679
-
--How many Mouse gene nodes do we have?
-match (mg:Code {SAB: "HGNC HCOP"}) return count(mg) # 22,295
-
-
 
 ####### Create index and unique constraints
 // After UMLS import script is run, run these...
@@ -71,7 +56,7 @@ __________________________________________
 LOAD CSV WITH HEADERS FROM "file:///hgnc_2_mouse_homologs.csv" AS row
 MERGE (t:Code {CODE: row.mouse_symbol, SAB: 'HGNC HCOP' } )    // gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id,
 
-^^^^
+^^^^^^^^^
 Replace this with master_genes.csv file, just to create mouse gene nodes. The master_genes.csv covers genes from this step as well as step 2.
 Added 27390 labels, created 27390 nodes, set 54780 properties
 :auto USING PERIODIC COMMIT 10000
