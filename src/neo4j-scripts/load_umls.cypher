@@ -49,30 +49,30 @@ Create new Code nodes representing (homologous) mouse genes
 // Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship
 __________________________________________
 # CREATE INDEX FOR (c:Code) ON (c.CODE); // already handled by chucks indexing
-# CREATE CONSTRAINT Code_CODE ON (c:Code) ASSERT c.CODE IS UNIQUE // cant do this... MATCH (s:Code) WHERE s.CODE = '0' RETURN s limit 5
+# CREATE CONSTRAINT Code_CODE ON (c:Code) ASSERT c.CODE IS UNIQUE // cant do this... MATCH (s:Code) WHERE s.CODE = '0' RETURN s 
 
-// This query does : Added 22295 labels, created 22295 nodes, set 111475 properties
+//  First load in the NODES_GENES.csv and create all mouse gene Concept nodes and all mouse gene Code nodes
+// Added 54780 labels, created 54780 nodes, set 109560 properties, completed after 7277 ms  # ~27k concept and ~27k code nodes
 :auto USING PERIODIC COMMIT 10000
-LOAD CSV WITH HEADERS FROM "file:///hgnc_2_mouse_homologs.csv" AS row
-MERGE (t:Code {CODE: row.mouse_symbol, SAB: 'HGNC HCOP' } )    // gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id,
+LOAD CSV WITH HEADERS FROM "file:///NODES_GENES.csv" AS row
+CREATE (mg_concepts:Concept {CUI: row.`Concept ID`})
+CREATE (mg_codes:Code {CODEID: row.CODEID, CODE:row.Gene, SAB: 'HGNC HCOP'}) // gene_name:row.mouse_symbol,  MGI:row.mgi_id,
 
-^^^^^^^^^
-Replace this with master_genes.csv file, just to create mouse gene nodes. The master_genes.csv covers genes from this step as well as step 2.
-Added 27390 labels, created 27390 nodes, set 54780 properties
+// Connect mouse gene Concepts to Codes
+// Added 27390 labels, created 27390 nodes, set 27390 properties, created 27390 relationships,
 :auto USING PERIODIC COMMIT 10000
-LOAD CSV WITH HEADERS FROM "file:///master_genes.csv" AS row
-MERGE (t:Code {CODE: row.mouse_symbol, SAB: 'HGNC HCOP' } )    // gene_name:row.mouse_symbol, SUI:row.SUI, MGI:row.mgi_id,
-
+LOAD CSV WITH HEADERS FROM "file:///NODES_GENES.csv" AS row
+MATCH (mg_concepts:Concept {CUI: row.`Concept ID`})
+MERGE (mg_concepts)-[:CODE]->(mg_codes:Code {CODEID: row.CODEID}) 
 
 // Connect HGNC Code nodes to its corresponding mouse gene Code node with a :MOUSE_HOMOLOG relationship
-// This query does: Added 41 labels, created 41 nodes, set 82 properties, created 66848 relationships
+// Created 66753 relationships,gene-gene relationships are not always 1-to-1 which is why there are more relationships created than there are mouse gene nodes.
 :auto USING PERIODIC COMMIT 10000 
 LOAD CSV WITH HEADERS FROM "file:///hgnc_2_mouse_homologs.csv" AS row
-MERGE (n:Code {SAB:'HGNC', CODE:row.hgnc_id})
-MERGE (t:Code {SAB:'HGNC HCOP', CODE:row.mouse_symbol})
+MATCH (n:Code {SAB:'HGNC', CODE:row.hgnc_id})
+MATCH (t:Code {SAB:'HGNC HCOP', CODE:row.mouse_symbol})
 CREATE (n)-[:MOUSE_HOMOLOG]->(t)
 _________________________________________
-# Why is this query creating so many nodes???? -- there may be HGNC IDs in hgnc_2_mouse_homologs.csv that are not in UMLS
 # make sure each query is adding the right number of new nodes
 # make sure attribute signatures match for nodes of the same type 
 # see how many HGNC and HGNC HCOP nodes there are before and after query
@@ -124,14 +124,22 @@ ____________________________________
 // Cant use the MERGE statement below unless we set a uniqueness constraint, cant put uniqueness constraint
 // on Code.CODE because there are multiple UMLS Code nodes that have a CODE attribute value of '0', so make      # Make CODEID attribute !!!!!
 an identical attribute mp_term_name and set constraint on that.
-CREATE CONSTRAINT Code_mp_term ON (c:Code) ASSERT c.mp_term_name IS UNIQUE
+# CREATE CONSTRAINT Code_mp_term ON (c:Code) ASSERT c.mp_term_name IS UNIQUE
 
-// Create MP Code nodes. Shouldnt there be multiple genes per phenotype here? Unless I unraveled the genes column in Python (have to check on this),
-// We might want to make the name of the phenotype into Term nodes
-// This query does: Added 740 labels, created 740 nodes, set 2,220 properties     # Check the overlap between (unique) genes here and (unique) genes in step 1,
-:auto USING PERIODIC COMMIT 10000 
-LOAD CSV WITH HEADERS FROM "file:///geno2pheno_mapping.csv" AS row
-MERGE (mouse_pheno:Code { CODE: row.mp_term_id, mp_term_name: row.mp_term_id,  SAB:'MP'}) // Extra attributes name: row.mp_term_name, parameter_name:row.parameter_name,gene_id:row.marker_symbol,
+// Load in the NODES_MP_TERMS.csv and create all mouse gene Concept nodes and all mouse gene Code nodes
+// Added 20660 labels, created 20660 nodes, set 41320 properties,
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///NODES_MP_TERMS.csv" AS row
+CREATE (mp_concepts:Concept {CUI: row.`Concept ID`})
+CREATE (mp_codes:Code {CODEID: row.CODEID, CODE:row.MP_term, SAB: 'MP'}) 
+
+// Create connections between mouse phenotype concept and code nodes
+// Added 10330 labels, created 10330 nodes, set 10330 properties, created 10330 relationships     # why is this creating 10k nodes?
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///NODES_MP_TERMS.csv" AS row
+MATCH (mp_concepts:Concept {CUI: row.`Concept ID`})
+MERGE (mp_concepts)-[:CODE]->(mp_codes:Code {CODEID: row.CODEID}) 
+
 
 // Connect MP nodes to mouse gene Code nodes
 // This query does: Created 30753 relationships
@@ -141,7 +149,7 @@ MATCH (mouse_pheno:Code {CODE: row.mp_term_id, SAB:'MP'})
 MATCH (mouse_gene:Code {CODE:row.marker_symbol, SAB:'HGNC HCOP'})
 MERGE (mouse_gene)-[:HAS_PHENOTYPE]->(mouse_pheno)
 ______________________________________                                                                             
-BEFORE and AFTER query: 740 MP nodes, 22295 mouse gene nodes 
+
 
 
 
@@ -157,32 +165,24 @@ BEFORE and AFTER query: 740 MP nodes, 22295 mouse gene nodes
 ##########################################################      ### Include confidence score and match type from tiffanys mappings data!!
 
 # There are multiple HPO nodes with the same name, each connected to a different MP term. None of the HPO term nodes  are the actual HGNC nodes
-                                             
-// First mint new MP terms if MP terms in Tiffanys mappings are not present. Do the same thing with the HPO terms. 
-// This query is creating only 551 new nodes, bc there are 602 unique MP terms in Tiffs list and only 51 of them overlap with the MP terms list from STEP 2
-// This query does: Added 551 labels, created 551 nodes, set 1102 properties                                            
-:auto USING PERIODIC COMMIT 10000
-LOAD CSV WITH HEADERS FROM  "file:///tiffs_mappings_ravel.csv" AS row                                              
-MERGE (hpo:Code {SAB:'HPO',CODE:row.HP_ID})  # adds nothing
-MERGE (mp:Code {SAB: 'MP', CODE: row.MPO_URI})        
-   
-# BEFORE query: 740 MP nodes and 14,586 HPO nodes
-# AFTER query: 1,291 MP nodes and 14,586 HPO nodes # include  mp_term_name: row.mp_term_id, when merging MP, like in STEP 2?
 
 // Connect HPO Concept nodes to MP Concept nodes  
 // This query does: Created 1219 relationships
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM "file:///tiffs_mappings_ravel.csv" AS row  
 MATCH (hpo:Code {CODE: row.HP_ID})
-MATCH (mp:Code {CODE: row.MPO_URI}
+MATCH (mp:Code {CODE: row.MPO_URI})
 MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)                            
 
-                                                                                                    
+                                                                                                  
 // check if every HP term we're importing is already in UMLS. --They are bc MERGE (hpo:Code {SAB:'HPO',CODE:row.HP_ID})  # adds nothing
 // ^^^This may change as we add additional HP terms  (outside of  KF)                                 
                                                                             
-                                                     
-                                                                                                     
+     
+     
+     
+     
+     
  Do we need/have human genotype to phenotype (HPO terms to human gene/genotype connections)?  
  --This is the point of building the graph because comprehensive data of this type does not exist  
    at least for congenital heart disease, structural birth defects, etc.
