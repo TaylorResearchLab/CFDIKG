@@ -179,15 +179,19 @@ MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)
 
                                                                                                     
 // check if every HP term we're importing is already in UMLS. --They are bc MERGE (hpo:Code {SAB:'HPO',CODE:row.HP_ID})  # adds nothing
-                                   
+// ^^^This may change as we add additional HP terms  (outside of  KF)                                 
                                                                             
                                                      
-                                                     
-                                                     
+                                                                                                     
  Do we need/have human genotype to phenotype (HPO terms to human gene/genotype connections)?  
  --This is the point of building the graph because comprehensive data of this type does not exist  
    at least for congenital heart disease, structural birth defects, etc.
  
+ 
+ Have Tiffany map all hp - mp terms for the time being until Nico et al are done?
+ Import MP.owl? 
+ Need Concept nodes?
+ Bgee RDF data? GTEx in RDF graph form
  
  
  #####################################
