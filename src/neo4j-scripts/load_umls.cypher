@@ -183,6 +183,7 @@ MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)
      
      
      
+     
  Do we need/have human genotype to phenotype (HPO terms to human gene/genotype connections)?  
  --This is the point of building the graph because comprehensive data of this type does not exist  
    at least for congenital heart disease, structural birth defects, etc.
