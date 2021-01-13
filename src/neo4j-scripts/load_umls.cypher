@@ -98,23 +98,28 @@ RETURN count(n)
 # 22,295 mouse_gene nodes
 
 
+##############################################################
+###### STEP 2.0: Load Mammalian Phenotype Ontology ###########
+##############################################################
+-Must add MP_term  and Parent_terms to the NODES_MP_TERMS.csv file eventually?
+-Term/definition nodes to add to the MP Code nodes
+
+
+// Added 13116 labels, created 13116 nodes, set 39348 properties
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///NODES_mp_ont.csv" AS row
+MERGE (mp:Code {CODE: row.MP_terms, CODEID: row.CODEID,SAB: 'MP'})  
+
+// Created 16531 relationships
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///mp_graph.csv" AS row
+MATCH  (mp:Code {CODE: row.MP_term})
+MATCH  (mp_parents:Code {CODE: row.Parent_terms})
+MERGE (mp)-[:SCO]->(mp_parents)
+
+
 ############################################################### 
-##### STEP 2: Loading in genotype-phenotype data ##############
+######## STEP 2.1: Load genotype-phenotype data ###############
 ############################################################### 
-
-HPO terms are modeled at the Code level, with a corresponding Concept node. There are also several Term nodes 
-(varying names of the Code node) off of the HPO Code nodes like usual.  We should model the MP terms as Concept
-nodes just like the HPO terms. Do we have the Term nodes to add to the MP Code nodes?
-       
-The HPO Concept nodes in the UMLS KG are connected to eachother like a normal ontology would be. Right now, our
-MP terms are not modeled like a traditional ontology. Instead, we have MP <--> genes/genotypes and MP <--> HPO
-connections, which are both mostly one-to-one mappings (but there are one-to-many mappings in both).
-
-In the geno2pheno_mappings.csv file, we do have the columns 'MP_term' and 'top_MP_term', which could be used to
-connect the MP term nodes in a simplistic way. Otherwise, maybe we can import MP.owl (and have all the nodes be 
-Code nodes, attached to their Concept nodes, like the other ontologies in the UMLS KG) and just connect the 
-corresponding HPO terms and the genes/genotypes afterwards.
-
+   
 Should we connect every MP code node to a MP concepts node...or just the top level MP nodes?
 Are all HPO Code nodes attached to a HPO Concept node, or are just the top level HPO codes attached to Concept nodes?
 # match (n:Code {SAB:'HPO'}) return count(n) # 14,586 HPO Code nodes
@@ -122,7 +127,7 @@ Are all HPO Code nodes attached to a HPO Concept node, or are just the top level
 
 ____________________________________
 // Cant use the MERGE statement below unless we set a uniqueness constraint, cant put uniqueness constraint
-// on Code.CODE because there are multiple UMLS Code nodes that have a CODE attribute value of '0', so make      # Make CODEID attribute !!!!!
+// on Code.CODE because there are multiple UMLS Code nodes that have a CODE attribute value of '0', so make      
 an identical attribute mp_term_name and set constraint on that.
 # CREATE CONSTRAINT Code_mp_term ON (c:Code) ASSERT c.mp_term_name IS UNIQUE
 
