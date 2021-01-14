@@ -12,7 +12,9 @@
 
 // Added 13116 labels, created 13116 nodes, set 39348 properties
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///NODES_mp_ont.csv" AS row
-MERGE (mp:Code {CODE: row.MP_terms, CODEID: row.CODEID,SAB: 'MP'})  
+MERGE (mp_Code:Code {CODE: row.MP_terms, CODEID: row.CODEID,SAB: 'MP'})  
+MERGE (mp_Concept:Concept {CUI: row.CUI})
+
 
 // Created 16531 relationships
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///mp_graph.csv" AS row
