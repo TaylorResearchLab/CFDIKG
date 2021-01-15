@@ -38,6 +38,7 @@ CREATE INDEX FOR (n:Definition) ON (n.DEF);
 CREATE CONSTRAINT ON (n:NDC) ASSERT n.ATUI IS UNIQUE;
 CREATE CONSTRAINT ON (n:NDC) ASSERT n.NDC IS UNIQUE;
 CALL db.index.fulltext.createNodeIndex("Term_name",["Term"],["name"]);
+MATCH (n:Term) WHERE size((n)--())=0 DELETE (n)
 
 ##########################################################################
 ##### STEP 1: Loading/connecting homologous genes (with hgnc ids) ########  HGNC Code nodes <-[:Homologous]->  Mouse gene Code nodes
