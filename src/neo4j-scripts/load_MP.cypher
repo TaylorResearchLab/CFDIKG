@@ -11,25 +11,22 @@
 -Term/definition nodes to add to the MP Code nodes
 
 #### Create MP Concept and Code nodes 
-//  Added 14241 labels, created 14241 nodes, set 42723 properties, 
+//  Added 28482 labels, created 28482 nodes, set 56964 properties 
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///NODES_mp_ont.csv" AS row
-MERGE (mp_Code:Code {CODE: row.MP_term, CodeID: row.CODEID,SAB: 'MP'})  
+MERGE (mp_Code:Code {CODE: row.MP_term, CodeID: row.CodeID,SAB: 'MP'})  
 MERGE (mp_Concept:Concept {CUI: row.CUI})
 
 #### Connect MP Concept and Code nodes 
+// Created 14241 relationships
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///NODES_mp_ont.csv" AS row
-MATCH  (mp_Code:Code {CodeID: row.CODEID})
+MATCH  (mp_Code:Code {CodeID: row.CodeID})
 MATCH  (mp_Concept:Concept {CUI: row.CUI})
 MERGE (mp_Concept)-[:CODE]->(mp_Code)
 
-:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///NODES_mp_ont.csv" AS row
- MERGE (mp_Concept:Concept {CUI: row.CUI})-[:CODE]->(mp_Code:Code {CodeID: row.CODEID})
-
-
 
 #### Load MP heirachy 
-// Created 16531 relationships
-:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///child2parent_mp_mappings.csv" AS row
+// Added 33064 labels, created 33064 nodes, set 33064 properties, created 16532 relationships, c
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///child2parent_mp_ont.csv" AS row
 MATCH  (mp:Code {CODE: row.MP_term})
 MATCH  (mp_parents:Code {CODE: row.Parent_terms})
 MERGE (mp)-[:SCO]->(mp_parents)
