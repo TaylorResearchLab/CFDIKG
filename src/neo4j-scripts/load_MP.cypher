@@ -1,6 +1,25 @@
 ##############################################################
-###### STEP 2.0: Load Mammalian Phenotype Ontology ###########
+###### STEP 2: Load Mammalian Phenotype Ontology ###########
 ##############################################################
+
+
+CREATE CONSTRAINT ON (n:Semantic) ASSERT n.TUI IS UNIQUE;
+CREATE CONSTRAINT ON (n:Semantic) ASSERT n.STN IS UNIQUE;
+CREATE CONSTRAINT ON (n:Semantic) ASSERT n.DEF IS UNIQUE;
+CREATE CONSTRAINT ON (n:Semantic) ASSERT n.name IS UNIQUE;
+CREATE CONSTRAINT ON (n:Concept) ASSERT n.CUI IS UNIQUE;
+CREATE CONSTRAINT ON (n:Code) ASSERT n.CodeID IS UNIQUE;
+CREATE INDEX FOR (n:Code) ON (n.SAB);
+CREATE INDEX FOR (n:Code) ON (n.CODE);
+CREATE CONSTRAINT ON (n:Term) ASSERT n.SUI IS UNIQUE;
+CREATE INDEX FOR (n:Term) ON (n.name);
+CREATE CONSTRAINT ON (n:Definition) ASSERT n.ATUI IS UNIQUE;
+CREATE INDEX FOR (n:Definition) ON (n.SAB);
+CREATE INDEX FOR (n:Definition) ON (n.DEF);
+CREATE CONSTRAINT ON (n:NDC) ASSERT n.ATUI IS UNIQUE;
+CREATE CONSTRAINT ON (n:NDC) ASSERT n.NDC IS UNIQUE;
+CALL db.index.fulltext.createNodeIndex("Term_name",["Term"],["name"]);
+
 
 ##############################################################
 ############## STEP 2.0.0 Load MP terms and their ############
@@ -19,15 +38,14 @@ MERGE (mp_Concept:Concept {CUI: row.CUI})
 #### Connect MP Concept and Code nodes 
 // Created 14241 relationships
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///NODES_mp_ont.csv" AS row
-MATCH  (mp_Code:Code {CodeID: row.CodeID})
+MATCH  (mp_Code:Code {CodeID: row.CodeID, SAB: 'MP'})
 MATCH  (mp_Concept:Concept {CUI: row.CUI})
 MERGE (mp_Concept)-[:CODE]->(mp_Code)
 
-
-#### Load MP heirachy 
-// Added 33064 labels, created 33064 nodes, set 33064 properties, created 16532 relationships, c
+#### Load MP heirachy   
+// Created 16531 relationships,
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///child2parent_mp_ont.csv" AS row
-MATCH  (mp:Code {CODE: row.MP_term})
+MATCH  (mp:Code {CODE: row.MP_term}) 
 MATCH  (mp_parents:Code {CODE: row.Parent_terms})
 MERGE (mp)-[:SCO]->(mp_parents)
 
@@ -45,8 +63,8 @@ MERGE (mp)-[:SCO]->(mp_parents)
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///TERMS_mp_ont.csv" AS row
 MERGE (t:Term {Name: row.Term, SUI: row.SUI })  
 
-# Connnect MP Code nodes to their Term nodes      should be 39721 rels
-// Created 99011 relationships
+# Connnect MP Code nodes to their Term nodes 
+// Created 39721 relationships,
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///TERMS_mp_ont.csv" AS row
 MATCH (mp:Code {CODE: row.MP_term})
 MATCH (term:Term {SUI: row.SUI})
@@ -57,12 +75,15 @@ MERGE (mp)-[:TERM]->(term)
 
 ##############################################################
 ############ STEP 2.0.2 Load definitions #####################  
-##############################################################   ATUI
+##############################################################  
 
 # Create all definition nodes
 // Added 14241 labels, created 14241 nodes,
-:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///DEFs_mp_onto.csv" AS row
-CREATE (c:Definitions {DEF: row.Definition })
+// MERGE: Added 3349 labels, created 3349 nodes, set 3349 properties
+// CREATE: Added 13393 labels, created 13393 nodes, set 13393 properties, completed after 163 ms.
+
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///DEFs_mp_ont.csv" AS row
+MERGE (c:Definitions {DEF: row.Definitions })
 
 ATUI:AT254763528
 DEF:Shlukování suspendovaného materiálu (buněk, bakterií), které je výsledkem působení aglutininů.
@@ -78,3 +99,32 @@ MERGE (c)-[:DEF]->(d)
 
 
 ------Connect MP Concept or Code nodes??? to Def nodes
+
+##############################################################
+######### STEP 2.0.3 Load and Connect Cross Reference ######## 
+############################################################## 
+
+# Load XREF nodes, as Code
+// Added 521 labels, created 521 nodes, set 1563 properties, c
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///XREF_mp_ont.csv" AS row
+MERGE (xref:Code {CODE: row.CODE, CodeID: row.CodeID, SAB: row.SAB })
+
+# Connect them to Code/Concept nodes
+// Created 686 relationships, 
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///XREF_mp_ont.csv" AS row
+MATCH (xref:Code {CODE: row.CODE, CodeID: row.CodeID, SAB: row.SAB })
+MATCH (c:Code {CODE: row.MP_term})
+MERGE (xref)-[:CROSS_REF]->(c)
+
+
+
+
+#######################################
+########## Explore MP Graph ###########
+#######################################
+How many MP Code Nodes?
+match (n:Code {SAB:'MP'}) return count(n)  # 14,241 
+
+How many MP Concept nodes?
+match (n:Concept) where n.CUI starts with 'K'  return count(n)   # 14,241
+
