@@ -63,14 +63,20 @@ MERGE (mp)-[:SCO]->(mp_parents)
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///TERMS_mp_ont.csv" AS row
 MERGE (t:Term {Name: row.Term, SUI: row.SUI })  
 
-# Connnect MP Code nodes to their Term nodes 
+# Connnect MP Code nodes to their Term nodes with a :TERM relationship
 // Created 39721 relationships,
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///TERMS_mp_ont.csv" AS row
 MATCH (mp:Code {CODE: row.MP_term})
 MATCH (term:Term {SUI: row.SUI})
 MERGE (mp)-[:TERM]->(term)
 
-------Connect preferred_label Term nodes to MP Concept
+------Connect preferred_label Term nodes to MP Concept with a :PREF_TERM relationship
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUI_2_PrefTerms_mp_ont.csv" AS row
+MATCH (c:Concept {CUI: row.CUI})
+MATCH (term:Term {SUI: row.SUI})
+MERGE (c)-[:PREF_TERM]->(term)
+
+
 
 
 ##############################################################
