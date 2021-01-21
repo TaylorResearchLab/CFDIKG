@@ -204,7 +204,15 @@ MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)
  #####################################
  ###### STEP 4. Add GTEx data ########
  #####################################
- ...
+ 
+ Gene Transcripts TPM 
+ We have Gene--Tissue (UBERON) expression levels
+ 
+ eQTL
+ SNP--gene--Tissue (UBERON)
+ 
+ 
+ 
  
  #####################################
  ######  STEP 5. Add MSigDB data #####
