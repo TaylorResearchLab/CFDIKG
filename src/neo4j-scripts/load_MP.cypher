@@ -63,6 +63,13 @@ MERGE (mp)-[:SCO]->(mp_parents)
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///TERMS_mp_ont.csv" AS row
 MERGE (t:Term {Name: row.Term, SUI: row.SUI })  
 
+# Connect preferred_label Term nodes to MP Concept with a :PREF_TERM relationship
+// Created 14241 relationships
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUI_2_PrefTerms_mp_ont.csv" AS row
+MATCH (c:Concept {CUI: row.CUI})
+MATCH (term:Term {SUI: row.SUI})
+MERGE (c)-[:PREF_TERM]->(term)
+
 # Connnect MP Code nodes to their Term nodes with a :TERM relationship
 // Created 39721 relationships,
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///TERMS_mp_ont.csv" AS row
@@ -70,13 +77,7 @@ MATCH (mp:Code {CODE: row.MP_term})
 MATCH (term:Term {SUI: row.SUI})
 MERGE (mp)-[:TERM]->(term)
 
-------Connect preferred_label Term nodes to MP Concept with a :PREF_TERM relationship
-:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUI_2_PrefTerms_mp_ont.csv" AS row
-MATCH (c:Concept {CUI: row.CUI})
-MATCH (term:Term {SUI: row.SUI})
-MERGE (c)-[:PREF_TERM]->(term)
-
-
+---check that some codes have multiple terms.
 
 
 ##############################################################
@@ -84,27 +85,23 @@ MERGE (c)-[:PREF_TERM]->(term)
 ##############################################################  
 
 # Create all definition nodes
-// Added 14241 labels, created 14241 nodes,
 // MERGE: Added 3349 labels, created 3349 nodes, set 3349 properties
-// CREATE: Added 13393 labels, created 13393 nodes, set 13393 properties, completed after 163 ms.
-
+// CREATE: Added 13393 labels, created 13393 nodes, set 40179 properties,
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///DEFs_mp_ont.csv" AS row
-MERGE (c:Definitions {DEF: row.Definitions })
+MERGE (d:Definitions {DEF: row.Definitions, ATUI: row.ATUI, SAB: 'MP' })
 
 ATUI:AT254763528
-DEF:Shlukování suspendovaného materiálu (buněk, bakterií), které je výsledkem působení aglutininů.
-SAB:MSHCZE
 
 
 # Connect Definition nodes to Concept nodes 
-//
-:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///TERMS_mp_ont.csv" AS row
+// 
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///DEFs_mp_ont.csv" AS row
 MATCH (c:Concept {CUI: row.CUI})
 MATCH (d:Definition {DEF: row.Definition})
 MERGE (c)-[:DEF]->(d)
 
 
-------Connect MP Concept or Code nodes??? to Def nodes
+
 
 ##############################################################
 ######### STEP 2.0.3 Load and Connect Cross Reference ######## 
