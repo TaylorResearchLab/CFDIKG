@@ -5,6 +5,9 @@
 ![alt text](https://github.com/TaylorResearchLab/CFDIKG/blob/master/images/umls_nodes.png)
 
 
+###                          Unique Identifiers UMLS vs  UMLS+
+
+
 ------------------------------------------------------------------------------------------------
 Node Type  | UI property |   UMLS ex.  |      UMLS+     |  NOTES                               |
 | :---: | :---: | :---: | :---: | :---: | 
