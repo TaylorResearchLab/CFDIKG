@@ -205,12 +205,32 @@ MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)
  ###### STEP 4. Add GTEx data ########
  #####################################
  
- Gene Transcripts TPM 
- We have Gene--Tissue (UBERON) expression levels
+ Median Gene (Transcripts Per Million) per Tissue
  
- eQTL
- SNP--gene--Tissue (UBERON)
+ :auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
+MATCH (uberon:Code {CODE: row.SMUBRID, SAB: 'UBERON'} )
+MATCH (hgnc:Code {CODE: row.hgnc_id, SAB: 'HGNC'} )
+MERGE (uberon)-[ :HAS_EXPRESSION {median_tpm: row.median_TPM} ]->(hgnc) 
+
  
+ eQTLs
+ # First Create eqtl Code nodes  
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///eqtl.csv" AS row
+MERGE (eqtl:Code {CODE: row.rs_id_dbSNP151_GRCh38p7, gene_name: row.gene_name, chromosome: row.gene_chr, gene_start: row.gene_start,
+                                                     gene_end: row.gene_end, ,maf: row.maf, SAB: 'GTEx' })
+
+ 
+ # Connect eqtl Code nodes to UBERON Code nodes
+ :auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///eqtl.csv" AS row
+MATCH (uberon: Code {CODE: row.SMUBRID,SAB: 'UBERON'})
+MATCH (hgnc: Code {CODE: row.hgnc_id,SAB: 'HGNC'})
+MERGE (uberon)-[:HAS_eQTL]->(eqtl:Code {CODE: row.rs_id_dbSNP151_GRCh38p7, SAB: 'GTEx'})
+MERGE (hgnc)-[:eQTL]->(eqtl:Code {CODE: row.rs_id_dbSNP151_GRCh38p7, SAB: 'GTEx'})
+
+# split these up?
  
  
  
