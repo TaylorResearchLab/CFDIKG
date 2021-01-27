@@ -14,8 +14,6 @@ and a HPO Code node looks like:     CODE:'HP:0001928'
 
 Do we want to follow this form exactly? If so, where will we put the additional node information like MGI ID, ENSEMBL ID etc,
 Model them as Terms? Or as additional Codes? Or just as attributes on the original nodes?
-
-
 Maybe just keep them as attributes on the original nodes for now. 
 
 
@@ -47,10 +45,13 @@ MATCH (n:Term) WHERE size((n)--())=0 DELETE (n)
  We should model mouse genes as Code nodes because human genes are Code nodes (HGNC Code nodes)
 Create new Code nodes representing (homologous) mouse genes
 
-// Create Index on the node types we want to connect with a :MOUSE_HOMOLOG relationship
-__________________________________________
-# CREATE INDEX FOR (c:Code) ON (c.CODE); // already handled by chucks indexing
 # CREATE CONSTRAINT Code_CODE ON (c:Code) ASSERT c.CODE IS UNIQUE // cant do this... MATCH (s:Code) WHERE s.CODE = '0' RETURN s 
+### Number of HGNC Code nodes in UMLS before we add our homolog mappings: 41,638 HGNC Nodes
+### after we had in the homologue mappings and there are still 41,638 HGNC code Nodes
+### Number of relationships between human and mouse gene nodes 66,753
+### Number of HGNC HCOP Code nodes: 27390
+
+__________________________________________
 
 //  First load in the NODES_GENES.csv and create all mouse gene Concept nodes and all mouse gene Code nodes
 // Added 54780 labels, created 54780 nodes, set 109560 properties, completed after 7277 ms  # ~27k concept and ~27k code nodes
