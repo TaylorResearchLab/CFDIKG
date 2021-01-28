@@ -206,16 +206,29 @@ MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)
  ###### STEP 4. Add GTEx data ########
  #####################################
  
- Median Gene (Transcripts Per Million) per Tissue    # Make GTEx nodes AND connections to UBERON/HGNC
- 
+ ## Median Gene (Transcripts Per Million) per Tissue    # Make GTEx nodes AND connections to UBERON/HGNC
+  # First Create GTEx nodes Code nodes  
+
+
+
  :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
 MATCH (uberon:Code {CODE: row.SMUBRID, SAB: 'UBERON'} )
 MATCH (hgnc:Code {CODE: row.hgnc_id, SAB: 'HGNC'} )
 MERGE (uberon)-[ :HAS_EXPRESSION {median_tpm: row.median_TPM} ]->(hgnc) 
 
+# :auto USING PERIODIC COMMIT 10000
+#LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
+#MATCH (uberon:Code {CODE: row.SMUBRID, SAB: 'UBERON'} )
+#MATCH (hgnc:Code {CODE: row.hgnc_id, SAB: 'HGNC'} )
+#MERGE (uberon)-[ :HAS_EXPRESSION {median_tpm: row.median_TPM} ]->(hgnc) 
+
  
- eQTLs
+ 
+ 
+ 
+ 
+## eQTLs
  # First Create eqtl Code nodes  
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM "file:///eqtl.csv" AS row
