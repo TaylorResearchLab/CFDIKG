@@ -187,64 +187,96 @@ MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)
                                                                             
      
      
-     
-     
-     
-     
- Do we need/have human genotype to phenotype (HPO terms to human gene/genotype connections)?  
- --This is the point of building the graph because comprehensive data of this type does not exist  
-   at least for congenital heart disease, structural birth defects, etc.
- 
- 
- Have Tiffany map all hp - mp terms for the time being until Nico et al are done?
- Import MP.owl? 
- Need Concept nodes?
- Bgee RDF data? GTEx in RDF graph form
- 
+
  
  #####################################
  ###### STEP 4. Add GTEx data ########
  #####################################
  
- ## Median Gene (Transcripts Per Million) per Tissue    # Make GTEx nodes AND connections to UBERON/HGNC
-  # First Create GTEx nodes Code nodes  
+ ###### Median Gene (Transcripts Per Million) per Tissue  ######
 
-
-
- :auto USING PERIODIC COMMIT 10000
-LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
-MATCH (uberon:Code {CODE: row.SMUBRID, SAB: 'UBERON'} )
-MATCH (hgnc:Code {CODE: row.hgnc_id, SAB: 'HGNC'} )
-MERGE (uberon)-[ :HAS_EXPRESSION {median_tpm: row.median_TPM} ]->(hgnc) 
-
-# :auto USING PERIODIC COMMIT 10000
-#LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
-#MATCH (uberon:Code {CODE: row.SMUBRID, SAB: 'UBERON'} )
-#MATCH (hgnc:Code {CODE: row.hgnc_id, SAB: 'HGNC'} )
-#MERGE (uberon)-[ :HAS_EXPRESSION {median_tpm: row.median_TPM} ]->(hgnc) 
-
- 
- 
- 
- 
- 
-## eQTLs
- # First Create eqtl Code nodes  
+# First create the GTEx Concept and Code nodes
 :auto USING PERIODIC COMMIT 10000
-LOAD CSV WITH HEADERS FROM "file:///eqtl.csv" AS row
-MERGE (eqtl:Code {CODE: row.rs_id_dbSNP151_GRCh38p7, gene_name: row.gene_name, chromosome: row.gene_chr, gene_start: row.gene_start,
-                                                     gene_end: row.gene_end, ,maf: row.maf, SAB: 'GTEx' })
+LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
+MERGE (gtex_Concept:Concept {CUI: row.CUI})
+MERGE (gtex_Code:Code  {CodeID: row.CodeID, SAB: 'GTEx',transcript_id: row.`Transcript ID`, median_tpm: row.Median_TPM,
+                                                top_level_tissue: row.SMTS, tissue:row.tissue, gene_symbol:row.symbol, gene_name: row.name,
+                                                locus_group: row.locus_group, locus_type:row.locus_type, location:row.location})   # what should the GTEx Code nodes CODE be?    # CODE: row.CODE                                     
+# Connect the concept and code nodes
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
+MATCH (gtex_Concept:Concept {CUI: row.CUI})
+MATCH (gtex_Code:Code  {CodeID: row.CodeID, SAB: 'GTEx'})   
+MERGE (gtex_Concept)-[:CODE]-(gtex_Code)
+
+# Connect GTEx Code nodes to HGNC and UBERON Code nodes
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
+MATCH (gtex:Code {CodeID: row.CodeID})
+MATCH (uberon:Code {CODE: row.SMUBRID, SAB: 'UBERON'} )
+MATCH (hgnc:Code {CODE: row.hgnc_id, SAB: 'HGNC'} )     #MERGE (uberon)-[ :HAS_EXPRESSION {median_tpm: row.median_TPM} ]->(hgnc) 
+MERGE (uberon)-[:HAS_EXPRESSION]-(gtex)
+MERGE (hgnc)-[:EXPRESSED]-(gtex)
+ 
+ 
+ 
+ #### HGNC eQTLs ######   combine both data sets and just drop NANs when creating HGNC connections
+ 
+## Create the HGNC eQTL  Concept and Code nodes    # what to make the CODE?  CODE: row.rs_id_dbSNP151_GRCh38p7
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///eqtl_HGNC_GTEx.csv" AS row
+MERGE (eqtl_Concept:Concept {CUI:row.CUI}) 
+MERGE (eqtl:Code {CodeID:row.CodeID, gene_symbol:row.symbol, top_level_tissue:row.SMTS,tissue:row.tissue,
+        gene_id:row.gene_id,chromosome:row.gene_chr,gene_name: row.gene_name, chromosome: row.gene_chr, 
+        gene_start: row.gene_start,gene_end: row.gene_end, ,pval:row.pval_true_df,variant_id:row.variant_id,
+        rs_id: row.rs_id_dbSNP151_GRCh38p7, maf: row.maf, SAB: 'GTEx' })
+
+ # Connect the HGNC eQTL Code and Concept nodes
+ :auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///eqtl_HGNC_GTEx.csv" AS row
+MATCH (gtex_Concept:Concept {CUI: row.CUI})
+MATCH (gtex_Code:Code  {CodeID: row.CodeID, SAB: 'GTEx'})   
+MERGE (gtex_Concept)-[:CODE]-(gtex_Code)
+
+ # Connect HGNC eQTL Code nodes to UBERON and HGNC Code nodes
+ :auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///eqtl_HGNC_GTEx.csv" AS row
+MATCH (uberon: Code {CODE: row.SMUBRID, SAB: 'UBERON'})
+MATCH (hgnc: Code {CODE: row.hgnc_id,SAB: 'HGNC'})
+MATCH (eqtl:Code {CODE: row.rs_id_dbSNP151_GRCh38p7, SAB: 'GTEx'})
+MERGE (uberon)-[:HAS_eQTL]->(eqtl)
+MERGE (hgnc)-[:eQTL]->(eqtl)
+
+
+
+ #### non-HGNC eQTLs ######
+
+## Create the non-HGNC eQTL  Concept and Code nodes  
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///eqtl_nonHGNC_GTEx.csv" AS row
+MERGE (eqtl_Concept:Concept {CUI:row.CUI}) 
+MERGE (eqtl:Code {CodeID:row.CodeID, gene_symbol:row.symbol, top_level_tissue:row.SMTS,tissue:row.tissue,
+        gene_id:row.gene_id,chromosome:row.gene_chr,gene_name: row.gene_name, chromosome: row.gene_chr, 
+        gene_start: row.gene_start,gene_end: row.gene_end, ,pval:row.pval_true_df,variant_id:row.variant_id,
+        rs_id: row.rs_id_dbSNP151_GRCh38p7, maf: row.maf, SAB: 'GTEx' })
+
+# Connect the nonHGNC eQTL Code and Concept nodes
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///eqtl_nonHGNC_GTEx.csv" AS row
+MATCH (gtex_Concept:Concept {CUI: row.CUI})
+MATCH (gtex_Code:Code  {CodeID: row.CodeID, SAB: 'GTEx'})   
+MERGE (gtex_Concept)-[:CODE]-(gtex_Code)
+  
+ # Connect non-HGNC eQTL Code nodes to UBERON and HGNC Code nodes
+ :auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///eqtl_nonHGNC_GTEx.csv" AS row
+MATCH (uberon: Code {CODE: row.SMUBRID, SAB: 'UBERON'})
+MATCH (hgnc: Code {CODE: row.hgnc_id,SAB: 'HGNC'})
+MATCH (eqtl:Code {CODE: row.rs_id_dbSNP151_GRCh38p7, SAB: 'GTEx'})
+MERGE (uberon)-[:HAS_eQTL]->(eqtl)
+
 
  
- # Connect eqtl Code nodes to UBERON Code nodes
- :auto USING PERIODIC COMMIT 10000
-LOAD CSV WITH HEADERS FROM "file:///eqtl.csv" AS row
-MATCH (uberon: Code {CODE: row.SMUBRID,SAB: 'UBERON'})
-MATCH (hgnc: Code {CODE: row.hgnc_id,SAB: 'HGNC'})
-MERGE (uberon)-[:HAS_eQTL]->(eqtl:Code {CODE: row.rs_id_dbSNP151_GRCh38p7, SAB: 'GTEx'})
-MERGE (hgnc)-[:eQTL]->(eqtl:Code {CODE: row.rs_id_dbSNP151_GRCh38p7, SAB: 'GTEx'})
-
-# split these up?
  
  
  
