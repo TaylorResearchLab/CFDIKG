@@ -196,25 +196,35 @@ MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)
  ###### Median Gene (Transcripts Per Million) per Tissue  ######
 
 # First create the GTEx Concept and Code nodes
+// Running Concepts alone: Added 1319926 labels, created 1319926 nodes, set 1319926 properties
+// Running Codes alone:  Added 1319926 labels, created 1319926 nodes, set 14519186 properties
 :auto USING PERIODIC COMMIT 10000
-LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
-MERGE (gtex_Concept:Concept {CUI: row.CUI})
-MERGE (gtex_Code:Code  {CodeID: row.CodeID, SAB: 'GTEx',transcript_id: row.`Transcript ID`, median_tpm: row.Median_TPM,
-                                                top_level_tissue: row.SMTS, tissue:row.tissue, gene_symbol:row.symbol, gene_name: row.name,
-                                                locus_group: row.locus_group, locus_type:row.locus_type, location:row.location})   # what should the GTEx Code nodes CODE be?    # CODE: row.CODE                                     
+LOAD CSV WITH HEADERS FROM "file:///median_gene_TPM_GTEx.csv" AS row
+MERGE (gtex_Concept:Concept {CUI: row.CUI})   
+MERGE (gtex_Code:Code  {CodeID: row.CodeID, SAB: 'GTEx',transcript_id: row.`Transcript ID`, 
+                                                median_tpm: row.Median_TPM,
+                                                top_level_tissue: row.SMTS,
+                                                tissue:row.tissue, 
+                                                gene_symbol:row.symbol, 
+                                                gene_name: row.name,
+                                                locus_group: row.locus_group,
+                                                locus_type:row.locus_type, 
+                                                location:row.location})   # what should the GTEx Code nodes CODE be?    # CODE: row.CODE                                     
+
 # Connect the concept and code nodes
+// Created 1909926 relationships
 :auto USING PERIODIC COMMIT 10000
-LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
+LOAD CSV WITH HEADERS FROM "file:///median_gene_TPM_GTEx.csv" AS row
 MATCH (gtex_Concept:Concept {CUI: row.CUI})
 MATCH (gtex_Code:Code  {CodeID: row.CodeID, SAB: 'GTEx'})   
 MERGE (gtex_Concept)-[:CODE]-(gtex_Code)
 
 # Connect GTEx Code nodes to HGNC and UBERON Code nodes
 :auto USING PERIODIC COMMIT 10000
-LOAD CSV WITH HEADERS FROM "file:///median_gene_TMP_GTEx.csv" AS row
+LOAD CSV WITH HEADERS FROM "file:///median_gene_TPM_GTEx.csv" AS row
 MATCH (gtex:Code {CodeID: row.CodeID})
 MATCH (uberon:Code {CODE: row.SMUBRID, SAB: 'UBERON'} )
-MATCH (hgnc:Code {CODE: row.hgnc_id, SAB: 'HGNC'} )     #MERGE (uberon)-[ :HAS_EXPRESSION {median_tpm: row.median_TPM} ]->(hgnc) 
+MATCH (hgnc:Code {CODE: row.hgnc_id, SAB: 'HGNC'} )    
 MERGE (uberon)-[:HAS_EXPRESSION]-(gtex)
 MERGE (hgnc)-[:EXPRESSED]-(gtex)
  
