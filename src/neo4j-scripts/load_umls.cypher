@@ -36,7 +36,7 @@ CREATE INDEX FOR (n:Definition) ON (n.DEF);
 CREATE CONSTRAINT ON (n:NDC) ASSERT n.ATUI IS UNIQUE;
 CREATE CONSTRAINT ON (n:NDC) ASSERT n.NDC IS UNIQUE;
 CALL db.index.fulltext.createNodeIndex("Term_name",["Term"],["name"]);
-MATCH (n:Term) WHERE size((n)--())=0 DELETE (n)
+//MATCH (n:Term) WHERE size((n)--())=0 DELETE (n)
 
 ##########################################################################
 ##### STEP 1: Loading/connecting homologous genes (with hgnc ids) ########  HGNC Code nodes <-[:Homologous]->  Mouse gene Code nodes
@@ -158,8 +158,6 @@ MERGE (mouse_gene)-[:HAS_PHENOTYPE]->(mouse_pheno)
 ______________________________________                                                                             
 
 
-
-
 ###########################################################
 ############# STEP 2.5: Add Allele data (allele terms, ####
 ############### allele MGI accession numbers, etc.) #######
@@ -201,15 +199,9 @@ MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)
 :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM "file:///median_gene_TPM_GTEx.csv" AS row
 MERGE (gtex_Concept:Concept {CUI: row.CUI})   
-MERGE (gtex_Code:Code  {CodeID: row.CodeID, SAB: 'GTEx',transcript_id: row.`Transcript ID`, 
-                                                median_tpm: row.Median_TPM,
-                                                top_level_tissue: row.SMTS,
-                                                tissue:row.tissue, 
-                                                gene_symbol:row.symbol, 
-                                                gene_name: row.name,
-                                                locus_group: row.locus_group,
-                                                locus_type:row.locus_type, 
-                                                location:row.location})   # what should the GTEx Code nodes CODE be?    # CODE: row.CODE                                     
+MERGE (gtex_Code:Code  {CodeID: row.CodeID, SAB: 'GTEx',transcript_id: row.`Transcript ID`, median_tpm: row.Median_TPM,top_level_tissue: row.SMTS,tissue:row.tissue, 
+                                                gene_symbol:row.symbol, gene_name: row.name,locus_group: row.locus_group,locus_type:row.locus_type, location:row.location})   // what should the GTEx Code nodes CODE be?    # CODE: row.CODE                                     
+
 
 # Connect the concept and code nodes
 // Created 1909926 relationships
