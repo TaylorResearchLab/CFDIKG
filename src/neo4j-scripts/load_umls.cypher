@@ -244,6 +244,8 @@ MATCH (gtex_Code:Code  {CodeID: row.CodeID, SAB: 'GTEx'})
 MERGE (gtex_Concept)-[:CODE]-(gtex_Code)
 
 
+CREATE INDEX FOR (n:Code) ON (n.rs_id);
+
 
  # Connect  eQTL Code nodes to UBERON nodes
  :auto USING PERIODIC COMMIT 10000
@@ -254,11 +256,12 @@ MERGE (uberon)-[:HAS_eQTL]->(eqtl)
 
 
  # Connect  eQTL Code nodes to HGNC nodes
+ // Created 1002641 nodes, created 1002641 relationships  how many unique values are there?
  :auto USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM "file:///eqtl_all_GTEx.csv" AS row
 WITH row WHERE NOT row.hgnc_id IS null
 MATCH (hgnc: Code {CODE: row.hgnc_id,SAB: 'HGNC'})
-MATCH (eqtl:Code {CODE: row.rs_id_dbSNP151_GRCh38p7, SAB: 'GTEx'})
+MATCH (eqtl:Code {rs_id: row.rs_id_dbSNP151_GRCh38p7, SAB: 'GTEx'})
 MERGE (HGNC)-[:eQTL]->(eqtl)
 
 
