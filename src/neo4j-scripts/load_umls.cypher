@@ -51,6 +51,38 @@ Create new Code nodes representing (homologous) mouse genes
 ### Number of relationships between human and mouse gene nodes 66,753
 ### Number of HGNC HCOP Code nodes: 27390
 
+
+_________NEW FILES___________
+
+# Create mouse gene Concept nodes
+//  Added 22256 labels, created 22256 nodes, set 22256 properties, 
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CUI_mouse.csv" AS row
+MERGE (mg_concepts:Concept {CUI: row.CUI_mouse})
+
+# Create mouse gene Code nodes
+// Added 22256 labels, created 22256 nodes, set 66768 properties
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CODE_mouse.csv" AS row
+MERGE (mg_codes:Code {CodeID: row.CodeID_mouse,CODE: row.CODE_mouse, SAB: 'HGNC HCOP'}) // gene_name:row.mouse_symbol,  MGI:row.mgi_id,
+
+# Connect mouse gene Concept node to their Code node 
+// Added 22256 labels, created 22256 nodes, set 22256 properties, created 22256 relationships
+:auto USING PERIODIC COMMIT 10000 
+LOAD CSV WITH HEADERS FROM "file:///CUI-CODE.csv" AS row
+MATCH (mg_concepts:Concept {CUI: row.CUI_mouse})
+MERGE (mg_concepts)-[:CODE]->(mg_codes:Code {CodeID: row.CODE_mouse}) 
+
+# Connect mouse gene CUI to human gene CUI
+// Created 66754 relationships
+:auto USING PERIODIC COMMIT 10000 
+LOAD CSV WITH HEADERS FROM "file:///CUI-CUI.csv" AS row
+MATCH (human_gene:Concept {CUI: row.CUI_human})
+MATCH (mouse_gene:Concept {CUI: row.CUI_mouse})
+MERGE (human_gene)-[:ortholog]->(mouse_gene) 
+
+
+__________________________________________
 __________________________________________
 
 //  First load in the NODES_GENES.csv and create all mouse gene Concept nodes and all mouse gene Code nodes
@@ -66,15 +98,18 @@ CREATE (mg_codes:Code {CODEID: row.CODEID, CODE:row.Gene, SAB: 'HGNC HCOP'}) // 
 :auto USING PERIODIC COMMIT 10000 
 LOAD CSV WITH HEADERS FROM "file:///NODES_GENES.csv" AS row
 MATCH (mg_concepts:Concept {CUI: row.`Concept ID`})
-MERGE (mg_concepts)-[:CODE]->(mg_codes:Code {CODEID: row.CODEID}) 
+MERGE (mg_concepts)-[:CODE]->(mg_codes:Code {CodeID: row.CodeID}) 
 
-// Connect HGNC Code nodes to its corresponding mouse gene Code node with a :MOUSE_HOMOLOG relationship
+#### Connect HGNC concept notes to mouse gene concept nodes instead of out the code to code level ########
+
+// Connect HGNC Code nodes to its corresponding mouse gene Code node with a :mouse_homolog relationship
 // Created 66753 relationships,gene-gene relationships are not always 1-to-1 which is why there are more relationships created than there are mouse gene nodes.
 :auto USING PERIODIC COMMIT 10000 
 LOAD CSV WITH HEADERS FROM "file:///orthologs.csv" AS row
 MATCH (n:Code {SAB:'HGNC', CODE:row.hgnc_id})
 MATCH (t:Code {SAB:'HGNC HCOP', CODE:row.mouse_symbol})
-CREATE (n)-[:MOUSE_HOMOLOG]->(t)
+CREATE (n)-[:mouse_homolog]->(t)
+
 _________________________________________
 # make sure each query is adding the right number of new nodes
 # make sure attribute signatures match for nodes of the same type 
