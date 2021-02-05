@@ -231,6 +231,36 @@ ______________________________________
 
 # There are multiple HPO nodes with the same name, each connected to a different MP term. None of the HPO term nodes  are the actual HGNC nodes
 
+______________new Files_____________________
+# Create Concepts
+// Added 462 labels, created 462 nodes,
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CUIs_phenomapping.csv" AS row  
+CREATE (hpo_concepts:Concept {CUI: row.CUI})
+
+# Create Codes
+// Added 462 labels, created 462 nodes, set 1386 properties
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CODEs_phenomapping.csv" AS row  
+MERGE (hpo_codes:Code {CODE: row.CODE, CodeID: row.CodeID, SAB: row.SAB})
+
+# Connect Concepts to Codes
+// Created 1148 relationships
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CUI-CODEs_phenomapping.csv" AS row  
+MATCH (concepts:Concept {CUI: row.CUI})
+MATCH (code:Code {CODE: row.CODE})
+MERGE (concepts)-[c:code]->(code) 
+
+# Connect CUI-CUI
+// Created 1218 relationships
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CUI-CUI_phenomapping.csv" AS row 
+MATCH (concepts_hpo:Concept {CUI: row.CUI_HPO})
+MATCH (concepts_mp:Concept {CUI: row.CUI_MP})
+MERGE (concepts_hpo)-[c:pheno_crosswalk]->(concepts_mp) 
+
+_________________________________________________
 // Connect HPO Concept nodes to MP Concept nodes  
 // This query does: Created 1219 relationships
 :auto USING PERIODIC COMMIT 10000
