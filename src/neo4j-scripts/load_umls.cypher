@@ -157,17 +157,41 @@ MERGE (mp)-[:SCO]->(mp_parents)
 ############################################################### 
 ######## STEP 2.1: Load genotype-phenotype data ###############
 ############################################################### 
-   
-Should we connect every MP code node to a MP concepts node...or just the top level MP nodes?
-Are all HPO Code nodes attached to a HPO Concept node, or are just the top level HPO codes attached to Concept nodes?
+   Are all HPO Code nodes attached to a HPO Concept node, or are just the top level HPO codes attached to Concept nodes?
 # match (n:Code {SAB:'HPO'}) return count(n) # 14,586 HPO Code nodes
 # match (n:Code {SAB:'HPO'})--(C:Concept) return count(n) # 16,270 
 
-____________________________________
-// Cant use the MERGE statement below unless we set a uniqueness constraint, cant put uniqueness constraint
-// on Code.CODE because there are multiple UMLS Code nodes that have a CODE attribute value of '0', so make      
-an identical attribute mp_term_name and set constraint on that.
-# CREATE CONSTRAINT Code_mp_term ON (c:Code) ASSERT c.mp_term_name IS UNIQUE
+____________ NEW FILES ____________
+
+# Load mouse_gene and mp_term Code nodes
+//  Added 27688 labels, created 27688 nodes, set 83064 properties,
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CODEs_genotype.csv" AS row
+CREATE (mp_codes:Code {CodeID: row.CodeID, CODE:row.CODE, SAB: row.SAB}) 
+
+# Load in mouse_gene and mp_term Concept nodes
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CUIs_genotype.csv.csv" AS row
+Create (concepts:Concept {CUI: row.CUI})
+
+# Connect mouse_gene CUI to mp_term CUI
+// Created 234042 relationships
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CUI-CUI_genotype.csv" AS row
+MATCH (mouse_gene:Concept {CUI: row.CUI_mouse_gene})
+MATCH (mp_term:Concept {CUI:row.CUI_mp_term})
+MERGE (mouse_gene)-[:has_phenotype]->(mp_term)
+
+# Connect Concepts to Codes
+// Created 27688 relationships, 
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CUI-CODE_genotype.csv" AS row
+MATCH (concept:Concept {CUI: row.CUI})
+MATCH (code:Code {CODE: row.CODE})
+MERGE (concept)-[:code]->(code)
+
+
+_____________old import ________________
 
 // Load in the NODES_MP_TERMS.csv and create all mouse gene Concept nodes and all mouse gene Code nodes
 // Added 20660 labels, created 20660 nodes, set 41320 properties,
