@@ -20,6 +20,75 @@ CREATE CONSTRAINT ON (n:NDC) ASSERT n.ATUI IS UNIQUE;
 CREATE CONSTRAINT ON (n:NDC) ASSERT n.NDC IS UNIQUE;
 CALL db.index.fulltext.createNodeIndex("Term_name",["Term"],["name"]);
 
+__________________________New Files_________________________
+#### Create Concept nodes 
+// Added 14241 labels, created 14241 nodes, set 14241 properties
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUIs_mp_ont.csv" AS row
+MERGE (mp_Concept:Concept {CUI: row.CUI})
+
+#### Create Code nodes
+// Added 14241 labels, created 14241 nodes, set 42723 properties,
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CODEs_mp_ont.csv" AS row
+MERGE (mp_Code:Code {CODE: row.CODE, CodeID: row.CodeID,SAB: row.SAB })  
+
+#### Connect Concept-Code
+// Created 24505 relationships, 
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUI-CODEs_mp_ont.csv" AS row
+MATCH  (mp_Code:Code {CODE: row.CODE})
+MATCH  (mp_Concept:Concept {CUI: row.CUI})
+MERGE (mp_Concept)-[:code]->(mp_Code)
+
+#### CUI-CUI (parent-child mp terms)
+// Created 14165 relationships,
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUI-CUIs_mp_ont.csv" AS row
+MATCH  (mp_child:Concept {CUI: row.CUI_child}) 
+MATCH  (mp_parent:Concept {CUI: row.CUI_parent})
+MERGE (mp_child)-[:sco]->(mp_parent)
+
+##### Preferred Terms (Concept-Term)     need actual Term !!!!!!!
+#### CUI-SUI
+# create Terms
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUI-SUI_mp_ont.csv" AS row
+MERGE (t:Term {Name: row.Term, SUI: row.SUI })  
+
+#### CUI-SUI
+# Connect CUI-SUI
+// Created 14240 relationships
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUI-SUI_mp_ont.csv" AS row
+MATCH (c:Concept {CUI: row.CUI}) 
+MATCH (t:Term {SUI: row.SUI }) 
+MERGE  (c)-[:pref_term]->(t)
+
+###### Other Terms (Code-Term)
+#### CODE-SUI
+# Create Terms
+// Added 25341 labels, created 25341 nodes, set 25341 properties,
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CODE-SUIs_mp_ont.csv" AS row
+MERGE (t:Term {Name: row.Term, SUI: row.SUI })  
+
+#### CODE-SUI
+# Connect CODE-SUI
+// Created 70691 relationships
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CODE-SUIs_mp_ont.csv" AS row
+MATCH (code:Code {CODE: row.MP_term}) 
+MATCH (t:Term {SUI: row.SUI }) 
+MERGE  (code)-[:term]->(t)
+
+
+#### CUI-DEF
+// Added 13217 labels, created 13217 nodes
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUI-DEFs_mp_ont.csv" AS row
+MERGE (d:Definition {Name: row.Definitions, ATUI: row.ATUI }) 
+
+#### Connect CUI-DEFs
+// Created 13392 relationships
+:auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUI-DEFs_mp_ont.csv" AS row
+MATCH (concept:Concept {CUI: row.CUI}) 
+MATCH (def:Definition {ATUI: row.ATUI }) 
+MERGE  (concept)-[:def]->(def)
+
+_____________________________________________________________
+
 
 ##############################################################
 ############## STEP 2.0.0 Load MP terms and their ############
