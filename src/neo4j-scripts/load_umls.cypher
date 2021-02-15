@@ -291,6 +291,55 @@ MERGE (hpo)-[r:PHENO_CROSSWALK]->(mp)
  ###### STEP 4. Add GTEx data ########
  #####################################
  
+ _________________ new files _____________
+ 
+ ##### median genes ######
+ 
+ 
+ ###### eqtls #####
+ 
+ # Concepts
+ :auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CUIs_eqtl_GTEx.csv" AS row
+CREATE (eqtl_Concept:Concept {CUI:row.CUI_gtex}) 
+
+# Codes
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CODEs_eqtl_GTEx.csv" AS row
+CREATE (eqtl:Code {CodeID:row.CodeID_gtex,  SAB: row.SAB })
+
+# CUI-CUIs
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CUI-CUI_eqtl_GTEx.csv" AS row
+MATCH (gtex_Concept:Concept {CUI: row.CUI_gtex})
+MATCH (concept:Concept  {CUI: row.CUI}) 
+WITH gtex_Concept, concept, row
+CALL apoc.create.relationship(gtex_Concept, row.rel, {}, concept) YIELD rel
+RETURN concept limit 5
+
+# CUI-CODEs
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CUI-CODEs_eqtl_GTEx.csv" AS row
+MATCH (gtex_Concept:Concept {CUI: row.CUI_gtex})
+MATCH (gtex_Code:Code  {CodeID: row.CodeID_gtex}) 
+MERGE (gtex_Concept)-[:code]->(gtex_Code)
+
+# SUIs
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///SUIs_GTEx.csv" AS row
+CREATE (term:Term {name:row.Term  ,SUI: row.SUI })
+
+# CODE-SUIs
+:auto USING PERIODIC COMMIT 10000
+LOAD CSV WITH HEADERS FROM "file:///CODE-SUIs_GTEx.csv" AS row
+MATCH (gtex_Code:Code  {CodeID: row.CodeID_gtex}) 
+MATCH (gtex_Term:Term  {SUI: row.SUI}) 
+WITH gtex_Concept, gtex_Term, row
+CALL apoc.create.relationship(gtex_Code, row.rel, {}, gtex_Term) YIELD rel
+RETURN concept limit 5
+ ____________________________________________
+ 
+ 
  ###### Median Gene (Transcripts Per Million) per Tissue  ######
 
 # First create the GTEx Concept and Code nodes
