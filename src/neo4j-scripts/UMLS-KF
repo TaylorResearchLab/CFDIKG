@@ -4,23 +4,29 @@
 #######################################
 ##### Node & Relationship Checks ######
 #######################################
+# Check how many new nodes we added (nodes that have a unique identifier that starts with 'K')
+match (concept: Concept) where concept.CUI starts with 'K'    # 1,562,505
+return count(concept)
+
+match (code: Code) where code.CodeID contains 'KC'     # 885,203
+
+return count(code)
+
+# Check number of MP Concept and Codenodes 
+match (concept:Concept)--(codee:Code) where code.SAB = 'MP' return count(concept), count(code)  # 14,274 concepts and 14,274 codes
+
+# Check number of HGNC HCOP Concept and Code nodes
+match (concept:Concept)--(code:Code) where code.SAB = 'HGNC HCOP' return count(concept), count(code)  # 17,391 concepts and 27,357 codes
+
+# Check number of GTEX (eQTL) Concept and Code nodes
+match (concept:Concept)--(code:Code) where code.SAB = 'GTEX' return count(c)  # 17,391
 
 
-# Check number of MP Code nodes
-match (n:Code) where n.SAB = 'MP' return count(n)     # 14,274
+#########################
+###### eQTL queries #####
+#########################
 
-# Check number of MP Concept nodes 
-match (c:Concept)--(n:Code) where n.SAB = 'MP' return count(c)  # 14,274
-
-# Check number of HGNC HCOP Code nodes
- match (n:Code) where n.SAB = 'HGNC HCOP' return count(n) # 27,357
- 
-# Check number of HGNC HCOP Concept nodes
-match (c:Concept)--(n:Code) where n.SAB = 'HGNC HCOP' return count(c)  # 17,391
-
-
-
-eQTL queries: # must differentiate b/t the different kinds of GTEX nodes, SAB: GTEX points to eqtls and median gene ex.
+# must differentiate b/t the different kinds of GTEX nodes, SAB: GTEX points to eqtls and median gene ex.
 
 # Search eqtls by UBERON CUI (tissue)
 #  Return number of eqtls that are connected to the UBERON Brain Concept node
@@ -30,3 +36,21 @@ MATCH (UB_brain:Concept {CUI:'HC009101'})--(eqtls:Concept)--(eqtl_code:Code {SAB
 #  Return number of eqtls that are connected to this HGNC Concept node
 MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX'}) return count(eqtl_code)    # 26 correct!
 
+# Search eqtls by Varaint/dbSNP CUI 
+# Return number of eqtls associated with this variation
+
+
+
+# Search for the unique eqtl that is associated with one tissue, one gene and one variation.
+# Find the eqtl associated with brain tissue, the FTLP2 gene and the rs191565734 variation.
+MATCH (eqtl)-[]->(tissue:Concept {CUI:'HC009101'})
+MATCH (eqtl)-[]->(gene:Concept {CUI:'C2829418'})
+MATCH (eqtl)-[]->(var:Concept {CUI: 'KC9461979778652'})  // returns KC5566850536992, which is correct
+RETURN eqtl
+
+# Return the Code node attached to the eqtl Concept node we just searched for.
+MATCH (eqtl)-[]->(tissue:Concept {CUI:'HC009101'})
+MATCH (eqtl)-[]->(gene:Concept {CUI:'C2829418'})
+MATCH (eqtl)-[]->(var:Concept {CUI: 'KC9461979778652'}) 
+MATCH (eqtl)-[]-(code:Code)
+RETURN code
