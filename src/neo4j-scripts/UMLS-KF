@@ -4,22 +4,45 @@
 #######################################
 ##### Node & Relationship Checks ######
 #######################################
+
 # Check how many new nodes we added (nodes that have a unique identifier that starts with 'K')
-match (concept: Concept) where concept.CUI starts with 'K'    # 1,562,505
-return count(concept)
 
-match (code: Code) where code.CodeID contains 'KC'     # 885,203
+# Concept
+match (concept: Concept) where concept.CUI starts with 'K' return count(concept)   # 1,562,505   correct
 
-return count(code)
+# Code
+match (code: Code) where code.CodeID contains 'KC' return count(code)    # 885,203  correct
 
-# Check number of MP Concept and Codenodes 
-match (concept:Concept)--(codee:Code) where code.SAB = 'MP' return count(concept), count(code)  # 14,274 concepts and 14,274 codes
+# Term
+match (t:Term) where t.SUI starts with 'KS'  return count(t)    # 2,152,570   correct.
 
-# Check number of HGNC HCOP Concept and Code nodes
-match (concept:Concept)--(code:Code) where code.SAB = 'HGNC HCOP' return count(concept), count(code)  # 17,391 concepts and 27,357 codes
+
+# Check number of MP Concept and Code nodes connected 
+match (concept:Concept)--(code:Code) where code.SAB = 'MP' return count(concept), count(code)  # 14,274 concepts and 14,274 codes, correct
+
+# Check number of HGNC HCOP Concept and Code nodes connected
+match (concept:Concept)--(code:Code) where code.SAB = 'HGNC HCOP' return count(concept), count(code)  # 17,391 concepts and 27,357 codes, correct
 
 # Check number of GTEX (eQTL) Concept and Code nodes
-match (concept:Concept)--(code:Code) where code.SAB = 'GTEX' return count(c)  # 17,391
+match (concept:Concept)--(code:Code) where code.SAB = 'GTEX' return count(concept),count(code)    # 884,757 concepts and 884,757 codes, check
+
+
+
+##################################
+##### Check for isolated nodes ###
+##################################
+
+# Concepts
+match (c:Concept) where c.CUI starts with 'KC' and not (c)--() return count(c)  #  0
+
+# Codes
+match (c:Code) where c.CodeID starts with 'KC' and not (c)--() return count(c)  #  0
+
+# Terms
+match (t:Term) where t.SUI starts with 'KS' and not (t)--() return count(t)     #  0
+
+
+
 
 
 #########################
@@ -40,13 +63,12 @@ MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'G
 # Return number of eqtls associated with this variation
 
 
-
 # Search for the unique eqtl that is associated with one tissue, one gene and one variation.
 # Find the eqtl associated with brain tissue, the FTLP2 gene and the rs191565734 variation.
 MATCH (eqtl)-[]->(tissue:Concept {CUI:'HC009101'})
 MATCH (eqtl)-[]->(gene:Concept {CUI:'C2829418'})
 MATCH (eqtl)-[]->(var:Concept {CUI: 'KC9461979778652'})  // returns KC5566850536992, which is correct
-RETURN eqtl
+RETURN eqtl, tissue, gene
 
 # Return the Code node attached to the eqtl Concept node we just searched for.
 MATCH (eqtl)-[]->(tissue:Concept {CUI:'HC009101'})
@@ -54,3 +76,8 @@ MATCH (eqtl)-[]->(gene:Concept {CUI:'C2829418'})
 MATCH (eqtl)-[]->(var:Concept {CUI: 'KC9461979778652'}) 
 MATCH (eqtl)-[]-(code:Code)
 RETURN code
+
+
+
+
+
