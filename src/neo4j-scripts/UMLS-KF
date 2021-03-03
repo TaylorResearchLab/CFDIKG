@@ -24,8 +24,10 @@ match (concept:Concept)--(code:Code) where code.SAB = 'MP' return count(concept)
 match (concept:Concept)--(code:Code) where code.SAB = 'HGNC HCOP' return count(concept), count(code)  # 17,391 concepts and 27,357 codes, correct
 
 # Check number of GTEX (eQTL) Concept and Code nodes
-match (concept:Concept)--(code:Code) where code.SAB = 'GTEX' return count(concept),count(code)    # 884,757 concepts and 884,757 codes, check
+match (concept:Concept)--(code:Code) where code.SAB = 'GTEX EQTL' return count(concept),count(code)    # 884,757 concepts and 884,757 codes, correct
 
+# Check number of GTEX (Expression) Concept and Code nodes
+match (concept:Concept)--(code:Code) where code.SAB = 'GTEX EXP' return count(concept),count(code)    # 1,839,188 concepts and 1,839,188 codes, correct
 
 
 ##################################
@@ -78,6 +80,12 @@ MATCH (eqtl)-[]-(code:Code)
 RETURN code
 
 
+#####################################
+###### GTEX Expression queries ######
+#####################################
 
-
+match (gtex_exp:Concept) where code.SAB = 'GTEX EXP' 
+match (gtex_exp)--(hgnc_concept:Concept)--(hgnc_code:Code) where hgnc_code.SAB = 'HGNC'
+match (gtex_exp)--(ub_concept:Concept)--(ub_code:Code) ub_code.SAB = 'UBERON'
+return gtex_exp, hgnc_code, ub_code limit 1
 
