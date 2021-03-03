@@ -84,8 +84,16 @@ RETURN code
 ###### GTEX Expression queries ######
 #####################################
 
-match (gtex_exp:Concept) where code.SAB = 'GTEX EXP' 
-match (gtex_exp)--(hgnc_concept:Concept)--(hgnc_code:Code) where hgnc_code.SAB = 'HGNC'
-match (gtex_exp)--(ub_concept:Concept)--(ub_code:Code) ub_code.SAB = 'UBERON'
-return gtex_exp, hgnc_code, ub_code limit 1
+# Show a GTEX EXP Concept node, with its HGNC and UBERON Concept nodes connections, along with all three of their Code nodes
+match (gtex_exp:Concept)-[r0]-(gtex_exp_code:Code) where gtex_exp_code.SAB = 'GTEX EXP' 
+match (gtex_exp)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code) where hgnc_code.SAB = 'HGNC'
+match (gtex_exp)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code) where ub_code.SAB = 'UBERON'
+return gtex_exp, gtex_exp_code, 
+       hgnc_concept,hgnc_code, 
+       ub_concept, ub_code,
+       r0,r1,r2,r3,r4 limit 1
+       
+       
+# Return all GTEX EXP nodes associated with a specific tissue (UBERON code),   ie, venous blood
+match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX EXP'}) return count(gtex_exp_code)        # 35,369
 
