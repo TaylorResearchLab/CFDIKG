@@ -97,3 +97,33 @@ return gtex_exp, gtex_exp_code,
 # Return all GTEX EXP nodes associated with a specific tissue (UBERON code),   ie, venous blood
 match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX EXP'}) return count(gtex_exp_code)        # 35,369
 
+
+
+
+
+
+
+
+###########################
+#### QUERY STEPS 1-5 ######
+###########################
+
+
+# STEP 1
+match (hp_phenotype:Code {CODE:'HP:0025579'})
+return hp_phenotype
+
+# STEP 2
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(c1:Concept)-[r1]-(c2:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'}) 
+return hp_phenotype,r0,r1,r2,c1,c2,mp_phenotype
+
+# STEP 3
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
+return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,hcop_concept,mouse_gene limit 5
+
+# STEP 4
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene limit 2
