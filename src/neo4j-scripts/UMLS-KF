@@ -127,3 +127,50 @@ match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp
 match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
 match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
 return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene limit 2
+
+
+# STEP 5
+
+# Median TPM
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(tpm:Code {SAB:'GTEX EXP'})
+return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,
+hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,tpm limit 1
+
+# eQTL
+
+
+
+#########################################################
+###### Search for genes from the email with Deanne ######
+#########################################################
+
+MP terms and defs, From OLS
+
+# MP:0003923 = abnormal heart left atrium morphology     (IMPC does not have this)
+
+
+# MP:0003921 = abnormal heart left ventricle morphology    (This is what IMPC has) 
+
+
+match (mp:Code {CODE:'MP:0003921'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC HCOP'})   return count(gene)
+
+# 115
+
+match (mp:Code {CODE:'MP:0003923'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC HCOP'})   return count(gene)
+
+# 8     --- these are from MGI 
+
+
+##############################################################################
+#### search for all cardiac phenotypes, their associated genes and eqtls #####
+##############################################################################
+
+
+
+MP --- has_human_phhenotype --->>> hpo
+
+HPO  --- has_mouse_phenotype ---->>>> MP
+
