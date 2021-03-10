@@ -174,3 +174,18 @@ MP --- has_human_phhenotype --->>> hpo
 
 HPO  --- has_mouse_phenotype ---->>>> MP
 
+
+
+####################
+
+####################
+How many GTEX EQTL Code nodes have at least one Term node
+match (c:Code {SAB:'GTEX EQTL'})--(:Term) return count( distinct c)   #  336722 
+
+How many GTEX EQTL code nudes are there total?  #   884757       find out how many GTEX EQTL code nodes have  no Terms, should be the difference b/t these 2 #'s
+match (c:Code {SAB:'GTEX EQTL'}) return count(c)
+
+
+
+How many GTEX EXP code nudes are there total?
+match (c:Code {SAB:'GTEX EXP'}) return count(c)  # 1839188
