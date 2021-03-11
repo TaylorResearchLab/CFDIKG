@@ -4,28 +4,20 @@
 #######################################
 ##### Node & Relationship Checks ######
 #######################################
-
 # Check how many new nodes we added (nodes that have a unique identifier that starts with 'K')
-
 # Concept
 match (concept: Concept) where concept.CUI starts with 'K' return count(concept)   # 1,562,505   correct
-
 # Code
 match (code: Code) where code.CodeID contains 'KC' return count(code)    # 885,203  correct
-
 # Term
 match (t:Term) where t.SUI starts with 'KS'  return count(t)    # 2,152,570   correct.
 
-
 # Check number of MP Concept and Code nodes connected 
 match (concept:Concept)--(code:Code) where code.SAB = 'MP' return count(concept), count(code)  # 14,274 concepts and 14,274 codes, correct
-
 # Check number of HGNC HCOP Concept and Code nodes connected
 match (concept:Concept)--(code:Code) where code.SAB = 'HGNC HCOP' return count(concept), count(code)  # 17,391 concepts and 27,357 codes, correct
-
 # Check number of GTEX (eQTL) Concept and Code nodes
 match (concept:Concept)--(code:Code) where code.SAB = 'GTEX EQTL' return count(concept),count(code)    # 884,757 concepts and 884,757 codes, correct
-
 # Check number of GTEX (Expression) Concept and Code nodes
 match (concept:Concept)--(code:Code) where code.SAB = 'GTEX EXP' return count(concept),count(code)    # 1,839,188 concepts and 1,839,188 codes, correct
 
@@ -33,19 +25,12 @@ match (concept:Concept)--(code:Code) where code.SAB = 'GTEX EXP' return count(co
 ##################################
 ##### Check for isolated nodes ###
 ##################################
-
 # Concepts
 match (c:Concept) where c.CUI starts with 'KC' and not (c)--() return count(c)  #  0
-
 # Codes
 match (c:Code) where c.CodeID starts with 'KC' and not (c)--() return count(c)  #  0
-
 # Terms
 match (t:Term) where t.SUI starts with 'KS' and not (t)--() return count(t)     #  0
-
-
-
-
 
 #########################
 ###### eQTL queries #####
@@ -63,7 +48,6 @@ MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'G
 
 # Search eqtls by Varaint/dbSNP CUI 
 # Return number of eqtls associated with this variation
-
 
 # Search for the unique eqtl that is associated with one tissue, one gene and one variation.
 # Find the eqtl associated with brain tissue, the FTLP2 gene and the rs191565734 variation.
@@ -88,16 +72,13 @@ RETURN code
 match (gtex_exp:Concept)-[r0]-(gtex_exp_code:Code) where gtex_exp_code.SAB = 'GTEX EXP' 
 match (gtex_exp)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code) where hgnc_code.SAB = 'HGNC'
 match (gtex_exp)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code) where ub_code.SAB = 'UBERON'
-return gtex_exp, gtex_exp_code, 
-       hgnc_concept,hgnc_code, 
-       ub_concept, ub_code,
-       r0,r1,r2,r3,r4 limit 1
-       
+return gtex_exp, gtex_exp_code, hgnc_concept,hgnc_code, ub_concept, ub_code,r0,r1,r2,r3,r4 limit 1
        
 # Return all GTEX EXP nodes associated with a specific tissue (UBERON code),   ie, venous blood
-match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX EXP'}) return count(gtex_exp_code)        # 35,369
+match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX EXP'}) return count(gtex_exp_code)        # 35,369   must check each tissue
 
-
+# Return all GTEX EXP nodes associated with a specific gene (HGNC code),   ie, venous blood
+match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX EXP'}) return count(gtex_exp_code) 
 
 
 
@@ -128,9 +109,7 @@ match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC 
 match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
 return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene limit 2
 
-
 # STEP 5
-
 # Median TPM
 match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
 match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
@@ -138,8 +117,13 @@ match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HG
 match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(tpm:Code {SAB:'GTEX EXP'})
 return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,
 hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,tpm limit 1
-
 # eQTL
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(tpm:Code {SAB:'GTEX EXP'})
+return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,
+hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,tpm limit 1
 
 
 
@@ -148,19 +132,11 @@ hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,tpm lim
 #########################################################
 
 MP terms and defs, From OLS
-
 # MP:0003923 = abnormal heart left atrium morphology     (IMPC does not have this)
-
-
 # MP:0003921 = abnormal heart left ventricle morphology    (This is what IMPC has) 
-
-
 match (mp:Code {CODE:'MP:0003921'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC HCOP'})   return count(gene)
-
-# 115
-
+# 115   --- ~87 of these are from IMPC
 match (mp:Code {CODE:'MP:0003923'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC HCOP'})   return count(gene)
-
 # 8     --- these are from MGI 
 
 
@@ -169,23 +145,21 @@ match (mp:Code {CODE:'MP:0003923'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Co
 ##############################################################################
 
 
-
-MP --- has_human_phhenotype --->>> hpo
-
-HPO  --- has_mouse_phenotype ---->>>> MP
-
-
-
-####################
-
-####################
-How many GTEX EQTL Code nodes have at least one Term node
-match (c:Code {SAB:'GTEX EQTL'})--(:Term) return count( distinct c)   #  336722 
-
-How many GTEX EQTL code nudes are there total?  #   884757       find out how many GTEX EQTL code nodes have  no Terms, should be the difference b/t these 2 #'s
+#########################################################
+### Check that the GTEX EQTL and GTEX EXP Code nodes ####
+######### have the correct # of Term nodes ##############
+#########################################################
+# Correct
+How many GTEX EQTL Code nodes have at least one Term node?
+match (c:Code {SAB:'GTEX EQTL'})--(:Term) return count( distinct c)   #  884757
+How many GTEX EQTL code nodes are there total?  #   884,757   
 match (c:Code {SAB:'GTEX EQTL'}) return count(c)
-
-
-
-How many GTEX EXP code nudes are there total?
+# Correct
+How many GTEX EXP code nodes have at least one Term node? Should be 1-to-1. 
+match (c:Code {SAB:'GTEX EXP'})--(:Term) return count( distinct c)   # 1839188
+How many GTEX EXP code nodes are there total?
 match (c:Code {SAB:'GTEX EXP'}) return count(c)  # 1839188
+
+#############################
+#############################
+
