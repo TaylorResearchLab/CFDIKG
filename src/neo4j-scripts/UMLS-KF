@@ -4,13 +4,39 @@
 #######################################
 ##### Node & Relationship Checks ######
 #######################################
+
 # Check how many new nodes we added (nodes that have a unique identifier that starts with 'K')
-# Concept
-match (concept: Concept) where concept.CUI starts with 'K' return count(concept)   # 1,562,505   correct
-# Code
-match (code: Code) where code.CodeID contains 'KC' return count(code)    # 885,203  correct
-# Term
-match (t:Term) where t.SUI starts with 'KS'  return count(t)    # 2,152,570   correct.
+
+### Concept
+match (concept: Concept) where concept.CUI starts with 'K' return count(concept)   # 3,401,693   (was 1,562,505 before adding 'GTEX EXP')  CORRECT
+
+### Code ###
+match (code: Code) where code.CodeID contains 'KC' return count(code)   # 2,724,391  (was 885,203)  why is this not the same as concepts count? B/c only the GTEX EQTL and GTEX EXP have CodeIDs that contain 'KC'
+
+ # Code by SAB
+match (hgnc_hcop: Code {SAB : 'HGNC HCOP'})  return count(hgnc_hcop) as hgnc_hcop_cnt    #  27,357  CORRECT
+
+match (mp: Code {SAB : 'MP'})  return count(mp) as mp_cnt   # 14,274   CORRECT
+
+match (gtex_exp: Code {SAB : 'GTEX EXP'}) return count(gtex_exp) as gtex_exp_cnt     #  1,839,188  CORRECT
+
+match (gtex_eqtl: Code {SAB : 'GTEX EQTL'}) return count(gtex_eqtl) as gtex_eqtl_cnt   #  884,757  CORRECT
+
+match (dbsnp: Code {SAB : 'DBSNP 151'}) return count(dbsnp) as dbsnp_cnt   # 636,117 CORRECT
+
+27,357 + 14,274 + 1,839,188 + 884,757 + 636,117 = 3,401,693  # same as the Concepts, CORRECT
+
+# Code Nodes by SAB
+Counter({'HGNC HCOP': 27357,
+         'MP': 14274,
+         'GTEX EXP': 1839188,
+         'GTEX EQTL': 884757,
+         'DBSNP 151': 636117})
+
+
+
+### Term ###
+match (t:Term) where t.SUI starts with 'KS'  return count(t)    #  3,026,420  (was 2,152,570)   correct.
 
 # Check number of MP Concept and Code nodes connected 
 match (concept:Concept)--(code:Code) where code.SAB = 'MP' return count(concept), count(code)  # 14,274 concepts and 14,274 codes, correct
@@ -121,11 +147,21 @@ hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,tpm lim
 match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
 match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
 match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
-match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(tpm:Code {SAB:'GTEX EXP'})
+match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(eqtl:Code {SAB:'GTEX EXP'})
+
 return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,
-hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,tpm limit 1
+hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,eqtl limit 1
 
 
+
+
+# SHOW EQTL triple
+match (eqtl:Code {SAB:'GTEX EQTL'})-[r]-(c:Concept)
+match (c)-[*1]-(cc:Concept) return c,cc limit 3
+
+# SHOW EXP double
+match (eqtl:Code {SAB:'GTEX EXP'})-[r]-(c:Concept)
+match (c)-[*1]-(cc:Concept) return c,cc limit 2
 
 #########################################################
 ###### Search for genes from the email with Deanne ######
