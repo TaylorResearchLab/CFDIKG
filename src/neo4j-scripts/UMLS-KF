@@ -115,27 +115,26 @@ match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX EXP'}) re
 #### QUERY STEPS 1-5 ######
 ###########################
 
-
-# STEP 1
+#### STEP 1
 match (hp_phenotype:Code {CODE:'HP:0025579'})
 return hp_phenotype
 
-# STEP 2
+#### STEP 2
 match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(c1:Concept)-[r1]-(c2:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'}) 
 return hp_phenotype,r0,r1,r2,c1,c2,mp_phenotype
 
-# STEP 3
+#### STEP 3
 match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
 match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
 return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,hcop_concept,mouse_gene limit 5
 
-# STEP 4
+#### STEP 4
 match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
 match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
 match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
 return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene limit 2
 
-# STEP 5
+#### STEP 5
 # Median TPM
 match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
 match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
@@ -147,14 +146,50 @@ hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,tpm lim
 match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
 match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
 match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
-match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(eqtl:Code {SAB:'GTEX EXP'})
-
+match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(eqtl:Code {SAB:'GTEX EQTL'})
 return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,
 hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,eqtl limit 1
 
+##########################################
+######## Check Interval Term nodes #######
+##########################################
+
+# Make sure every exp or eqtl code node is attached to an interval term node
+match (exp:Code {SAB:'GTEX EXP'}) return count(exp)  # 1,839,188
+match (exp:Code {SAB:'GTEX EXP'})--(:Term) return count(exp) # 1,839,188      CORRECT
+
+match (eqtl:Code {SAB:'GTEX EQTL'}) return count(eqtl) # 884,757
+match (eqtl:Code {SAB:'GTEX EQTL'})-[:p_value]-(:Term) return count(eqtl) # 884,757    CORRECT
+
+#######################################
+##### Search by eqtl p-value ##########
+#######################################   
+
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(eqtl:Code {SAB:'GTEX EQTL'})-[p:p_value]-(t:Term)
+where t.bins_upperbound < 0.02 and  t.bins_lowerbound > .001
+return count(eqtl)              #    112 eqtls
+
+upperbound below .02 = 5,664 eqtls
+upperbound below .02 and lowerbound above .001 = 112 eqtls
+
+
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+match (hgnc_concept)-[r7]-(exp_concept:Concept)-[r8]-(exp:Code {SAB:'GTEX EXP'})-[tpm:TPM]-(t:Term)
+where t.bins_upperbound < 50
+return count(exp)                    # 6,696 genes 
 
 
 
+
+
+########################################
+####### Show GTEX (eQTL and Exp) #######
+########################################
 # SHOW EQTL triple
 match (eqtl:Code {SAB:'GTEX EQTL'})-[r]-(c:Concept)
 match (c)-[*1]-(cc:Concept) return c,cc limit 3
