@@ -63,8 +63,20 @@ match (t:Term) where t.SUI starts with 'KS' and not (t)--() return count(t)     
 #### dbSNP queries #####
 ########################  # Can't just search for 'DBSNP 151' bc the dbsnp nodes from GTEx have the same SAB
 
+### Check number of dbSNP nodes
 match (DB_code:Code {SAB:'DBSNP 151'})--(c1:Concept)--(c2:Concept)--(hgnc:Code {SAB:'HGNC'})
 return COUNT(DB_code)
+
+### Show gene w multiple snps
+MATCH (n:Concept)-[r:has_snp]-(:Concept)
+WITH n, count(r) as snp_cnt
+WHERE snp_cnt > 1
+MATCH g=(n)-[:has_snp]-(:Concept)
+RETURN g
+LIMIT 2
+
+
+
 
 #########################
 ###### eQTL queries #####
