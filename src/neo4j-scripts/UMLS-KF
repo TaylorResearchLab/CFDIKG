@@ -22,17 +22,17 @@ match (gtex_exp: Code {SAB : 'GTEX EXP'}) return count(gtex_exp) as gtex_exp_cnt
 
 match (gtex_eqtl: Code {SAB : 'GTEX EQTL'}) return count(gtex_eqtl) as gtex_eqtl_cnt   #  884,757  CORRECT
 
-match (dbsnp: Code {SAB : 'DBSNP 151'}) return count(dbsnp) as dbsnp_cnt   # 636,117 CORRECT
+
+match (dbsnp: Code {SAB : 'DBSNP 151'}) return count(dbsnp) as dbsnp_cnt   # 636,117 CORRECT, After adding the actual dbSNP data, this # is going to be much higher
+
 
 27,357 + 14,274 + 1,839,188 + 884,757 + 636,117 = 3,401,693  # same as the Concepts, CORRECT
-
 # Code Nodes by SAB
 Counter({'HGNC HCOP': 27357,
          'MP': 14274,
          'GTEX EXP': 1839188,
          'GTEX EQTL': 884757,
          'DBSNP 151': 636117})
-
 
 
 ### Term ###
@@ -57,6 +57,14 @@ match (c:Concept) where c.CUI starts with 'KC' and not (c)--() return count(c)  
 match (c:Code) where c.CodeID starts with 'KC' and not (c)--() return count(c)  #  0
 # Terms
 match (t:Term) where t.SUI starts with 'KS' and not (t)--() return count(t)     #  0
+
+
+########################
+#### dbSNP queries #####
+########################  # Can't just search for 'DBSNP 151' bc the dbsnp nodes from GTEx have the same SAB
+
+match (DB_code:Code {SAB:'DBSNP 151'})--(c1:Concept)--(c2:Concept)--(hgnc:Code {SAB:'HGNC'})
+return COUNT(DB_code)
 
 #########################
 ###### eQTL queries #####
@@ -105,6 +113,8 @@ match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX EXP'}) re
 
 # Return all GTEX EXP nodes associated with a specific gene (HGNC code),   ie, venous blood
 match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX EXP'}) return count(gtex_exp_code) 
+
+
 
 
 
@@ -182,7 +192,6 @@ match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HG
 match (hgnc_concept)-[r7]-(exp_concept:Concept)-[r8]-(exp:Code {SAB:'GTEX EXP'})-[tpm:TPM]-(t:Term)
 where t.bins_upperbound < 50
 return count(exp)                    # 6,696 genes 
-
 
 
 
