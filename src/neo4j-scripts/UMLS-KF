@@ -172,6 +172,7 @@ match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(eqtl:Code {SAB:'GTEX EQTL
 return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,
 hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,eqtl limit 1
 
+
 ##########################################
 ######## Check Interval Term nodes #######
 ##########################################
@@ -182,6 +183,7 @@ match (exp:Code {SAB:'GTEX EXP'})--(:Term) return count(exp) # 1,839,188      CO
 
 match (eqtl:Code {SAB:'GTEX EQTL'}) return count(eqtl) # 884,757
 match (eqtl:Code {SAB:'GTEX EQTL'})-[:p_value]-(:Term) return count(eqtl) # 884,757    CORRECT
+
 
 #######################################
 ##### Search by eqtl p-value ##########
@@ -243,14 +245,14 @@ match (mp:Code {CODE:'MP:0003923'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Co
 #########################################################
 # Correct
 How many GTEX EQTL Code nodes have at least one Term node?
-match (c:Code {SAB:'GTEX EQTL'})--(:Term) return count( distinct c)   #  884757
+match (c:Code {SAB:'GTEX EQTL'})--(:Term) return count( distinct c)   #  884,757
 How many GTEX EQTL code nodes are there total?  #   884,757   
 match (c:Code {SAB:'GTEX EQTL'}) return count(c)
 # Correct
 How many GTEX EXP code nodes have at least one Term node? Should be 1-to-1. 
-match (c:Code {SAB:'GTEX EXP'})--(:Term) return count( distinct c)   # 1839188
+match (c:Code {SAB:'GTEX EXP'})--(:Term) return count( distinct c)   # 1,839,188
 How many GTEX EXP code nodes are there total?
-match (c:Code {SAB:'GTEX EXP'}) return count(c)  # 1839188
+match (c:Code {SAB:'GTEX EXP'}) return count(c)  # 1,839,188
 
 #############################
 #############################
