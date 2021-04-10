@@ -46,17 +46,18 @@ match (concept:Concept)--(code:Code) where code.SAB = 'HGNC HCOP' return count(c
 match (concept:Concept)--(code:Code) where code.SAB = 'GTEX EQTL' return count(concept),count(code)    # 884,757 concepts and 884,757 codes, correct
 # Check number of GTEX (Expression) Concept and Code nodes
 match (concept:Concept)--(code:Code) where code.SAB = 'GTEX EXP' return count(concept),count(code)    # 1,839,188 concepts and 1,839,188 codes, correct
+# Check number of dbSNP Concept and Code nodes
 
+match (concept:Concept)--(code:Code) where code.SAB = 'DBSNP 151' return count(concept),count(code)    #  636,527
 
 ##################################
 ##### Check for isolated nodes ###
 ##################################
-# Concepts
-match (c:Concept) where c.CUI starts with 'KC' and not (c)--() return count(c)  #  0
-# Codes
-match (c:Code) where c.CodeID starts with 'KC' and not (c)--() return count(c)  #  0
-# Terms
-match (t:Term) where t.SUI starts with 'KS' and not (t)--() return count(t)     #  0
+
+match (c:Concept) where c.CUI starts with 'KC' and not (c)--() 
+match (co:Code) where co.CodeID starts with 'KC' and not (co)--()   
+match (t:Term) where t.SUI starts with 'KS' and not (t)--() 
+return count(c), count(co), count(t)    
 
 
 ########################
@@ -76,8 +77,6 @@ RETURN g
 LIMIT 2
 
 
-
-
 #########################
 ###### eQTL queries #####
 #########################
@@ -86,11 +85,11 @@ LIMIT 2
 
 # Search eqtls by UBERON CUI (tissue)
 #  Return number of eqtls that are connected to the UBERON Brain Concept node
-MATCH (UB_brain:Concept {CUI:'HC009101'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX'}) return count(eqtl_code)  # 18,751 correct!
+MATCH (UB_brain:Concept {CUI:'HC009101'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX EQTL'}) return count(eqtl_code)  # 18,751 correct!
 
 # Search eqtls by HGNC CUI (gene)
 #  Return number of eqtls that are connected to this HGNC Concept node
-MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX'}) return count(eqtl_code)    # 26 correct!
+MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX EQTL'}) return count(eqtl_code)    # 26 correct!
 
 # Search eqtls by Varaint/dbSNP CUI 
 # Return number of eqtls associated with this variation
@@ -228,8 +227,13 @@ match (c)-[*1]-(cc:Concept) return c,cc limit 2
 MP terms and defs, From OLS
 # MP:0003923 = abnormal heart left atrium morphology     (IMPC does not have this)
 # MP:0003921 = abnormal heart left ventricle morphology    (This is what IMPC has) 
-match (mp:Code {CODE:'MP:0003921'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC HCOP'})   return count(gene)
+
+match (mp_code:Code {SAB: 'MP', CODE:'MP:0003921'})-[r0:CODE]-(mp_concept:Concept)-[r1:disease_has_associated_gene]
+-(gene_Concept:Concept)-[r2:CODE]-(gene_code:Code {SAB:'HGNC HCOP'}) 
+return count(gene_code)
 # 115   --- ~87 of these are from IMPC
+
+
 match (mp:Code {CODE:'MP:0003923'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC HCOP'})   return count(gene)
 # 8     --- these are from MGI 
 
