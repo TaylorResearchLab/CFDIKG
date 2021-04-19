@@ -1,0 +1,56 @@
+#######################################
+### Scripts to run graph algorithms ###
+#######################################
+
+
+Before we can run any graph algorithms we need to extract our sub graph from the entire UMLS graph.
+
+We want to include all node types (Concept, Code, Term) from the data
+sources we put in the graph as well as any data sources that our data makes a direct relationship to.
+These include:
+
+- HGNC HCOP (mouse genes) nodesv
+- IMPC
+- MP
+- GTEX eqtl and GTEX exp
+
+- HGNC (human genes) nodes
+- HPO
+- UBERON
+
+### Create an in-memory graph w/ gds.graph.create('name','Labels','relationships')
+
+CALL gds.graph.create('my-graph', 'Concept', 'has_human_phenotype')
+YIELD graphName, nodeCount, relationshipCount;
+
+Nodes: 9,669,972	Relationships: 1218
+
+remove graph,  CALL gds.graph.drop('myGraph') 
+get graph info, CALL gds.graph.list('my-graph3')
+check for graph, CALL gds.graph.exists('myGraph') YIELD exists
+
+#####################
+###### ALGOS ########  https://neo4j.com/docs/graph-data-science/current/appendix-b/migration-product-algos/
+#####################
+
+#### Louvain #####
+CALL gds.louvain.stream('my-graph3') YIELD nodeId, communityId, intermediateCommunityIds
+### Node Similarity ###
+CALL gds.nodeSimilarity.stream('my-graph3') YIELD node1, node2, similarity
+### Weakly Connected Components ###
+CALL gds.wcc.stream('myGraph') YIELD nodeId, componentId
+
+
+### Page Rank ###
+CALL gds.pageRank.stream('my-graph3',{maxIterations: 2})
+
+### Triangle Counts ####
+CALL gds.triangleCount.stream('myGraph')       // relationship  orientation must be 'UNDIRECTED'
+YIELD nodeId, triangleCount
+
+### Clustering Coefficients ###
+CALL gds.localClusteringCoefficient.stream('myGraph')     // relationship  orientation must be 'UNDIRECTED'
+YIELD nodeId, localClusteringCoefficient
+
+### Betweenness Centrality ###
+CALL gds.betweenness.stream('myGraph') YIELD nodeId, score
