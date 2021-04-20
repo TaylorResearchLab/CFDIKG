@@ -18,16 +18,31 @@ These include:
 - HPO
 - UBERON
 
-### Create an in-memory graph w/ gds.graph.create('name','Labels','relationships')
 
+####### DON'T use gds.graph.create() ##########
+### Create an in-memory graph w/ gds.graph.create('name','Labels','relationships')
 CALL gds.graph.create('my-graph', 'Concept', 'has_human_phenotype')
 YIELD graphName, nodeCount, relationshipCount;
-
 Nodes: 9,669,972	Relationships: 1218
-
 remove graph,  CALL gds.graph.drop('myGraph') 
 get graph info, CALL gds.graph.list('my-graph3')
 check for graph, CALL gds.graph.exists('myGraph') YIELD exists
+
+########### Use apoc.path.subgraphAll to get subgraph########
+MATCH (p:Person {name: "Stefan"})
+CALL apoc.path.subgraphAll(p, {
+	relationshipFilter: "KNOWS",
+    minLevel: 1,
+    maxLevel: 2
+})
+YIELD nodes, relationships
+RETURN p,nodes, relationships;
+
+
+
+
+
+
 
 #####################
 ###### ALGOS ########  https://neo4j.com/docs/graph-data-science/current/appendix-b/migration-product-algos/
