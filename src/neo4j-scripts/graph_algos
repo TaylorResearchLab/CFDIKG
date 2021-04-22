@@ -17,9 +17,10 @@ These include:
 - HGNC (human genes) nodes
 - HPO
 - UBERON
+#################### We are only going to consider the Concept space (Concept-Concept)...
 
 
-####### DON'T use gds.graph.create() ##########
+####### DON'T use gds.graph.create() ##########   whats the difference b/t gds.graph.create() and gds.graph.create.cypher(), both create in-memory?
 ### Create an in-memory graph w/ gds.graph.create('name','Labels','relationships')
 CALL gds.graph.create('my-graph', 'Concept', 'has_human_phenotype')
 YIELD graphName, nodeCount, relationshipCount;
@@ -38,8 +39,40 @@ CALL apoc.path.subgraphAll(p, {
 YIELD nodes, relationships
 RETURN p,nodes, relationships;
 
+### Example of apoc.path.subgraphAll() #######
+MATCH (e:COMP) WHERE e.componentID= "f4db22e7-68d2-473d-960b-c98dbbadb3a0" 
+with e limit 1 CALL apoc.path.subgraphAll(e, 
+{relationshipFilter:'CHILD_OF|CONNECTED_TO|LINKED_TO', limit:10}) YIELD nodes 
+UNWIND nodes as node  RETURN node.componentID as uuid, node.orphanID as oid, 
+node.cTime as time
 
 
+
+
+
+####### Or just use  gds.graph.create.cypher()     https://towardsdatascience.com/how-to-get-started-with-the-new-graph-data-science-library-of-neo4j-3c8fff6107b
+CALL gds.graph.create.cypher('full_graph','MATCH (n) RETURN id(n) AS id','MATCH (n)-[e]-(m) RETURN id(n) AS source, e.weight AS weight, id(m) AS target')
+
+--------------- UMLS UBERON graph algo results-------------------
+# Create a Subgraph of the Concept-space on the 'UMLS UBERON' graph  
+CALL gds.graph.create.cypher('g1','MATCH (n:Concept) RETURN id(n) AS id','MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target')
+
+nodeQuery				relationshipQuery	                                                        graphName    nodeCount	relationshipCount    createMillis
+"MATCH (n:Concept) RETURN id(n) AS id"	"MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target"	"g1"	     4629031	47629518	     124491
+
+##### UMLS UBERON ONLY #####
+CALL gds.graph.create.cypher('g1','MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id',
+    'MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target',
+     {validateRelationships: False})
+     
+nodeQuery	relationshipQuery	graphName	nodeCount	relationshipCount	createMillis
+"MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id"	"MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target"	"g1"	13422	41944	51051
+
+
+### CALL gds.louvain.stream('g1')   # yield nodeId,communityId,intermediateCommunityIds
+### CALL gds.pageRank.stream('g1')  # yield nodeId, score
+### CALL gds.localClusteringCoefficient.stream('myGraph') # yield nodeId, localClusteringCoefficient
+### CALL gds.betweenness.stream('myGraph') YIELD nodeId, score
 
 
 
@@ -69,3 +102,24 @@ YIELD nodeId, localClusteringCoefficient
 
 ### Betweenness Centrality ###
 CALL gds.betweenness.stream('myGraph') YIELD nodeId, score
+
+
+
+######### Helpful queries ###########
+
+Check memory estimation of algorithm (just bc the estimate fits into memory (max heap size) this does not guaruntee the actual query will fit.)
+------------------------------------
+CALL gds.louvain.stream.estimate('g1') 
+
+
+
+
+# How to get a list of nodeIds with their node type, for plotting
+MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id, labels(n) as nodetype
+
+# List of Concepts, with their attached Code node SABs
+MATCH (n:Concept)-[:CODE]-(c:Code) WHERE n.CUI starts with "H" RETURN id(n) AS id, c.SAB as sab
+
+# Get degree 
+MATCH (p:Person {name: "Michael"})RETURN apoc.node.degree(p) AS output;
+
