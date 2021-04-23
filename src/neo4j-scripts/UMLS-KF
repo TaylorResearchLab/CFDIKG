@@ -225,6 +225,13 @@ match (c)-[*1]-(cc:Concept) return c,cc limit 3
 match (eqtl:Code {SAB:'GTEX EXP'})-[r]-(c:Concept)
 match (c)-[*1]-(cc:Concept) return c,cc limit 2
 
+###########################################################
+### Show HGNC Gene Location/Strand/Chrom Code and Terms ###
+###########################################################
+
+match (gl_code:Code {SAB:'GENE LOCATION'})-[r]-(c:Concept)-[r2]-(hgnc_code:Code {SAB:'HGNC'})
+return gl_code,r,r2,hgnc_code,c limit 5
+       
 
 
 #########################################################
