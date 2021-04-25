@@ -61,9 +61,7 @@ nodeQuery				relationshipQuery	                                                 
 "MATCH (n:Concept) RETURN id(n) AS id"	"MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target"	"g1"	     4629031	47629518	     124491
 
 ##### UMLS UBERON ONLY #####
-CALL gds.graph.create.cypher('g1','MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id',
-    'MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target',
-     {validateRelationships: False})
+CALL gds.graph.create.cypher('g1','MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id','MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target',{validateRelationships: False});
      
 nodeQuery	relationshipQuery	graphName	nodeCount	relationshipCount	createMillis
 "MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id"	"MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target"	"g1"	13422	41944	51051
@@ -104,8 +102,9 @@ YIELD nodeId, localClusteringCoefficient
 CALL gds.betweenness.stream('myGraph') YIELD nodeId, score
 
 
-
+#####################################
 ######### Helpful queries ###########
+#####################################
 
 Check memory estimation of algorithm (just bc the estimate fits into memory (max heap size) this does not guaruntee the actual query will fit.)
 ------------------------------------
@@ -121,5 +120,5 @@ MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id, labels(n) as n
 MATCH (n:Concept)-[:CODE]-(c:Code) WHERE n.CUI starts with "H" RETURN id(n) AS id, c.SAB as sab
 
 # Get degree 
-MATCH (p:Person {name: "Michael"})RETURN apoc.node.degree(p) AS output;
+MATCH (c:Concept {CUI: "Michael"})RETURN apoc.node.degree(p) AS output;
 
