@@ -9,11 +9,13 @@ We want to include all node types (Concept, Code, Term) from the data
 sources we put in the graph as well as any data sources that our data makes a direct relationship to.
 These include:
 
-- HGNC HCOP (mouse genes) nodesv
+## Added to UMLS
+- HGNC HCOP (mouse genes) nodes
 - IMPC
 - MP
 - GTEX eqtl and GTEX exp
 
+## IN UMLS already
 - HGNC (human genes) nodes
 - HPO
 - UBERON
@@ -120,5 +122,5 @@ MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id, labels(n) as n
 MATCH (n:Concept)-[:CODE]-(c:Code) WHERE n.CUI starts with "H" RETURN id(n) AS id, c.SAB as sab
 
 # Get degree 
-MATCH (c:Concept {CUI: "Michael"})RETURN apoc.node.degree(p) AS output;
+MATCH (c:Concept {CUI: "Michael"}) RETURN apoc.node.degree(p) AS output;
 
