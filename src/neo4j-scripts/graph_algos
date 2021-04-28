@@ -121,6 +121,20 @@ MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id, labels(n) as n
 # List of Concepts, with their attached Code node SABs
 MATCH (n:Concept)-[:CODE]-(c:Code) WHERE n.CUI starts with "H" RETURN id(n) AS id, c.SAB as sab
 
-# Get degree 
-MATCH (c:Concept {CUI: "Michael"}) RETURN apoc.node.degree(p) AS output;
 
+
+###############
+### Degree ####
+###############   (Run these on cluster in bin/cypher-shell)
+
+
+# Degree of whole concept space
+WITH "MATCH (c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query  CALL apoc.export.csv.query(query, "degree-concept.csv", {})  
+YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data  
+RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data; 
+
+# Degree of HGNC concept space
+
+WITH "MATCH (hgnc_code:Code {SAB: 'HGNC'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query  CALL apoc.export.csv.query(query, "degree-HGNC-concepts.csv", {})  
+YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data  
+RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data; 
