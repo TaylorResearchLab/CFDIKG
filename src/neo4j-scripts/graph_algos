@@ -51,23 +51,21 @@ CALL gds.graph.create.cypher('full_graph','MATCH (n) RETURN id(n) AS id','MATCH 
 
 --------------- UMLS UBERON graph algo results-------------------
 ###########################################################################################
-######### Create a Subgraph of the entire Concept-space on the 'UMLS UBERON' graph  #######
+######### Create a Subgraph of the entire Concept-space on the 'UMLS UBERON' graph  #######  <---- This is the one you want if youre on the server
 ###########################################################################################
 CALL gds.graph.create.cypher('g1', 'MATCH (n:Concept) 
 RETURN id(n) AS id', 'MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target' );
 
 ##### UMLS UBERON ONLY #####
 CALL gds.graph.create.cypher('g1','MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id','MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target',{validateRelationships: False});
-     
-nodeQuery	relationshipQuery	graphName	nodeCount	relationshipCount	createMillis
-"MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id"	"MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target"	"g1"	13422	41944	51051
 
 
-### CALL gds.louvain.stream('g1')   # yield nodeId,communityId,intermediateCommunityIds
+
+
+### CALL gds.louvain.stream('g1') yield nodeId,communityId,intermediateCommunityIds
 ### CALL gds.pageRank.stream('g1') yield nodeId, score
-### CALL gds.localClusteringCoefficient.stream('myGraph') # yield nodeId, localClusteringCoefficient
-### CALL gds.betweenness.stream('myGraph') YIELD nodeId, score
-
+### CALL gds.localClusteringCoefficient.stream('g1') yield nodeId, localClusteringCoefficient
+### CALL gds.betweenness.stream('g1') YIELD nodeId, score
 
 
 
@@ -207,7 +205,7 @@ MATCH (n:Concept)-[:CODE]-(c:Code) WHERE n.CUI starts with "H" RETURN id(n) AS i
 
 # seperate queries by semicolon allows you to put multiple queries in a single script in the cypher-shell. 
 If you want to execute multiple queries at a time in the desktop you need to go to the settings tab and enable multiple query capability
-cypher-shell --format plain < query.txt
+cypher-shell --format plain < query.txt # write results to a file without apoc.export.csv function
 
 
 # Degree of whole concept space
