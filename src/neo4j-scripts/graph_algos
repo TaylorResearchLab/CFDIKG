@@ -11,7 +11,7 @@ These include:
 
 ## Added to UMLS
 - HGNC HCOP (mouse genes) nodes
-- IMPC
+- IMPC (no new SAB here, just HGNC and MP nodes)
 - MP
 - GTEX eqtl and GTEX exp
 
@@ -20,7 +20,6 @@ These include:
 - HPO
 - UBERON
 #################### We are only going to consider the Concept space (Concept-Concept)...
-
 
 ####### DON'T use gds.graph.create() ##########   whats the difference b/t gds.graph.create() and gds.graph.create.cypher(), both create in-memory?
 ### Create an in-memory graph w/ gds.graph.create('name','Labels','relationships')
@@ -33,13 +32,8 @@ check for graph, CALL gds.graph.exists('myGraph') YIELD exists
 
 ########### Use apoc.path.subgraphAll to get subgraph########
 MATCH (p:Person {name: "Stefan"})
-CALL apoc.path.subgraphAll(p, {
-	relationshipFilter: "KNOWS",
-    minLevel: 1,
-    maxLevel: 2
-})
-YIELD nodes, relationships
-RETURN p,nodes, relationships;
+CALL apoc.path.subgraphAll(p, {relationshipFilter: "KNOWS",minLevel: 1,maxLevel: 2}) 
+YIELD nodes, relationships RETURN p,nodes, relationships;
 
 ### Example of apoc.path.subgraphAll() #######
 MATCH (e:COMP) WHERE e.componentID= "f4db22e7-68d2-473d-960b-c98dbbadb3a0" 
@@ -56,11 +50,11 @@ node.cTime as time
 CALL gds.graph.create.cypher('full_graph','MATCH (n) RETURN id(n) AS id','MATCH (n)-[e]-(m) RETURN id(n) AS source, e.weight AS weight, id(m) AS target')
 
 --------------- UMLS UBERON graph algo results-------------------
-# Create a Subgraph of the Concept-space on the 'UMLS UBERON' graph  
-CALL gds.graph.create.cypher('g1','MATCH (n:Concept) RETURN id(n) AS id','MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target')
-
-nodeQuery				relationshipQuery	                                                        graphName    nodeCount	relationshipCount    createMillis
-"MATCH (n:Concept) RETURN id(n) AS id"	"MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target"	"g1"	     4629031	47629518	     124491
+###########################################################################################
+######### Create a Subgraph of the entire Concept-space on the 'UMLS UBERON' graph  #######
+###########################################################################################
+CALL gds.graph.create.cypher('g1', 'MATCH (n:Concept) 
+RETURN id(n) AS id', 'MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target' );
 
 ##### UMLS UBERON ONLY #####
 CALL gds.graph.create.cypher('g1','MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id','MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target',{validateRelationships: False});
@@ -70,16 +64,83 @@ nodeQuery	relationshipQuery	graphName	nodeCount	relationshipCount	createMillis
 
 
 ### CALL gds.louvain.stream('g1')   # yield nodeId,communityId,intermediateCommunityIds
-### CALL gds.pageRank.stream('g1')  # yield nodeId, score
+### CALL gds.pageRank.stream('g1') yield nodeId, score
 ### CALL gds.localClusteringCoefficient.stream('myGraph') # yield nodeId, localClusteringCoefficient
 ### CALL gds.betweenness.stream('myGraph') YIELD nodeId, score
 
 
 
 
-#####################
-###### ALGOS ########  https://neo4j.com/docs/graph-data-science/current/appendix-b/migration-product-algos/
-#####################
+######################################
+############ GRAPH ALGOS #############  https://neo4j.com/docs/graph-data-science/current/appendix-b/migration-product-algos/
+######################################
+
+####### Page Rank ##############
+WITH "CALL gds.pageRank.stream('g1') yield nodeId, score" AS query
+CALL apoc.export.csv.query(query, "pageRank_concepts.csv", {})
+YIELD  done, RETURN done;
+
+##### Betweenness #############
+WITH "CALL gds.betweenness.stream('g1') YIELD nodeId, score" AS query
+CALL apoc.export.csv.query(query, "betweenness_concepts.csv", {})
+YIELD  done RETURN done;
+
+
+
+######## Mutate graph w/ algo score as property #####
+gds.pageRank.mutate()
+ CALL gds.pageRank.mutate('g1', {mutateProperty: 'score'});
+#######
+CALL gds.pageRank.mutate('g1', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  mutateProperty: 'pagerank'
+})
+YIELD nodePropertiesWritten, ranIterations
+#######
+CALL gds.pageRank.stream('g1')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+#######
+CALL gds.pageRank.stream('categorical_men',
+    {relationshipWeightProperty:'weight'})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).Label as name, score
+#######
+CALL gds.util.nodeProperty('g1','pagerank')
+#######
+CALL gds.pageRank.write('g1', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank'
+})
+YIELD nodePropertiesWritten, ranIterations
+
+
+
+CALL gds.pageRank.stream('g1')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).Label as name, score
+ORDER BY score DESC LIMIT 5
+
+CALL gds.graph.create.cypher('g1', 'MATCH (n:Concept) RETURN id(n) AS id',
+'MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target, n.CUI as CUI' )
+
+# Native Projection
+CALL gds.graph.create('g1', 'Concept', '*', {nodeProperties: ['CUI']})
+YIELD graphName, nodeCount, relationshipCount;
+
+
+
+########### Stream node properties (after mutating graph to add) #########
+########## This way we can return the score along with the CUI which allows us to map the scores by SAB  via the CUI-CODE file ######
+CALL gds.graph.streamNodeProperties('g1', ['ID'])
+
+
+
+
+
 
 #### Louvain #####
 CALL gds.louvain.stream('my-graph3') YIELD nodeId, communityId, intermediateCommunityIds
@@ -103,7 +164,6 @@ YIELD nodeId, localClusteringCoefficient
 ### Betweenness Centrality ###
 CALL gds.betweenness.stream('myGraph') YIELD nodeId, score
 
-
 #####################################
 ######### Helpful queries ###########
 #####################################
@@ -113,7 +173,26 @@ Check memory estimation of algorithm (just bc the estimate fits into memory (max
 CALL gds.louvain.stream.estimate('g1') 
 
 
+# Return info about graph projection
+CALL gds.graph.list('g1') YIELD
+  graphName,
+  database,
+  nodeProjection,
+  relationshipProjection,
+  nodeQuery,
+  relationshipQuery,
+  nodeCount,
+  relationshipCount,
+  schema,
+  degreeDistribution,
+  density,
+  creationTime,
+  modificationTime,
+  sizeInBytes,
+  memoryUsage;
+  
 
+  
 
 # How to get a list of nodeIds with their node type, for plotting
 MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id, labels(n) as nodetype
@@ -122,10 +201,13 @@ MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id, labels(n) as n
 MATCH (n:Concept)-[:CODE]-(c:Code) WHERE n.CUI starts with "H" RETURN id(n) AS id, c.SAB as sab
 
 
-
 ###############
-### Degree ####
-###############   (Run these on cluster in bin/cypher-shell)
+### Degree ####   (Make sure single quotes are of this kind: " ' ")
+###############   (Run the first one on cluster in bin/cypher-shell)
+
+# seperate queries by semicolon allows you to put multiple queries in a single script in the cypher-shell. 
+If you want to execute multiple queries at a time in the desktop you need to go to the settings tab and enable multiple query capability
+cypher-shell --format plain < query.txt
 
 
 # Degree of whole concept space
@@ -134,7 +216,26 @@ YIELD file, source, format, nodes, relationships, properties, time, rows, batchS
 RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data; 
 
 # Degree of HGNC concept space
-
 WITH "MATCH (hgnc_code:Code {SAB: 'HGNC'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query  CALL apoc.export.csv.query(query, "degree-HGNC-concepts.csv", {})  
 YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data  
 RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data; 
+
+# Degree of HPO concept space
+WITH "MATCH (hpo_code:Code {SAB: 'HPO'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept, count(c2) as degree" AS query
+CALL apoc.export.csv.query(query, "degree-concept-HPO.csv", {})
+YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
+RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
+
+# Degree of UBERON concept space
+WITH "MATCH (ub_code:Code {SAB: 'UBERON'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query
+CALL apoc.export.csv.query(query, "degree-concept-UBERON.csv", {})
+YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
+RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
+
+# Degree of GTEx concept space
+WITH "MATCH (gtex:Code)-[:CODE]-(c:Concept)-[*1]-(c2:Concept) WHERE gtex.SAB = 'GTEX EQTL' or gtex.SAB = 'GTEX EXP'
+RETURN c as concept,count(c2) as degree" AS query
+CALL apoc.export.csv.query(query, "degree-concept-GTEX-both.csv", {})
+YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
+RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
+
