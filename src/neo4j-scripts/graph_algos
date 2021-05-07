@@ -2,11 +2,9 @@
 ### Scripts to run graph algorithms ###
 #######################################
 
-
 Before we can run any graph algorithms we need to extract our sub graph from the entire UMLS graph.
-
-We want to include all node types (Concept, Code, Term) from the data
-sources we put in the graph as well as any data sources that our data makes a direct relationship to.
+We want to include all node types (Concept, Code, Term) from the data sources we put in the graph as 
+well as any data sources that our data makes a direct relationship to.
 These include:
 
 ## Added to UMLS
@@ -19,14 +17,228 @@ These include:
 - HGNC (human genes) nodes
 - HPO
 - UBERON
-#################### We are only going to consider the Concept space (Concept-Concept)...
+#################### We are only going to consider the Concept space (Concept-Concept) right now...
+
+
+
+###########################################################################################
+######### Create a Subgraph of the entire Concept-space on the UMLS graph  ################  
+###########################################################################################
+
+# Create graph projection of the concept space
+CALL gds.graph.create.cypher('g1', 'MATCH (n:Concept) 
+RETURN id(n) AS id', 'MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target' );
+
+##### UMLS UBERON ONLY ##### (just to test the function out quickly)
+CALL gds.graph.create.cypher('g1','MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id','MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target',{validateRelationships: False});
+
+
+#########################################
+############### GRAPH ALGOS #############  https://neo4j.com/docs/graph-data-science/current/appendix-b/migration-product-algos/
+#########################################
+
+####### Page Rank ##############
+WITH "CALL gds.pageRank.stream('g1') yield nodeId, score" AS query
+CALL apoc.export.csv.query(query, "pageRank_concepts.csv", {})
+YIELD done RETURN done;
+
+######## Betweenness #############
+WITH "CALL gds.betweenness.stream('g1') YIELD nodeId, score" AS query     ### cant run this right now, requires 3441 MiB, or 3.6 G
+CALL apoc.export.csv.query(query, "betweenness_concepts.csv", {})
+YIELD done RETURN done;
+
+###### Weakly Connected Components #######
+WITH "CALL gds.wcc.stream('g1') YIELD nodeId, componentId" AS query
+CALL apoc.export.csv.query(query, "wcc_concepts.csv", {})
+YIELD done RETURN done;
+
+########## Louvain ################
+WITH "CALL gds.louvain.stream('g1') yield nodeId,communityId,intermediateCommunityIds" AS query
+CALL apoc.export.csv.query(query, "louvain_concepts.csv", {})
+YIELD done RETURN done;
+
+###### Node Similarity (Jaccard) ########    DONT NEED RIGHT NOW
+WITH "CALL gds.nodeSimilarity.stream('g1') yield nodeId,communityId,intermediateCommunityIds" AS query   # not enough space for this either
+CALL apoc.export.csv.query(query, "nodeSimilarity_concepts.csv", {})
+YIELD done RETURN done;
+
+######## Clustering coeff. ###########
+WITH "CALL gds.localClusteringCoefficient.stream('g1')    
+YIELD nodeId, localClusteringCoefficient" AS query 
+CALL apoc.export.csv.query(query, "clusteringCoeff_concepts.csv", {})   
+YIELD done RETURN done;                  // relationship  orientation must be 'UNDIRECTED' (when you created graph projection)
+
+
+######## Triangle Counts #########
+WITH "CALL gds.triangleCount.stream('g1')       
+YIELD nodeId, triangleCount" AS query  
+CALL apoc.export.csv.query(query, "triangleCount_concepts.csv", {})
+YIELD done RETURN done;
+
+
+#### All Pairs Shortest Path ########
+CALL gds.alpha.allShortestPaths.stream({
+  nodeQuery: "MATCH (code:Code {SAB:'HGNC'}) RETURN id(code) AS id",
+  relationshipQuery: "MATCH (code:Code {SAB:'HGNC'})-[:CODE]-(c1:Concept)--(c2:Concept)-[:CODE]-(code2:Code {SAB:'HGNC'}) RETURN id(code) AS source, id(code2) AS target"
+  })
+
+YIELD sourceNodeId, targetNodeId, distance
+WITH sourceNodeId, targetNodeId, distance
+WHERE gds.util.isFinite(distance) = true
+
+MATCH (source:Code) WHERE id(source) = sourceNodeId
+MATCH (target:Code) WHERE id(target) = targetNodeId
+WITH source, target, distance WHERE source <> target
+
+RETURN source.CODE AS source, target.CODE AS target, distance
+ORDER BY distance DESC, source ASC, target ASC
+LIMIT 10
+
+------------
+
+############### All Pairs Shortest Path for all HGNC-HGNC pairs ###########
+######### Create projection for all pairs shortest path query (consider blacklisting 'genome' node here )
+######### check the nodes/rels in this projection bc we are not getting correct number of nodes in shortest path results
+CALL gds.graph.create.cypher('g1', "MATCH (code:Code {SAB:'HGNC'}) RETURN id(code) AS id", "MATCH (code:Code {SAB:'HGNC'})-[:CODE]-(c1:Concept)--(c2:Concept)-[:CODE]-(code2:Code {SAB:'HGNC'}) RETURN id(code) AS source, id(code2) AS target");
+
+CALL gds.graph.create.cypher('g1', "MATCH (code:Code {SAB:'HGNC'})-[:CODE]-(c1:Concept) RETURN distinct id(c1) AS id","MATCH (code:Code {SAB:'HGNC'})-[:CODE]-(c1:Concept)--(c2:Concept)-[:CODE]-(code2:Code {SAB:'HGNC'}) RETURN id(c1) AS source, id(c2) AS target");
+
+######## Shortest path algo and export results
+WITH "CALL gds.alpha.allShortestPaths.stream('g1')
+YIELD sourceNodeId, targetNodeId, distance
+WITH sourceNodeId, targetNodeId, distance
+WHERE gds.util.isFinite(distance) = true
+MATCH (source:Code) WHERE id(source) = sourceNodeId
+MATCH (target:Code) WHERE id(target) = targetNodeId
+WITH source, target, distance WHERE source <> target
+RETURN source.CODE AS source, target.CODE AS target, distance" AS query  
+CALL apoc.export.csv.query(query, "hgnc_shortest_pairs.csv", {})
+YIELD done RETURN done;
+
+
+#### More Pathfinding queries #####
+
+apoc.algo.allSimplePaths(startNode :: NODE?, endNode :: NODE?, relationshipTypesAndDirections :: STRING?, maxNodes :: INTEGER?) :: RETURN (path :: PATH?)
+
+-------count all paths between 2 nodes -----
+CALL apoc.export.csv.query("MATCH (a:A)-[:AB]->()-[:BC]->()-[:CD]->(d) WITH a, d, count(*) as totalPaths RETURN a.`_id`, d.`_id`, totalPaths", "results.csv", {})
+
+
+------------Return path elements (node-rel-node-rel-...)
+MATCH path = (club:Club)-[:IN_LEAGUE]->(league)-[:IN_COUNTRY]->(country)
+RETURN path, apoc.path.elements(path);
+
+----------- Return all relationships in each identified path -----------
+# Remember, these path queries will return any and all paths, not just the shortest one, like the shortest path algo does.
+MATCH p = (code1:Code {SAB:'HGNC'})-[r1:CODE]-(c:Concept)-[r2*]->(c2:Concept)-[r3:CODE]-(code2:Code {SAB:'HGNC'}) 
+WITH code1.CODE as co1, relationships(p) AS rels, code2.CODE as co2
+RETURN co1,[x in rels | type(x)] as rel_path,co2 limit 10
+
+---------- Return all Node labels in each identified path --------
+MATCH p = (code1:Code {SAB:'HGNC'})-[r1:CODE]-(c:Concept)-[r2*]->(c2:Concept)-[r3:CODE]-(code2:Code {SAB:'HGNC'}) 
+WITH code1.CODE as co1, nodes(p) AS n, code2.CODE as co2
+RETURN co1,[x in n | labels(x)] ,co2 limit 10
+
+---------Return all relationship types between 2 nodes--------
+match (p:Person)
+WHERE p.name IN ["Keanu Reeves", "Carrie-Anne Moss"]
+with collect(id(p)) as nodes
+CALL apoc.algo.cover(nodes) YIELD rel RETURN  startNode(rel), rel, endNode(rel);
+
+
+
+
+
+
+CALL gds.triangleCount.stream('g1')       // relationship  orientation must be 'UNDIRECTED' (when you created graph projection)
+YIELD nodeId, triangleCount
+
+###########################################
+######### Other Helpful queries ###########
+###########################################
+
+# Pattern matching https://neo4j.com/docs/cypher-manual/current/syntax/patterns/#cypher-pattern-relationship
+
+# Check memory estimation of algorithm (just bc the estimate fits into memory (max heap size) this does not guaruntee the actual query will fit.)
+CALL gds.louvain.stream.estimate('g1') 
+
+# Return info about a graph projection
+CALL gds.graph.list('g1') YIELD
+  graphName, database, nodeProjection, relationshipProjection, nodeQuery, relationshipQuery, nodeCount,
+  relationshipCount, schema, degreeDistribution, density, creationTime, modificationTime, sizeInBytes, memoryUsage;
+
+# How to get a list of nodeIds with their node type, for plotting
+MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id, labels(n) as nodetype
+
+# List of Concepts, with their attached Code node SABs
+MATCH (n:Concept)-[:CODE]-(c:Code) WHERE n.CUI starts with "H" RETURN id(n) AS id, c.SAB as sab
+
+
+
+
+
+#######################
+### Degree Queries ####   (Make sure single quotes are of this kind: " ' ")
+#######################   (Run the first one on cluster in bin/cypher-shell)
+
+
+## Get degree/num relationships
+MATCH (s:Semantic {name: "Gene or Genome"})
+RETURN apoc.node.degree(s) AS output;
+
+# seperating queries by semicolon allows you to put multiple queries in a single script in the cypher-shell. 
+# If you want to execute multiple queries at a time in the desktop you need to go to the settings tab and enable multiple query capability
+# cypher-shell --format plain < query.txt # write results to a file without apoc.export.csv function
+
+# These queries are all pretty much the same except for the part in the quotes that defines the actual query. The apoc.export.csv.query function
+# acts the same in all of these queries.
+# You can return a lot of info from the apoc.export function if you want to (see last query here).
+
+# Degree of whole concept space
+WITH "MATCH (c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query 
+CALL apoc.export.csv.query(query, "degree-concept.csv", {})  
+YIELD  done RETURN  done; 
+
+# Degree of HGNC concept space
+WITH "MATCH (hgnc_code:Code {SAB: 'HGNC'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query  
+CALL apoc.export.csv.query(query, "degree-HGNC-concepts.csv", {})  
+YIELD done RETURN done; 
+
+# Degree of HPO concept space
+WITH "MATCH (hpo_code:Code {SAB: 'HPO'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept, count(c2) as degree" AS query
+CALL apoc.export.csv.query(query, "degree-concept-HPO.csv", {})
+YIELD done RETURN done;
+
+# Degree of UBERON concept space
+WITH "MATCH (ub_code:Code {SAB: 'UBERON'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query
+CALL apoc.export.csv.query(query, "degree-concept-UBERON.csv", {})
+YIELD done RETURN done;
+
+# Degree of GTEx concept space
+WITH "MATCH (gtex:Code)-[:CODE]-(c:Concept)-[*1]-(c2:Concept) WHERE gtex.SAB = 'GTEX EQTL' or gtex.SAB = 'GTEX EXP'
+RETURN c as concept,count(c2) as degree" AS query
+CALL apoc.export.csv.query(query, "degree-concept-GTEX-both.csv", {})
+YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
+RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------
+--------------------------- Ignore these queries, theyre just random notes ----------------------------------
+-------------------------------------------------------------------------------------------------------------
 
 ####### DON'T use gds.graph.create() ##########   whats the difference b/t gds.graph.create() and gds.graph.create.cypher(), both create in-memory?
 ### Create an in-memory graph w/ gds.graph.create('name','Labels','relationships')
 CALL gds.graph.create('my-graph', 'Concept', 'has_human_phenotype')
 YIELD graphName, nodeCount, relationshipCount;
 Nodes: 9,669,972	Relationships: 1218
-remove graph,  CALL gds.graph.drop('myGraph') 
+remove graph,  CALL gds.graph.drop('g1') 
 get graph info, CALL gds.graph.list('my-graph3')
 check for graph, CALL gds.graph.exists('myGraph') YIELD exists
 
@@ -42,46 +254,8 @@ with e limit 1 CALL apoc.path.subgraphAll(e,
 UNWIND nodes as node  RETURN node.componentID as uuid, node.orphanID as oid, 
 node.cTime as time
 
-
-
-
-
 ####### Or just use  gds.graph.create.cypher()     https://towardsdatascience.com/how-to-get-started-with-the-new-graph-data-science-library-of-neo4j-3c8fff6107b
 CALL gds.graph.create.cypher('full_graph','MATCH (n) RETURN id(n) AS id','MATCH (n)-[e]-(m) RETURN id(n) AS source, e.weight AS weight, id(m) AS target')
-
---------------- UMLS UBERON graph algo results-------------------
-###########################################################################################
-######### Create a Subgraph of the entire Concept-space on the 'UMLS UBERON' graph  #######  <---- This is the one you want if youre on the server
-###########################################################################################
-CALL gds.graph.create.cypher('g1', 'MATCH (n:Concept) 
-RETURN id(n) AS id', 'MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target' );
-
-##### UMLS UBERON ONLY #####
-CALL gds.graph.create.cypher('g1','MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id','MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target',{validateRelationships: False});
-
-
-
-
-### CALL gds.louvain.stream('g1') yield nodeId,communityId,intermediateCommunityIds
-### CALL gds.pageRank.stream('g1') yield nodeId, score
-### CALL gds.localClusteringCoefficient.stream('g1') yield nodeId, localClusteringCoefficient
-### CALL gds.betweenness.stream('g1') YIELD nodeId, score
-
-
-
-######################################
-############ GRAPH ALGOS #############  https://neo4j.com/docs/graph-data-science/current/appendix-b/migration-product-algos/
-######################################
-
-####### Page Rank ##############
-WITH "CALL gds.pageRank.stream('g1') yield nodeId, score" AS query
-CALL apoc.export.csv.query(query, "pageRank_concepts.csv", {})
-YIELD  done, RETURN done;
-
-##### Betweenness #############
-WITH "CALL gds.betweenness.stream('g1') YIELD nodeId, score" AS query
-CALL apoc.export.csv.query(query, "betweenness_concepts.csv", {})
-YIELD  done RETURN done;
 
 
 
@@ -89,17 +263,15 @@ YIELD  done RETURN done;
 gds.pageRank.mutate()
  CALL gds.pageRank.mutate('g1', {mutateProperty: 'score'});
 #######
-CALL gds.pageRank.mutate('g1', {
-  maxIterations: 20,
-  dampingFactor: 0.85,
-  mutateProperty: 'pagerank'
-})
+CALL gds.pageRank.mutate('g1', {maxIterations: 20,dampingFactor: 0.85,mutateProperty: 'pagerank'})
 YIELD nodePropertiesWritten, ranIterations
 #######
+
 CALL gds.pageRank.stream('g1')
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC, name ASC
+
 #######
 CALL gds.pageRank.stream('categorical_men',
     {relationshipWeightProperty:'weight'})
@@ -108,15 +280,6 @@ RETURN gds.util.asNode(nodeId).Label as name, score
 #######
 CALL gds.util.nodeProperty('g1','pagerank')
 #######
-CALL gds.pageRank.write('g1', {
-  maxIterations: 20,
-  dampingFactor: 0.85,
-  writeProperty: 'pagerank'
-})
-YIELD nodePropertiesWritten, ranIterations
-
-
-
 CALL gds.pageRank.stream('g1')
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).Label as name, score
@@ -129,111 +292,11 @@ CALL gds.graph.create.cypher('g1', 'MATCH (n:Concept) RETURN id(n) AS id',
 CALL gds.graph.create('g1', 'Concept', '*', {nodeProperties: ['CUI']})
 YIELD graphName, nodeCount, relationshipCount;
 
-
-
 ########### Stream node properties (after mutating graph to add) #########
 ########## This way we can return the score along with the CUI which allows us to map the scores by SAB  via the CUI-CODE file ######
 CALL gds.graph.streamNodeProperties('g1', ['ID'])
 
-
-
-
-
-
-#### Louvain #####
-CALL gds.louvain.stream('my-graph3') YIELD nodeId, communityId, intermediateCommunityIds
-### Node Similarity ###
-CALL gds.nodeSimilarity.stream('my-graph3') YIELD node1, node2, similarity
-### Weakly Connected Components ###
-CALL gds.wcc.stream('myGraph') YIELD nodeId, componentId
-
-
-### Page Rank ###
-CALL gds.pageRank.stream('my-graph3',{maxIterations: 2})
-
-### Triangle Counts ####
-CALL gds.triangleCount.stream('myGraph')       // relationship  orientation must be 'UNDIRECTED'
-YIELD nodeId, triangleCount
-
-### Clustering Coefficients ###
-CALL gds.localClusteringCoefficient.stream('myGraph')     // relationship  orientation must be 'UNDIRECTED'
-YIELD nodeId, localClusteringCoefficient
-
-### Betweenness Centrality ###
-CALL gds.betweenness.stream('myGraph') YIELD nodeId, score
-
-#####################################
-######### Helpful queries ###########
-#####################################
-
-Check memory estimation of algorithm (just bc the estimate fits into memory (max heap size) this does not guaruntee the actual query will fit.)
-------------------------------------
-CALL gds.louvain.stream.estimate('g1') 
-
-
-# Return info about graph projection
-CALL gds.graph.list('g1') YIELD
-  graphName,
-  database,
-  nodeProjection,
-  relationshipProjection,
-  nodeQuery,
-  relationshipQuery,
-  nodeCount,
-  relationshipCount,
-  schema,
-  degreeDistribution,
-  density,
-  creationTime,
-  modificationTime,
-  sizeInBytes,
-  memoryUsage;
-  
-
-  
-
-# How to get a list of nodeIds with their node type, for plotting
-MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id, labels(n) as nodetype
-
-# List of Concepts, with their attached Code node SABs
-MATCH (n:Concept)-[:CODE]-(c:Code) WHERE n.CUI starts with "H" RETURN id(n) AS id, c.SAB as sab
-
-
-###############
-### Degree ####   (Make sure single quotes are of this kind: " ' ")
-###############   (Run the first one on cluster in bin/cypher-shell)
-
-# seperate queries by semicolon allows you to put multiple queries in a single script in the cypher-shell. 
-If you want to execute multiple queries at a time in the desktop you need to go to the settings tab and enable multiple query capability
-cypher-shell --format plain < query.txt # write results to a file without apoc.export.csv function
-
-
-# Degree of whole concept space
-WITH "MATCH (c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query  CALL apoc.export.csv.query(query, "degree-concept.csv", {})  
-YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data  
-RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data; 
-
-# Degree of HGNC concept space
-WITH "MATCH (hgnc_code:Code {SAB: 'HGNC'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query  CALL apoc.export.csv.query(query, "degree-HGNC-concepts.csv", {})  
-YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data  
-RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data; 
-
-# Degree of HPO concept space
-WITH "MATCH (hpo_code:Code {SAB: 'HPO'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept, count(c2) as degree" AS query
-CALL apoc.export.csv.query(query, "degree-concept-HPO.csv", {})
-YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
-RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
-
-# Degree of UBERON concept space
-WITH "MATCH (ub_code:Code {SAB: 'UBERON'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query
-CALL apoc.export.csv.query(query, "degree-concept-UBERON.csv", {})
-YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
-RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
-
-# Degree of GTEx concept space
-WITH "MATCH (gtex:Code)-[:CODE]-(c:Concept)-[*1]-(c2:Concept) WHERE gtex.SAB = 'GTEX EQTL' or gtex.SAB = 'GTEX EXP'
-RETURN c as concept,count(c2) as degree" AS query
-CALL apoc.export.csv.query(query, "degree-concept-GTEX-both.csv", {})
-YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
-RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
+-------------------------------------------------------------------------------------------------------------
+------------------------------- ^^^ Ignore these, theyre Just Random Notes/Queries ^^^-----------------------
+-------------------------------------------------------------------------------------------------------------
 
