@@ -33,6 +33,8 @@ RETURN id(n) AS id', 'MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, 
 CALL gds.graph.create.cypher('g1','MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id','MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target',{validateRelationships: False});
 
 
+
+
 #########################################
 ############### GRAPH ALGOS #############  https://neo4j.com/docs/graph-data-science/current/appendix-b/migration-product-algos/
 #########################################
