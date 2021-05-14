@@ -20,19 +20,36 @@ These include:
 #################### We are only going to consider the Concept space (Concept-Concept) right now...
 
 
-
 ###########################################################################################
 ######### Create a Subgraph of the entire Concept-space on the UMLS graph  ################  
 ###########################################################################################
 
-# Create graph projection of the concept space
+####### Create graph projection of just the CONCEPT space ##########
 CALL gds.graph.create.cypher('g1', 'MATCH (n:Concept) 
 RETURN id(n) AS id', 'MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target' );
+
+######## Concept and Code space w/o cypher ######
+CALL gds.graph.create('g1',['Concept','Code'], '*')
+nodes: 16001812, relationships: 39361933
+
+####### Create graph projection of the HGNC-HGNC connections, but include all interconnected nodes b/t any HGNC-HGNC paths too ##########
+##### For shortest HGNC-HGNC paths 
+CALL gds.graph.create.cypher('g1', 'MATCH (n:Concept) RETURN id(n) AS id', 'MATCH  (code1:Code {SAB:"HGNC"})-[r1:CODE]-(c:Concept)-[r2*]->(c2:Concept)-[r3:CODE]-(code2:Code {SAB:"HGNC"})  RETURN id(code1) AS source, id(code2) AS target' );
+
+
 
 ##### UMLS UBERON ONLY ##### (just to test the function out quickly)
 CALL gds.graph.create.cypher('g1','MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id','MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target',{validateRelationships: False});
 
+####### Create graph projection of just the whole graph ##########
+CALL gds.graph.create.cypher(
+    'my-cypher-graph',
+    'MATCH (n) RETURN id(n) AS id',
+    'MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target'
+)
 
+# my full graph projection query
+CALL gds.graph.create.cypher('full-graph', 'MATCH (n) RETURN id(n) AS id', 'MATCH (n)-[e]-(m) RETURN id(n) AS source, id(m) AS target' );
 
 
 #########################################
@@ -70,12 +87,22 @@ YIELD nodeId, localClusteringCoefficient" AS query
 CALL apoc.export.csv.query(query, "clusteringCoeff_concepts.csv", {})   
 YIELD done RETURN done;                  // relationship  orientation must be 'UNDIRECTED' (when you created graph projection)
 
+# Get just the average Clustering Coefficient
+CALL gds.localClusteringCoefficient.stats('full-graph')    
+YIELD  averageClusteringCoefficient
+RETURN averageClusteringCoefficient;
 
 ######## Triangle Counts #########
 WITH "CALL gds.triangleCount.stream('g1')       
 YIELD nodeId, triangleCount" AS query  
 CALL apoc.export.csv.query(query, "triangleCount_concepts.csv", {})
 YIELD done RETURN done;
+
+
+
+
+
+
 
 
 #### All Pairs Shortest Path ########
@@ -95,8 +122,29 @@ WITH source, target, distance WHERE source <> target
 RETURN source.CODE AS source, target.CODE AS target, distance
 ORDER BY distance DESC, source ASC, target ASC
 LIMIT 10
+--------------
+
+CALL gds.alpha.allShortestPaths.stream('g1')
+
+YIELD sourceNodeId, targetNodeId, distance
+WITH sourceNodeId, targetNodeId, distance
+WHERE gds.util.isFinite(distance) = true
+
+MATCH (source:Concept)-[:CODE]-(code1:Code {SAB:'HGNC'}) WHERE id(source) = sourceNodeId
+MATCH (target:Concept)-[:CODE]-(code1:Code {SAB:'HGNC'}) WHERE id(target) = targetNodeId
+WITH source, target, distance WHERE source <> target
+
+RETURN source.CUI AS source, target.CUI AS target, distance
+ORDER BY distance DESC, source ASC, target ASC
+LIMIT 10
+
 
 ------------
+
+# Using the shortestPath function 
+MATCH (code1:Code {SAB: 'HGNC',CODE:'HGNC:13765'} )-[:CODE]-(c1:Concept)--(c2:Concept)-[:CODE]-(code2:Code {SAB:'HGNC',CODE:'HGNC:28346'}), p = shortestPath((c1)-[*]-(c2))
+WITH p,c1,c2
+RETURN c1.CUI,p,c2.CUI
 
 ############### All Pairs Shortest Path for all HGNC-HGNC pairs ###########
 ######### Create projection for all pairs shortest path query (consider blacklisting 'genome' node here )
@@ -148,12 +196,38 @@ with collect(id(p)) as nodes
 CALL apoc.algo.cover(nodes) YIELD rel RETURN  startNode(rel), rel, endNode(rel);
 
 
+----------- Finding paths or 1 hop distance relationships
+----HGNC-HGNC 1 hops---
+MATCH path =(c:Code{SAB:'HGNC'})-[:CODE]-(n:Concept)-[r]-(m:Concept)-[:CODE]-(c2:Code{SAB:'HGNC'})
+RETURN c.CODE,n.CUI,type(r),m.CUI,c2.CODE 
+
+----HGNC-Concept 1 hops---
+WITH "MATCH path =(c:Code{SAB:'HGNC'})-[:CODE]-(n:Concept)-[r]-(m:Concept)-[:CODE]-(c2:Code{SAB:'HGNC'})
+RETURN c.CODE,n.CUI,type(r),m.CUI,c2.CODE " AS query  
+CALL apoc.export.csv.query(query, "HGNC-HGNC-1hop.csv", {})
+YIELD done RETURN done;
+
+----Concept-Concept 1 hops---
+WITH "MATCH path =(c:Concept)-[r]-(n:Concept)
+RETURN c.CUI as concept_1,type(r) as link,n.CUI as Concept_2 " AS query  
+CALL apoc.export.csv.query(query, "Concept-Concept-1hop.csv", {})
+YIELD done RETURN done;
+
+----Concept-Code 1 hops---
+WITH "MATCH path =(c:Concept)-[r]-(n:Code)
+RETURN c.CUI as concept,type(r) as link,n.CodeID as CodeID " AS query  
+CALL apoc.export.csv.query(query, "Concept-Code-1hop.csv", {})
+YIELD done RETURN done;
+
+######## Filter out HGNC-HGNC Concept relationships  # 11,934 direct HGNC-HGNC relationships, this should be the same as the # of rels in the HGNC Concept graph projection
+MATCH (code1:Code {SAB:"HGNC"})-[r1:CODE]-(c:Concept)-[r]->(c2:Concept)-[r3:CODE]-(code2:Code {SAB:"HGNC"}) 
+WITH c,r,c2 WHERE NOT type(r) IN ["RO","RB","RN","genetic_biomarker_related_to", "related_to_genetic_biomarker","isa","inverse_isa"] RETURN  c,r,c2
+
+##### Delete all direct HGNC-HGNC rels   #  Deleted 11,892 relationships, slightly less than expected.
+MATCH (code1:Code {SAB:"HGNC"})-[r1:CODE]-(c:Concept)-[r]->(c2:Concept)-[r3:CODE]-(code2:Code {SAB:"HGNC"}) 
+DELETE r
 
 
-
-
-CALL gds.triangleCount.stream('g1')       // relationship  orientation must be 'UNDIRECTED' (when you created graph projection)
-YIELD nodeId, triangleCount
 
 ###########################################
 ######### Other Helpful queries ###########
@@ -175,8 +249,12 @@ MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id, labels(n) as n
 # List of Concepts, with their attached Code node SABs
 MATCH (n:Concept)-[:CODE]-(c:Code) WHERE n.CUI starts with "H" RETURN id(n) AS id, c.SAB as sab
 
+remove graph,  CALL gds.graph.drop('g1') 
+get graph info, CALL gds.graph.list('my-graph3')
+check for graph, CALL gds.graph.exists('myGraph') YIELD exists
 
 
+CALL gds.graph.list()
 
 
 #######################
@@ -235,14 +313,11 @@ RETURN file, source, format, nodes, relationships, properties, time, rows, batch
 --------------------------- Ignore these queries, theyre just random notes ----------------------------------
 -------------------------------------------------------------------------------------------------------------
 
-####### DON'T use gds.graph.create() ##########   whats the difference b/t gds.graph.create() and gds.graph.create.cypher(), both create in-memory?
+####### DON'T use gds.graph.create() ##########   whats the difference b/t gds.graph.create() and gds.graph.create.cypher(), both create in-memory? --- more control w cypher projection
 ### Create an in-memory graph w/ gds.graph.create('name','Labels','relationships')
 CALL gds.graph.create('my-graph', 'Concept', 'has_human_phenotype')
 YIELD graphName, nodeCount, relationshipCount;
 Nodes: 9,669,972	Relationships: 1218
-remove graph,  CALL gds.graph.drop('g1') 
-get graph info, CALL gds.graph.list('my-graph3')
-check for graph, CALL gds.graph.exists('myGraph') YIELD exists
 
 ########### Use apoc.path.subgraphAll to get subgraph########
 MATCH (p:Person {name: "Stefan"})
