@@ -1,4 +1,7 @@
 # CFDIKG
+This is a "Common Fund" enabled knowledge graph built on UMLS.
+
+As of May 2021 the code will be sparse as we continue to update the repository. Please watch this repo as we expand and include more useful data and information.
 
 ## Basic Schema
 ### HumanPhenotype--MousePhenotype--MouseGenes--HumanGenes
