@@ -227,7 +227,22 @@ WITH c,r,c2 WHERE NOT type(r) IN ["RO","RB","RN","genetic_biomarker_related_to",
 MATCH (code1:Code {SAB:"HGNC"})-[r1:CODE]-(c:Concept)-[r]->(c2:Concept)-[r3:CODE]-(code2:Code {SAB:"HGNC"}) 
 DELETE r
 
+#### DEtach and Delete Semantic 'Gene or Genome' Node
+MATCH (s:Semantic {name: 'Gene or Genome'}) DETACH DELETE s
 
+
+
+WITH "MATCH (n:Code {SAB:"HGNC"})
+WITH collect(n) AS nodes
+UNWIND nodes AS a
+UNWIND nodes AS b
+WITH a, b
+WHERE a <> b
+MATCH p = shortestPath((a)-[*]-(b))
+RETURN a.CodeID,LENGTH(p),b.CodeID" AS query
+CALL apoc.export.csv.query(query, "HGNC-HGNC-shortestPath.csv", {})
+YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
+RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
 
 ###########################################
 ######### Other Helpful queries ###########
