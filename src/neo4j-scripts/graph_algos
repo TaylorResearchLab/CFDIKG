@@ -232,17 +232,32 @@ MATCH (s:Semantic {name: 'Gene or Genome'}) DETACH DELETE s
 
 
 
-WITH "MATCH (n:Code {SAB:"HGNC"})
-WITH collect(n) AS nodes
-UNWIND nodes AS a
-UNWIND nodes AS b
-WITH a, b
-WHERE a <> b
-MATCH p = shortestPath((a)-[*]-(b))
-RETURN a.CodeID,LENGTH(p),b.CodeID" AS query
+WITH 'MATCH (n:Code {SAB:"HGNC"}) WITH collect(n) AS nodes UNWIND nodes AS a UNWIND nodes AS b WITH a, b WHERE a <> b MATCH p = shortestPath((a)-[*]-(b)) RETURN a.CodeID,LENGTH(p),b.CodeID LIMIT 5000' AS query
 CALL apoc.export.csv.query(query, "HGNC-HGNC-shortestPath.csv", {})
 YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
 RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
+
+
+LIMIT 5000 --> took 12 minutues
+# Excluding inverse relationships decreases number of shortest paths to find by half, so 40k*40k = 1.6 billion / 2 = 800 million 
+
+MATCH (n:Code {SAB:'HGNC'}) 
+WITH collect(n) AS nodes 
+UNWIND nodes AS a 
+UNWIND nodes AS b 
+WITH * WHERE id(a) < id(b)
+WITH a, b 
+WHERE a <> b 
+MATCH p = shortestPath((a)-[*]-(b)) 
+RETURN a.CodeID,LENGTH(p) as distance,p as path,b.CodeID 
+
+
+
+
+
+
+
+
 
 ###########################################
 ######### Other Helpful queries ###########
