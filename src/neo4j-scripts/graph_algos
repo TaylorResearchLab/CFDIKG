@@ -253,7 +253,7 @@ RETURN a.CodeID,LENGTH(p) as distance,p as path,b.CodeID
 
 
 
-
+#### default depth limit for shortestPath is 15
 
 
 
