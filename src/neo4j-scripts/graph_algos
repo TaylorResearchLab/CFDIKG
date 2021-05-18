@@ -105,7 +105,7 @@ YIELD done RETURN done;
 
 
 
-#### All Pairs Shortest Path ########
+#### All Pairs Shortest Path ########   not using this anymore
 CALL gds.alpha.allShortestPaths.stream({
   nodeQuery: "MATCH (code:Code {SAB:'HGNC'}) RETURN id(code) AS id",
   relationshipQuery: "MATCH (code:Code {SAB:'HGNC'})-[:CODE]-(c1:Concept)--(c2:Concept)-[:CODE]-(code2:Code {SAB:'HGNC'}) RETURN id(code) AS source, id(code2) AS target"
@@ -165,8 +165,7 @@ RETURN source.CODE AS source, target.CODE AS target, distance" AS query
 CALL apoc.export.csv.query(query, "hgnc_shortest_pairs.csv", {})
 YIELD done RETURN done;
 
-
-#### More Pathfinding queries #####
+###### More Pathfinding queries ##########
 
 apoc.algo.allSimplePaths(startNode :: NODE?, endNode :: NODE?, relationshipTypesAndDirections :: STRING?, maxNodes :: INTEGER?) :: RETURN (path :: PATH?)
 
@@ -251,9 +250,54 @@ WHERE a <> b
 MATCH p = shortestPath((a)-[*]-(b)) 
 RETURN a.CodeID,LENGTH(p) as distance,p as path,b.CodeID 
 
-
-
 #### default depth limit for shortestPath is 15
+
+
+
+
+
+
+WITH "MATCH (n:Code {SAB:'HGNC'}) WITH collect(n) AS nodes UNWIND nodes AS a UNWIND nodes[2001..4000] AS b WITH * WHERE id(a) < id(b)WITH a, b WHERE a <> b MATCH p = shortestPath((a)-[*]-(b)) RETURN LENGTH(p) as distance"
+AS query  
+CALL apoc.export.csv.query(query, "hgncSP_2001_4000.csv", {})
+YIELD done RETURN done;
+
+
+
+hgnc partition queries:
+
+nodes[0..2000] - got 364,468 about 9% of the run
+nodes[2001..4000]
+
+
+
+
+
+#########################################################
+### HGNC-HGNC ShortestPath Screenshot Example Queries ###
+#########################################################
+
+####  LENGTH 4:
+MATCH (a:Code {SAB:'HGNC',CODE:'HGNC:7329'}) 
+MATCH (b:Code {SAB:'HGNC',CODE:'HGNC:12658'}) 
+MATCH (c:Concept {CUI:'C4684829'})-[r:CODE]-(d)
+WITH a,b,c,d,r
+MATCH p = shortestPath((a)-[*]-(b)) 
+RETURN a.CodeID as source,p as path,b.CodeID as target,c,r,d
+
+
+
+###### LENGTH 5:
+MATCH (a:Code {SAB:'HGNC',CODE:'HGNC:7329'}) 
+MATCH (b:Code {SAB:'HGNC',CODE:'HGNC:1068'}) 
+MATCH (c:Concept {CUI:'C1706576'})-[r:CODE]-(d)
+MATCH  (e:Concept {CUI:'C0086418'})-[r1:CODE]-(f)
+WITH a,b,c,d,r,e,f,r1
+MATCH p = shortestPath((a)-[*]-(b)) 
+RETURN a.CodeID as source,p as path,b.CodeID as target,c,r,d,e,f,r1
+
+
+
 
 
 
