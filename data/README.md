@@ -4,9 +4,12 @@
 ### 3. IMPC (includes KOMP2) and JAX
     * IMPC: http://ftp.ebi.ac.uk/pub/databases/impc/all-data-releases/latest/results/ 
         - genotype-phenotype-assertions-ALL.csv
-        - statistical-results-ALL.csv
+        - statistical-results-ALL.csv (Too big for github)
  
     * JAX: http://www.informatics.jax.org/downloads/reports/index.html#pheno
+        - HMD_HumanPhenotype.rpt (Table 2)
         - MGI_PhenoGenoMP.rpt (Table 5)
-        - 
+        - MGI_GenePheno.rpt (Table 9)
+        - MGI_Geno_DiseaseDO.rpt (Table 10)
+        
 ### 4. Genotype-Tissue Expression (GTEx) Portal 
