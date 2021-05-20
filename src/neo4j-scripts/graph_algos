@@ -286,7 +286,6 @@ MATCH p = shortestPath((a)-[*]-(b))
 RETURN a.CodeID as source,p as path,b.CodeID as target,c,r,d
 
 
-
 ###### LENGTH 5:
 MATCH (a:Code {SAB:'HGNC',CODE:'HGNC:7329'}) 
 MATCH (b:Code {SAB:'HGNC',CODE:'HGNC:1068'}) 
@@ -297,10 +296,28 @@ MATCH p = shortestPath((a)-[*]-(b))
 RETURN a.CodeID as source,p as path,b.CodeID as target,c,r,d,e,f,r1
 
 
+###### LENGTH 6:
+MATCH (a:Code {SAB:'HGNC',CODE:'HGNC:1744'}) 
+MATCH (b:Code {SAB:'HGNC',CODE:'HGNC:4897'}) 
+MATCH (c:Concept {CUI:'C1332725'})-[r:CODE]-(d)
+MATCH  (e:Concept {CUI:'C1705435'})-[r1:CODE]-(f)
+MATCH  (g:Concept {CUI:'C0086418'})-[r2:CODE]-(h)
+MATCH  (i:Concept {CUI:'C1708271'})-[r3:CODE]-(j)
+WITH a,b,c,d,r,e,f,r1,g,r2,h,i,j,r3
+MATCH p = shortestPath((a)-[*]-(b)) 
+RETURN a.CodeID as source,p as path,b.CodeID as target,c,r,d,e,f,r1,g,r2,h,i,j,r3
 
 
 
 
+
+
+#### Query for the odd degree in the new UMLS
+
+WITH 'match (n:Concept)-[:CODE]-(c:Code) with n,apoc.node.degree(n) as d,c where d = 53 return n.CUI,c.SAB ' AS query
+CALL apoc.export.csv.query(query, "newUMLS_OddDegree53_nodes.csv", {})
+YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
+RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
 
 
 ###########################################
