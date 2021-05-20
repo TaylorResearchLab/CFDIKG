@@ -312,12 +312,28 @@ RETURN a.CodeID as source,p as path,b.CodeID as target,c,r,d,e,f,r1,g,r2,h,i,j,r
 
 
 
-#### Query for the odd degree in the new UMLS
-
+#### Query for the odd degree ( do degree = 53 bc 53 is where the first deviation occurs in the plot) in the new UMLS
 WITH 'match (n:Concept)-[:CODE]-(c:Code) with n,apoc.node.degree(n) as d,c where d = 53 return n.CUI,c.SAB ' AS query
 CALL apoc.export.csv.query(query, "newUMLS_OddDegree53_nodes.csv", {})
 YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
 RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
+
+# SAme ^^ but concept space only
+WITH 'match (n:Concept) with n,apoc.node.degree(n) as d where d > 53 and d < 150 return n.CUI' AS query
+CALL apoc.export.csv.query(query, "newUMLS_OddDegree53_150_nodes.csv", {})
+YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data
+RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;
+
+
+# Example of one of the HGNC nodes that hhad its degree jump bc of gtex
+match (n:Concept{CUI:'C1413632'})-[r:CODE]-(c:Code) with n,r,c return r,c,n
+
+match (n:Concept{CUI:'C1413632'})-[r]-(c:Concept)-[:CODE]-(co:Code)
+return type(r) as rel, c.CUI as CUI,co.CodeID as codeID
+
+
+
+
 
 
 ###########################################
