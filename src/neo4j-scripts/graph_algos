@@ -249,8 +249,6 @@ RETURN a.CodeID,LENGTH(p) as distance,p as path,b.CodeID
 
 
 
-
-
 WITH "MATCH (n:Code {SAB:'HGNC'}) WITH collect(n) AS nodes UNWIND nodes AS a UNWIND nodes[2001..4000] AS b WITH * WHERE id(a) < id(b)WITH a, b WHERE a <> b MATCH p = shortestPath((a)-[*]-(b)) RETURN LENGTH(p) as distance"
 AS query  
 CALL apoc.export.csv.query(query, "hgncSP_2001_4000.csv", {})
@@ -305,7 +303,6 @@ RETURN a.CodeID as source,p as path,b.CodeID as target,c,r,d,e,f,r1,g,r2,h,i,j,r
 
 
 
-
 #### Query for the odd degree ( do degree = 53 bc 53 is where the first deviation occurs in the plot) in the new UMLS
 WITH 'match (n:Concept)-[:CODE]-(c:Code) with n,apoc.node.degree(n) as d,c where d = 53 return n.CUI,c.SAB ' AS query
 CALL apoc.export.csv.query(query, "newUMLS_OddDegree53_nodes.csv", {})
@@ -326,9 +323,22 @@ match (n:Concept{CUI:'C1413632'})-[r]-(c:Concept)-[:CODE]-(co:Code)
 return type(r) as rel, c.CUI as CUI,co.CodeID as codeID
 
 
+######### What are the hubs that HGNC-HGNC paths cross through?
+# Human Concept node: 'C0086418', see how many genes are connnected to this node
+MATCH (c:Concept {CUI:'C0086418'})-[r]-(c2:Concept)-[r2:CODE]-(co:Code {SAB:'HGNC'}) return count(distinct co)    # only 1,212
+
+# '+' strand Term node 
+MATCH (co:Code {SAB:'GENE LOCATION'})-[r1]-(t:Term {SUI:'KS73770739369183'}) return count(distinct co)    # 19,288
+
+# '-' strand Term node
+MATCH (co:Code {SAB:'GENE LOCATION'})-[r1]-(t:Term {name:'-'}) return count(distinct co)   # 18,262
 
 
 
+# show 6 step path HGNC-HGNC through +/- strand Terms
+MATCH (code1:Code {SAB:'HGNC'})-[r0]-(c:Concept)-[r1]-(code2:Code{SAB:'GENE LOCATION'})-[r2]-(t:Term)-[r3]-(code3:Code{SAB:'GENE LOCATION'})-[r4]-(c2:Concept)-[r5]-(code4:Code {SAB:'HGNC'})
+WHERE t.name = '+' or t.name  = '-'
+RETURN code1,r0,c,r1,code2,r2,t,r3,code3,r4,c2,r5,code4 limit 1
 
 ###########################################
 ######### Other Helpful queries ###########
