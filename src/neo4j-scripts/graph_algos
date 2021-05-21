@@ -42,11 +42,7 @@ CALL gds.graph.create.cypher('g1', 'MATCH (n:Concept) RETURN id(n) AS id', 'MATC
 CALL gds.graph.create.cypher('g1','MATCH (n:Concept) WHERE n.CUI starts with "H" RETURN id(n) AS id','MATCH (n:Concept)-[e]-(m:Concept) RETURN id(n) AS source, id(m) AS target',{validateRelationships: False});
 
 ####### Create graph projection of just the whole graph ##########
-CALL gds.graph.create.cypher(
-    'my-cypher-graph',
-    'MATCH (n) RETURN id(n) AS id',
-    'MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target'
-)
+CALL gds.graph.create.cypher('my-cypher-graph','MATCH (n) RETURN id(n) AS id','MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target')
 
 # my full graph projection query
 CALL gds.graph.create.cypher('full-graph', 'MATCH (n) RETURN id(n) AS id', 'MATCH (n)-[e]-(m) RETURN id(n) AS source, id(m) AS target' );
@@ -108,8 +104,7 @@ YIELD done RETURN done;
 #### All Pairs Shortest Path ########   not using this anymore
 CALL gds.alpha.allShortestPaths.stream({
   nodeQuery: "MATCH (code:Code {SAB:'HGNC'}) RETURN id(code) AS id",
-  relationshipQuery: "MATCH (code:Code {SAB:'HGNC'})-[:CODE]-(c1:Concept)--(c2:Concept)-[:CODE]-(code2:Code {SAB:'HGNC'}) RETURN id(code) AS source, id(code2) AS target"
-  })
+  relationshipQuery: "MATCH (code:Code {SAB:'HGNC'})-[:CODE]-(c1:Concept)--(c2:Concept)-[:CODE]-(code2:Code {SAB:'HGNC'}) RETURN id(code) AS source, id(code2) AS target" })
 
 YIELD sourceNodeId, targetNodeId, distance
 WITH sourceNodeId, targetNodeId, distance
@@ -137,7 +132,6 @@ WITH source, target, distance WHERE source <> target
 RETURN source.CUI AS source, target.CUI AS target, distance
 ORDER BY distance DESC, source ASC, target ASC
 LIMIT 10
-
 
 ------------
 
@@ -229,7 +223,7 @@ DELETE r
 #### DEtach and Delete Semantic 'Gene or Genome' Node
 MATCH (s:Semantic {name: 'Gene or Genome'}) DETACH DELETE s
 
-
+# FIND OUT EXACTLY WHAT KIND OF GRAPH SHORTEST PATH QUERY IS RUNNING ON THE SERVER^^^^^
 
 WITH 'MATCH (n:Code {SAB:"HGNC"}) WITH collect(n) AS nodes UNWIND nodes AS a UNWIND nodes AS b WITH a, b WHERE a <> b MATCH p = shortestPath((a)-[*]-(b)) RETURN a.CodeID,LENGTH(p),b.CodeID LIMIT 50000' AS query
 CALL apoc.export.csv.query(query, "HGNC-HGNC-shortestPath.csv", {})
@@ -267,7 +261,7 @@ YIELD done RETURN done;
 hgnc partition queries:
 
 nodes[0..2000] - got 364,468 about 9% of the run
-nodes[2001..4000]
+nodes[2001..4000] - not yet run
 
 
 
