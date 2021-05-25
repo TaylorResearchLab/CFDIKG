@@ -103,7 +103,7 @@ MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'G
 # Find the eqtl associated with brain tissue, the FTLP2 gene and the rs191565734 variation.
 MATCH (eqtl)-[]->(tissue:Concept {CUI:'HC009101'})
 MATCH (eqtl)-[]->(gene:Concept {CUI:'C2829418'})
-MATCH (eqtl)-[]->(var:Concept {CUI: 'KC9461979778652'})  // returns KC5566850536992, which is correct
+MATCH (eqtl)-[]->(var:Concept {CUI: 'KC94619797786527'})  // returns KC5566850536992, which is correct
 RETURN eqtl, tissue, gene
 
 # Return the Code node attached to the eqtl Concept node we just searched for.
