@@ -247,9 +247,19 @@ RETURN a.CodeID,LENGTH(p) as distance,p as path,b.CodeID
 #### default depth limit for shortestPath is 15
 
 
+#############################
+##### SHORTEST PATH #########
+#############################
 
-
-WITH "MATCH (n:Code {SAB:'HGNC'}) WITH collect(n) AS nodes UNWIND nodes AS a UNWIND nodes[2001..4000] AS b WITH * WHERE id(a) < id(b)WITH a, b WHERE a <> b MATCH p = shortestPath((a)-[*]-(b)) RETURN LENGTH(p) as distance"
+WITH "MATCH (n:Code {SAB:'HGNC'}) 
+WITH collect(n) AS nodes 
+UNWIND nodes AS a 
+UNWIND nodes AS b 
+WITH * WHERE id(a) < id(b)
+WITH a, b
+WHERE a <> b 
+MATCH p = shortestPath((a)-[*]-(b)) 
+RETURN LENGTH(p) as distance"
 AS query  
 CALL apoc.export.csv.query(query, "hgncSP_2001_4000.csv", {})
 YIELD done RETURN done;
@@ -257,7 +267,6 @@ YIELD done RETURN done;
 
 
 hgnc partition queries:
-
 nodes[0..2000] - got 364,468 about 9% of the run
 nodes[2001..4000] - not yet run
 
@@ -372,6 +381,8 @@ CALL gds.graph.list()
 ### Degree Queries ####   (Make sure single quotes are of this kind: " ' ")
 #######################   (Run the first one on cluster in bin/cypher-shell)
 
+Use -->
+
 
 ## Get degree/num relationships
 MATCH (s:Semantic {name: "Gene or Genome"})
@@ -391,7 +402,7 @@ CALL apoc.export.csv.query(query, "degree-concept.csv", {})
 YIELD  done RETURN  done; 
 
 # Degree of HGNC concept space
-WITH "MATCH (hgnc_code:Code {SAB: 'HGNC'})-[:CODE]-(c:Concept)-[*1]-(c2:Concept) RETURN c as concept,count(c2) as degree" AS query  
+WITH "MATCH (hgnc_code:Code {SAB: 'HGNC'})<-[:CODE]-(c:Concept)<--(c2:Concept) RETURN c as concept,count(c2) as degree" AS query  
 CALL apoc.export.csv.query(query, "degree-HGNC-concepts.csv", {})  
 YIELD done RETURN done; 
 
