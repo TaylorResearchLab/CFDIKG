@@ -244,6 +244,11 @@ match (mp:Code {CODE:'MP:0003923'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Co
 ### Check that the GTEX EQTL and GTEX EXP Code nodes ####
 ######### have the correct # of Term nodes ##############
 #########################################################
+
+# Theyre modeled to fit into the UMLS schema , so theree are no upper/lower bound properties
+# The name property contains the  interval,in the form 'lowerbound,upperbound'
+# You need to split the name property by ',' and cast each number to float.
+
 # Correct
 How many GTEX EQTL Code nodes have at least one Term node?
 match (c:Code {SAB:'GTEX EQTL'})--(:Term) return count( distinct c)   #  884,757
