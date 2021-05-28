@@ -131,10 +131,17 @@ match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX_EXP'}) re
 match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX_EXP'}) return count(gtex_exp_code) 
 
 
+#####################################################
+######  Check interval Term nodes (eQTL and TPM) ####
+#####################################################
 
+# Theyre modeled to fit into the UMLS schema , so theree are no upper/lower bound properties
+# The name property contains the  interval,in the form 'lowerbound,upperbound'
+# You need to split the name property by ',' and cast each number to float.
 
-
-
+# Check number of eqtl pval terms is correct
+match (n:Concept)-->(c:Code {SAB:'GTEX_EQTL'})-[r:p_value]-(t:Term)
+RETURN count(t)     # 884,757, correct
 
 
 ###########################
