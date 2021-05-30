@@ -1,0 +1,160 @@
+
+
+
+
+#################################################################################################
+######## These are some of the major queries that our version of UMLS can be used for ###########
+################ These are Cypher Queries that can take parameters.##############################
+
+
+
+
+
+#########################
+###### eQTL queries #####
+#########################
+
+# Search eqtls by UBERON CUI (tissue)
+#  Return number of eqtls that are connected to the UBERON Brain Concept node
+MATCH (UB_brain:Concept {CUI:'HC009101'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX_EQTL'}) return count(eqtl_code)  # 18,751 correct!
+
+# Search eqtls by HGNC CUI (gene)
+#  Return number of eqtls that are connected to this HGNC Concept node
+MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX_EQTL'}) return count(eqtl_code)    # 26 correct!
+
+# Search eqtls by Varaint/dbSNP CUI 
+# Return number of eqtls associated with this variation
+
+# Search for the unique eqtl that is associated with one tissue, one gene and one variation.
+# Find the eqtl associated with brain tissue, the FTLP2 gene and the rs191565734 variation.
+MATCH (eqtl)-[]->(tissue:Concept {CUI:'HC009101'})
+MATCH (eqtl)-[]->(gene:Concept {CUI:'C2829418'})
+MATCH (eqtl)-[]->(var:Concept {CUI: 'KC94619797786527'})  // returns KC5566850536992, which is correct
+RETURN eqtl, tissue, gene
+
+# Return the Code node attached to the eqtl Concept node we just searched for.
+MATCH (eqtl)-[]->(tissue:Concept {CUI:'HC009101'})
+MATCH (eqtl)-[]->(gene:Concept {CUI:'C2829418'})
+MATCH (eqtl)-[]->(var:Concept {CUI: 'KC9461979778652'}) 
+MATCH (eqtl)-[]-(code:Code)
+RETURN code
+
+
+#####################################
+###### GTEX Expression queries ######
+#####################################
+
+# Show a GTEX EXP Concept node, with its HGNC and UBERON Concept nodes connections, along with all three of their Code nodes
+match (gtex_exp:Concept)-[r0]-(gtex_exp_code:Code) where gtex_exp_code.SAB = 'GTEX_EXP' 
+match (gtex_exp)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code) where hgnc_code.SAB = 'HGNC'
+match (gtex_exp)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code) where ub_code.SAB = 'UBERON'
+return gtex_exp, gtex_exp_code, hgnc_concept,hgnc_code, ub_concept, ub_code,r0,r1,r2,r3,r4 limit 1
+       
+# Return all GTEX EXP nodes associated with a specific tissue (UBERON code),   ie, venous blood
+match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX_EXP'}) return count(gtex_exp_code)        # 35,369   must check each tissue
+
+# Return all GTEX EXP nodes associated with a specific gene (HGNC code),   ie, venous blood
+match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX_EXP'}) return count(gtex_exp_code) 
+
+
+###########################
+#### QUERY STEPS 1-5 ######
+########################### Each step builds on the previous step, so step 5 contains everything.
+
+#### STEP 1
+match (hp_phenotype:Code {CODE:'HP:0025579'})
+return hp_phenotype
+
+#### STEP 2
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(c1:Concept)-[r1]-(c2:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'}) 
+return hp_phenotype,r0,r1,r2,c1,c2,mp_phenotype
+
+#### STEP 3
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,hcop_concept,mouse_gene limit 5
+
+#### STEP 4
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene limit 2
+
+#### STEP 5
+# Median TPM
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(tpm:Code {SAB:'GTEX_EXP'})
+return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,
+hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,tpm limit 1
+# eQTL
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(eqtl:Code {SAB:'GTEX_EQTL'})
+return hp_phenotype,hp_concept,r0,r1,r2,mp_phenotype,mp_concept,r3,r4,
+hcop_concept,mouse_gene,hgnc_concept,r5,r6,human_gene,eqtl_concept,r7,r8,eqtl limit 1
+
+
+
+#######################################
+##### Search by eqtl p-value ##########
+#######################################   
+
+##### With p-values as integers 
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(eqtl:Code {SAB:'GTEX_EQTL'})-[p:p_value]-(t:Term)
+where t.bins_upperbound < 0.02 and  t.bins_lowerbound > .001 return count(eqtl)                        # 112 eqtls
+
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+match (hgnc_concept)-[r7]-(exp_concept:Concept)-[r8]-(exp:Code {SAB:'GTEX_EXP'})-[tpm:TPM]-(t:Term)
+where t.bins_upperbound < 50 return count(exp)                                                        # 6,696 genes 
+    
+########### Same 2 queries as above but
+########### With p-values as strings, located 
+########### in the name property of the pvalue Term
+
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(eqtl:Code {SAB:'GTEX_EQTL'})-[p:p_value]-(t:Term)
+WITH eqtl,toFloat(split(t.name,',')[0]) as lb, toFloat(split(t.name,',')[1]) as ub
+WHERE lb > .001 and ub  < .02 RETURN count(eqtl)                                                     # 112 eqtls
+
+
+match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+match (hgnc_concept)-[r7]-(exp_concept:Concept)-[r8]-(exp:Code {SAB:'GTEX_EXP'})-[tpm:TPM]-(t:Term)
+WITH exp,toFloat(split(t.name,',')[0]) as lb, toFloat(split(t.name,',')[1]) as ub
+WHERE ub  < 50 RETURN count(exp)                                                                    # 6,744 slightly less than above
+
+
+
+##############################
+########### With eQTL ########
+##############################
+
+##### Return all eqtls in the gene that my starting eqtl is in
+WITH 'rs4245244 - Brain Frontal Cortex BA9 - SMAD7' as eqtl_CODE
+MATCH (a:Code)<--(b:Concept)-[r0]-(c:Concept)-[r2]->(d:Code)
+MATCH (c)-[r1:gene_in_eqtl]->(e:Concept)-->(f:Code {SAB:'GTEX_EQTL'})
+WHERE  a.CODE = eqtl_CODE  AND d.SAB = 'HGNC'  
+RETURN COUNT(DISTINCT f)
+
+###############################
+###### With HGNC gene #########
+###############################
+
+WITH 'HGNC:12658' as gene
+
+
+
+####################################
+### Search By Gene/eQTL Location ###
+####################################
