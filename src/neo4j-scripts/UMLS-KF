@@ -195,11 +195,10 @@ where t.bins_upperbound < 50
 return count(exp)                    # 6,696 genes 
 
 
-
-
 ########################################
 ####### Show GTEX (eQTL and Exp) #######
 ########################################
+
 # SHOW EQTL triple
 match (eqtl:Code {SAB:'GTEX_EQTL'})-[r]-(c:Concept)
 match (c)-[*1]-(cc:Concept) return c,cc limit 3
@@ -238,6 +237,18 @@ match (mp:Code {CODE:'MP:0003923'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Co
 ##############################################################################
 #### search for all cardiac phenotypes, their associated genes and eqtls #####
 ##############################################################################
+
+
+
+######################################
+########## MP Queries ################
+######################################
+
+# Show all distinct MP-MP relationships
+MATCH (a:Code)<-[r]-(b:Concept)-[r1]->(c:Concept)-[r2]->(d:Code)
+WHERE  a.SAB = 'MP'  AND d.SAB = 'MP'  
+RETURN distinct type(r1) as rel
+
 
 
 #########################################################
