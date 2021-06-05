@@ -164,19 +164,33 @@ match (hgnc_concept)-[r7]-(eqtl_concept:Concept)-[r8]-(eqtl:Code {SAB:'GTEX_EQTL
 WITH eqtl,toFloat(split(t.name,',')[0]) as lb, toFloat(split(t.name,',')[1]) as ub
 WHERE lb > .001 and ub  < .02 RETURN count(eqtl)                                                     # 112 eqtls
 
-
 match (hp_phenotype:Code {CODE:'HP:0025579'})-[r0]-(hp_concept:Concept)-[r1]-(mp_concept:Concept)-[r2]-(mp_phenotype:Code {SAB:'MP'})
 match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
 match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
 match (hgnc_concept)-[r7]-(exp_concept:Concept)-[r8]-(exp:Code {SAB:'GTEX_EXP'})-[tpm:TPM]-(t:Term)
 WITH exp,toFloat(split(t.name,',')[0]) as lb, toFloat(split(t.name,',')[1]) as ub
-WHERE ub  < 50 RETURN count(exp)                                                                    # 6,744 slightly less than above
+WHERE ub  < 50 RETURN count(exp)                                                                    # 6,744 slightly more than above
 
 
 
-##############################
-########### With eQTL ########
-##############################
+####### Pvalue casting to int VS not casting to int query timing ######
+
+#  Timing the return of eqtls when you have to cast to int.
+MATCH (eqtl:Code {SAB:'GTEX_EQTL'})-[p:p_value]-(t:Term)
+WITH eqtl,toFloat(split(t.name,',')[0]) as lb, toFloat(split(t.name,',')[1]) as ub
+WHERE lb > 1e-20 and ub  < 1 RETURN count(eqtl)        #### 1447 ms.
+
+# Timing without having to cast
+# MATCH (eqtl:Code {SAB:'GTEX_EQTL'})-[p:p_value]-(t:Term)
+WHERE t.lowerbound > 1e-20 and t.upperbound  < 1 RETURN count(eqtl)  # 1118 ms.
+
+
+
+
+
+#######################################
+########### Starting With eQTL ########
+#######################################
 
 ##### Return all eqtls in the gene that my starting eqtl is in
 WITH 'rs4245244 - Brain Frontal Cortex BA9 - SMAD7' as eqtl_CODE
