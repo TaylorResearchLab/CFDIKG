@@ -57,6 +57,44 @@ match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX_EXP'}) re
 match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX_EXP'}) return count(gtex_exp_code) 
 
 
+
+
+
+#########################################################
+###### Search for genes from the email with Deanne ######
+#########################################################
+
+MP terms and defs, From OLS
+# MP:0003923 = abnormal heart left atrium morphology     (IMPC does not have this)
+# MP:0003921 = abnormal heart left ventricle morphology    (This is what IMPC has) 
+
+match (mp_code:Code {SAB: 'MP', CODE:'MP:0003921'})-[r0:CODE]-(mp_concept:Concept)-[r1:disease_has_associated_gene]
+-(gene_Concept:Concept)-[r2:CODE]-(gene_code:Code {SAB:'HGNC HCOP'}) 
+return count(gene_code)
+# 115   --- ~87 of these are from IMPC
+
+match (mp:Code {CODE:'MP:0003923'})--(mp_C:Concept)-[r:has_phenotype]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC HCOP'})   return count(gene)
+# 8     --- these are from MGI 
+
+
+##############################################################################
+#### search for all cardiac phenotypes, their associated genes and eqtls #####
+##############################################################################
+
+
+
+[Congenital Heart Defect] HP:0001627
+
+match (t:Term)--(a:Code{SAB:'HPO',CODE:'HP:0001627'})--(b:Concept)-[r1:has_mouse_phenotype]-(c:Concept)--(d:Code {SAB:'MP'}) with c
+match (c)-[r2]-(e:Concept)--(f:Code {SAB:'HGNC_HCOP'}) with e
+match (e)-[r3]-(g:Concept)--(h:Code {SAB:'HGNC'})
+return distinct h.CODE as CHD_genes
+
+
+
+
+
+
 ###########################
 #### QUERY STEPS 1-5 ######
 ########################### Each step builds on the previous step, so step 5 contains everything.
