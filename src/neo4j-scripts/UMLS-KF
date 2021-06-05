@@ -22,8 +22,14 @@ CALL db.index.fulltext.createNodeIndex("Term_name",["Term"],["name"]);
 //MATCH (n:Term) WHERE size((n)--())=0 DELETE (n)
 
 # Mutate GENE_LOCATIONs from Strings to Integers
-match (t:Term)-[r:gene_start_position|gene_end_position]-(i:Code {SAB:'GENE_LOCATION'})
-set t.name = toInteger(t.name)
+MATCH (t:Term)-[r:gene_start_position|gene_end_position]-(i:Code {SAB:'GENE_LOCATION'})
+SET t.name = toInteger(t.name);
+
+MATCH (eqtl:Code {SAB:'GTEX_EQTL'})-[p:p_value]-(t:Term) WITH t,split(t.name,',') as bin
+SET t.lowerbound = toFloat(bin[0]) 
+SET  t.upperbound = toFloat(bin[1])
+
+
 
 
 
