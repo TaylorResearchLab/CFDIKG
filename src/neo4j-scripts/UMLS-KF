@@ -21,18 +21,23 @@ CREATE CONSTRAINT ON (n:NDC) ASSERT n.NDC IS UNIQUE;
 CALL db.index.fulltext.createNodeIndex("Term_name",["Term"],["name"]);
 //MATCH (n:Term) WHERE size((n)--())=0 DELETE (n)
 
-# Mutate GENE_LOCATIONs from Strings to Integers
+// Mutate GENE_LOCATIONs from Strings to Integers
 MATCH (t:Term)-[r:gene_start_position|gene_end_position]-(i:Code {SAB:'GENE_LOCATION'})
 SET t.name = toInteger(t.name);
-
-#Mutate eqtl pvalues
+// Mutate eqtl pvalues
 MATCH (eqtl:Code {SAB:'GTEX_EQTL'})-[p:p_value]-(t:Term) WITH t,split(t.name,',') as bin
 SET t.lowerbound = toFloat(bin[0]) 
-SET  t.upperbound = toFloat(bin[1])
-
-# Mutate eQTL Location Terms
+SET  t.upperbound = toFloat(bin[1]);
+// Mutate eQTL Location Terms
 MATCH (t:Term)-[r:eqtl_location]-(i:Code {SAB:'GTEX_EQTL'})
 SET t.name = toInteger(t.name);
+
+
+
+
+
+
+
 
 
 
