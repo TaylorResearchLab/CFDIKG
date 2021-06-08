@@ -207,3 +207,12 @@ WITH 'HGNC:12658' as gene
 ####################################
 ### Search By Gene/eQTL Location ###
 ####################################
+
+MATCH (a:Term)-[:eqtl_location]-(b:Code {SAB:'GTEX_EQTL'})-[:on_chromosome]-(c:Term)
+WITH a.name as eloc, c.name as echrom, b.CODE as eqtl
+MATCH (d:Term)-[:PT]-(e:Code {SAB:'HGNC',CODE:'HGNC:11998'})--(f:Concept)--(g:Code  {SAB: 'GENE_LOCATION'})-[:gene_start_position]-(h:Term) 
+WITH h.name as gstart, d.name as gene,g,eloc, echrom, eqtl
+MATCH  (i:Term)-[:on_chromosome]-(g)-[:gene_end_position]-(j:Term) 
+WITH i.name as gchrom,j.name as gend,gstart, gene,g,eloc, echrom, eqtl
+WHERE gchrom = echrom AND gstart < eloc < gend
+RETURN COUNT(eqtl)
