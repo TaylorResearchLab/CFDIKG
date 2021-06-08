@@ -196,11 +196,15 @@ MATCH (c)-[r1:gene_in_eqtl]->(e:Concept)-->(f:Code {SAB:'GTEX_EQTL'})
 WHERE  a.CODE = eqtl_CODE  AND d.SAB = 'HGNC'  
 RETURN COUNT(DISTINCT f)
 
+
+
 ###############################
 ###### With HGNC gene #########
 ###############################
 
 WITH 'HGNC:12658' as gene
+
+
 
 
 
@@ -210,11 +214,16 @@ WITH 'HGNC:12658' as gene
 
 MATCH (a:Term)-[:PT]-(b:Code {CODE:'HGNC:11998'})--(c:Concept)--(d:Code{SAB:'GENE_LOCATION'})-[:on_chromosome]-(gchrom:Term)--(e:Code {SAB:'GTEX_EQTL'}) 
 WITH a.name as gene,d,e
-MATCH (f:Term)-[:gene_start_position]-(d)-[:gene_end_position]-(g:Term)
-WITH gene,e,f.name as gstart,g.name as gend
-MATCH (e)-[:eqtl_location]-(h:Term)
-WITH h.name as eloc,e.CODE as eqtl,gene,gstart,gend
-WHERE  gstart < eloc < gend
+MATCH (f:Term)-[:gene_start_position]-(d)-[:gene_end_position]-(g:Term) WITH gene,e,f.name as gstart,g.name as gend
+MATCH (e)-[:eqtl_location]-(h:Term) WITH h.name as eloc,e.CODE as eqtl,gene,gstart,gend WHERE  gstart < eloc < gend
 RETURN  COUNT(DISTINCT eqtl)    # 16, correct
 
 
+# Same as above but filter eqtls by p-value as well
+MATCH (a:Term)-[:PT]-(b:Code {CODE:'HGNC:11998'})--(c:Concept)--(d:Code{SAB:'GENE_LOCATION'})-[:on_chromosome]-(gchrom:Term)--(e:Code {SAB:'GTEX_EQTL'}) WITH a.name as gene,d,e
+MATCH (f:Term)-[:gene_start_position]-(d)-[:gene_end_position]-(g:Term)
+WITH gene,e,f.name as gstart,g.name as gend
+MATCH (e)-[:eqtl_location]-(h:Term)WITH h.name as eloc,gene,gstart,gend,e
+WHERE  gstart < eloc < gend WITH e.CODE as eqtl 
+MATCH (e)-[:p_value]-(i:Term) WHERE i.lowerbound > 1e-20 AND i.upperbound  < 1
+RETURN DISTINCT eqtl
