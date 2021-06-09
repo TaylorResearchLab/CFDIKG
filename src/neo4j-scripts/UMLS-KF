@@ -129,7 +129,7 @@ LIMIT 2
 
 
 ###############################
-###### GTEx eQTL queries ######
+###### GTEx eQTL checks  ######
 ###############################
 
 # Check that the correct number of GTEx eQTL Concept nodes are in the graph
@@ -141,30 +141,6 @@ match (a:Code {SAB:'GTEX_EQTL'})--(b:Concept)--(c:Concept)--(d:Code{SAB:'HGNC'})
 # Check that we have the correct number of GTEx eQTL Concept nodes that DO NOT HAVE relationships with HGNC Concept nodes 
 match (a:Code {SAB:'GTEX_EQTL'})--(b:Concept) where not (b)-[:eqtl_in_gene]-(:Concept)--(:Code{SAB:'HGNC'}) return count(distinct a) // 276181 correct
 
-# Search eqtls by UBERON CUI (tissue)
-#  Return number of eqtls that are connected to the UBERON Brain Concept node
-MATCH (UB_brain:Concept {CUI:'HC009101'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX_EQTL'}) return count(eqtl_code)  # 18,751 correct!
-
-# Search eqtls by HGNC CUI (gene)
-#  Return number of eqtls that are connected to this HGNC Concept node
-MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX_EQTL'}) return count(eqtl_code)    # 26 correct!
-
-# Search eqtls by Varaint/dbSNP CUI 
-# Return number of eqtls associated with this variation
-
-# Search for the unique eqtl that is associated with one tissue, one gene and one variation.
-# Find the eqtl associated with brain tissue, the FTLP2 gene and the rs191565734 variation.
-MATCH (eqtl)-[]->(tissue:Concept {CUI:'HC009101'})
-MATCH (eqtl)-[]->(gene:Concept {CUI:'C2829418'})
-MATCH (eqtl)-[]->(var:Concept {CUI: 'KC94619797786527'})  // returns KC5566850536992, which is correct
-RETURN eqtl, tissue, gene
-
-# Return the Code node attached to the eqtl Concept node we just searched for.
-MATCH (eqtl)-[]->(tissue:Concept {CUI:'HC009101'})
-MATCH (eqtl)-[]->(gene:Concept {CUI:'C2829418'})
-MATCH (eqtl)-[]->(var:Concept {CUI: 'KC9461979778652'}) 
-MATCH (eqtl)-[]-(code:Code)
-RETURN code
 
 
 #####################################
@@ -303,15 +279,4 @@ How many GTEX EXP code nodes are there total?
 match (c:Code {SAB:'GTEX EXP'}) return count(c)  # 1,839,188
 
 
-
-
-
-#############################
-###########################################
-###### Generate Gene Sets for Ryan ########
-###########################################
-
-# Do this starting with HPO (step 4 above)
-match (mp_code:Code {SAB: 'MP', CODE:'MP:0003921'})-[r0:CODE]-(mp_concept:Concept)-[r1:disease_has_associated_gene]-
-(gene_Concept:Concept)-[r2:CODE]-(gene_code:Code {SAB:'HGNC HCOP'}) return split(gene_code.CODE,':')[1] as genes
 
