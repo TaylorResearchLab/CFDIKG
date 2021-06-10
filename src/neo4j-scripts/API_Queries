@@ -10,9 +10,9 @@
 
 
 
-#########################
-###### eQTL queries #####
-#########################
+##############################
+###### GTEX_EQTL queries #####
+##############################
 
 # Search eqtls by UBERON CUI (tissue)
 #  Return number of eqtls that are connected to the UBERON Brain Concept node
@@ -24,6 +24,7 @@ MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'G
 
 # Search eqtls by Varaint/dbSNP CUI 
 # Return number of eqtls associated with this variation
+
 
 # Search for the unique eqtl that is associated with one tissue, one gene and one variation.
 # Find the eqtl associated with brain tissue, the FTLP2 gene and the rs191565734 variation.
