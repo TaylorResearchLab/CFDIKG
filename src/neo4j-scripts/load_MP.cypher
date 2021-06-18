@@ -1,9 +1,28 @@
+
+
+################################################
+######## Use Neosemantics (n10s) to Load the ##########
+####### Mammalalian Phenotype Ontology #########
+################################################
+
+
+# Must run these 2 commands before using neosemantics functions
+CALL n10s.graphconfig.init();
+CREATE CONSTRAINT n10s_unique_uri ON (r:Resource)
+ASSERT r.uri IS UNIQUE;
+
+# Import MPO (If you're getting a new protocol errror make sure you're including file:// infront of the path)
+CALL n10s.onto.import.fetch(
+    'file:///Users/stearb/Desktop/R03_local/data/ontologies/mp.owl',
+    'RDF/XML');
+
+
+---------------BELOW IS THE OLD WAY TO IMPORT MP  ----------------------
+
 ##############################################################
 ###### STEP 2: Load Mammalian Phenotype Ontology ###########
 ##############################################################
 
-
-__________________________New Files_________________________
 #### Create Concept nodes 
 // Added 14241 labels, created 14241 nodes, set 14241 properties
 :auto USING PERIODIC COMMIT 10000 LOAD CSV WITH HEADERS FROM "file:///CUIs_mp_ont.csv" AS row
