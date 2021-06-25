@@ -234,9 +234,9 @@ WHERE  gstart < eloc < gend WITH e.CODE as eqtl
 MATCH (e)-[:p_value]-(i:Term) WHERE i.lowerbound > 1e-20 AND i.upperbound  < 1
 RETURN DISTINCT eqtl
 
-##############################
-##### MP recursive Search ####
-##############################
+#######################################
+##### MP and HPO recursive Search #####
+#######################################
 
 # Return all MP codes UNDER (subclasses) of starting code
 match (b:Code {CODE:'MP:0005385'})--(a:Concept)<-[:SCO *1..]-(n:Concept)-[r]-(m:Code {SAB:'MP'}) 
