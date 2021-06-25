@@ -240,14 +240,14 @@ RETURN DISTINCT eqtl
 
 # Return all MP codes UNDER (subclasses) of starting code
 match (b:Code {CODE:'MP:0005385'})--(a:Concept)<-[:SCO *1..]-(n:Concept)-[r]-(m:Code {SAB:'MP'}) 
-RETURN m.CODE
+RETURN DISTINCT m.CODE
 
 # Reutrn all HPO codes under starting code
 match (b:Code {CODE:'HP:0030680'})--(a:Concept)-[:inverse_isa *1..]->(n:Concept)-[r]-(m:Code {SAB:'HPO'}) 
-RETURN m.CODE
+RETURN DISTINCT m.CODE
 
 WITH "match (b:Code {CODE:'HP:0030680'})--(a:Concept)-[:inverse_isa *1..]->(n:Concept)-[r]-(m:Code {SAB:'HPO'}) 
-RETURN m.CODE" AS query
+RETURN DISTINCT m.CODE" AS query
 CALL apoc.export.csv.query(query, "HP_0030680_subclasses.csv", {})
 YIELD  done
 RETURN done;
