@@ -120,10 +120,10 @@ match (DB_code:Code {SAB:'DBSNP_151'})--(c1:Concept)--(c2:Concept)--(hgnc:Code {
 return COUNT(DB_code)
 
 ### Show gene w multiple snps
-MATCH (n:Concept)-[r:has_snp]-(:Concept)
+MATCH (n:Concept)-[r:gene_has_eqtl]-(:Concept)
 WITH n, count(r) as snp_cnt
 WHERE snp_cnt > 1
-MATCH g=(n)-[:has_snp]-(:Concept)
+MATCH g=(n)-[:gene_has_eqtl]-(:Concept)
 RETURN g
 LIMIT 2
 
