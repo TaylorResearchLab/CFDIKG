@@ -24,19 +24,25 @@ CALL db.index.fulltext.createNodeIndex("Term_name",["Term"],["name"]);
 // Mutate GENE_LOCATIONs from Strings to Integers
 MATCH (t:Term)-[r:gene_start_position|gene_end_position]-(i:Code {SAB:'GENE_LOCATION'})
 SET t.name = toInteger(t.name);
+
 // Mutate eQTL Location Terms
 MATCH (t:Term)-[r:eqtl_location]-(i:Code {SAB:'GTEX_EQTL'})
 SET t.name = toInteger(t.name);
+
 // Mutate eqtl pvalue bins from string to int
 MATCH (eqtl:Code {SAB:'GTEX_EQTL'})-[p:p_value]-(t:Term) WITH t,split(t.name,',') as bin
 SET t.lowerbound = toFloat(bin[0]) 
 SET  t.upperbound = toFloat(bin[1]);
+
 // Mutate TPM bins from string to ints
 MATCH (eqtl:Code {SAB:'GTEX_EXP'})-[r:TPM]-(t:Term) WITH t,split(t.name,',') as bin
 SET t.lowerbound = toFloat(bin[0]) 
 SET  t.upperbound = toFloat(bin[1]);
 
-
+// Mutate sc data pvalue bins from string to int
+MATCH (eqtl:Code {SAB:'scHeart PMID: 31835037'})-[p:p_value]-(t:Term) WITH t,split(t.name,',') as bin
+SET t.lowerbound = toFloat(bin[0]) 
+SET  t.upperbound = toFloat(bin[1]);
 
 
 
