@@ -253,6 +253,9 @@ YIELD  done
 RETURN done;
 
 
+
+
+
 ##############################
 ### single cell heart data ###
 ##############################
@@ -261,3 +264,10 @@ MATCH (a:Code {SAB:'HGNC'})-[:CODE]-(b:Concept)-->(c:Concept)-[:CODE]-(d:Code {S
 with *
 where g.lowerbound = 0.0
 return count(distinct a.CODE)
+
+
+MATCH (a:Code {SAB:'CL',CODE:'0002131'})-[:CODE]-(b:Concept)-->(c:Concept)-[:CODE]-(d:Code {SAB:'scHeart PMID: 31835037'})-[:log2fc]-(e:Term)
+with e,c
+match (c)-->(f:Concept)-[:CODE]->(g:Code {SAB:'HGNC'})-[:MTH_ACR]-(h:Term)
+where e.upperbound > 2
+return g.CODE as HGNC_ID,h.name as gene_name,e.lowerbound as lowebound,e.upperbound as upperbound limit 50
