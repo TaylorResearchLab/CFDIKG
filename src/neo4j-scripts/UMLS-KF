@@ -44,7 +44,10 @@ MATCH (eqtl:Code {SAB:'scHeart PMID: 31835037'})-[p:p_value]-(t:Term) WITH t,spl
 SET t.lowerbound = toFloat(bin[0]) 
 SET  t.upperbound = toFloat(bin[1]);
 
-
+// Mutate sc data log2fc bins from string to int
+MATCH (eqtl:Code {SAB:'scHeart PMID: 31835037'})-[p:log2fc]-(t:Term) WITH t,split(t.name,',') as bin
+SET t.lowerbound = toFloat(bin[0]) 
+SET  t.upperbound = toFloat(bin[1]);
 
 
 
