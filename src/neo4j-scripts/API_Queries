@@ -271,3 +271,17 @@ with e,c
 match (c)-->(f:Concept)-[:CODE]->(g:Code {SAB:'HGNC'})-[:MTH_ACR]-(h:Term)
 where e.upperbound > 2
 return g.CODE as HGNC_ID,h.name as gene_name,e.lowerbound as lowebound,e.upperbound as upperbound limit 50
+
+##  with p-value filter
+MATCH (a:Code {SAB:'CL',CODE:'0002131'})-[:CODE]-(b:Concept)-->(c:Concept)-[:CODE]-(d:Code {SAB:'scHeart PMID: 31835037'})-[:log2fc]-(e:Term)
+with d,e,c
+MATCH (d)-[:p_value]-(i:Term)
+where i.upperbound > 0.00001
+with e,c,i
+match (c)-->(f:Concept)-[:CODE]->(g:Code {SAB:'HGNC'})-[:MTH_ACR]-(h:Term)
+where e.upperbound > 2
+return g.CODE as HGNC_ID,h.name as gene_name,e.lowerbound as lowebound,e.upperbound as upperbound  
+
+
+
+
