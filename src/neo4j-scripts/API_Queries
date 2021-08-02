@@ -260,7 +260,7 @@ RETURN done;
 ### single cell heart data ###
 ##############################
 
-MATCH (a:Code {SAB:'HGNC'})-[:CODE]-(b:Concept)-->(c:Concept)-[:CODE]-(d:Code {SAB:'scHeart PMID: 31835037'})-[:p_val]-(g:Term)
+MATCH (a:Code {SAB:'HGNC'})-[:CODE]-(b:Concept)-->(c:Concept)-[:CODE]-(d:Code {SAB:'scHeart PMID: 31835037'})-[:p_value]-(g:Term)
 with *
 where g.lowerbound = 0.0
 return count(distinct a.CODE)
