@@ -253,6 +253,20 @@ YIELD  done
 RETURN done;
 
 
+###########################################################
+####### Recursive Atrial Septal Defects (and children) ####
+##############  query for gene sets #######################
+###########################################################
+
+with 'MP:0010403' as parent
+match (b:Code {CODE:parent})--(a:Concept)<-[:SCO *1..]-(n:Concept)-[r]-(m:Code {SAB:'MP'}) 
+with  collect(n.CUI) + a.CUI as terms
+unwind terms as uterms
+with collect(distinct uterms) as phenos
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+where mp_concept.CUI in phenos
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+return distinct  human_gene.CODE
 
 
 
