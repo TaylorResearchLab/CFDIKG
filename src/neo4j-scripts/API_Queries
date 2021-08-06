@@ -275,6 +275,17 @@ return gstart.name,gend.name,gchrom.name,human_gene.CODE
 
 
 
+########## extend the above query to filter the gene list for gene expressed in the heart only #########
+heart-related UBERON CUI/CODEs
+
+'Artery - Aorta' - C0003956/0001496 - CODE isnt in UMLS
+'Heart - Left Ventricle' - HC005124/0006566
+'Heart - Atrial Appendage' - HC003129/0006631
+
+
+
+
+
 ##############################
 ### single cell heart data ###
 ##############################
