@@ -275,12 +275,31 @@ return gstart.name,gend.name,gchrom.name,human_gene.CODE
 
 
 
-########## extend the above query to filter the gene list for gene expressed in the heart only #########
-heart-related UBERON CUI/CODEs
+########## extend the above query to filter the gene list for gene expressed (by TPM) in the heart only heart-related UBERON CUI/CODEs
 
 'Artery - Aorta' - C0003956/0001496 - CODE isnt in UMLS
 'Heart - Left Ventricle' - HC005124/0006566
 'Heart - Atrial Appendage' - HC003129/0006631
+
+with 'MP:0010403' as parent // INSERT PARENT PHENOTYPE and level of recursion   
+match (b:Code {CODE:parent,SAB:'MP'})--(a:Concept)<-[:SCO *1..]-(n:Concept)-[r]-(m:Code {SAB:'MP'}) 
+with  collect(n.CUI) + a.CUI as terms unwind terms as uterms
+with collect(distinct uterms) as phenos
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+where mp_concept.CUI in phenos
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+with hgnc_concept,human_gene
+match (human_gene)-[:CODE]-(hgnc_concept)-[:gene_has_median_expression]-(gtex_concept:Concept)-[:median_expression_in_tissue]-(uberon_concept:Concept)-[:CODE]-(uberon_code:Code {SAB:'UBERON'})
+where uberon_code.CODE in ['0006566','0006631']    // INSERT UBERON TISSUE CODES 
+with *
+match (gtex_concept)--(gtex_code:Code {SAB:'GTEX_EXP'})--(gtex_term:Term)
+where gtex_term.lowerbound > 4
+return distinct human_gene.CODE 
+
+########### same query as above but instead of filtering by gene expression in a specific tissue(s) (with TPM), filter by the eqtl p value
+
+
+
 
 
 
