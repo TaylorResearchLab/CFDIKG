@@ -3,6 +3,7 @@
 #######################################################
 
 ####### Create index and unique constraints
+MATCH (n:Term) WHERE size((n)--())=0 DELETE (n)
 CREATE CONSTRAINT ON (n:Semantic) ASSERT n.TUI IS UNIQUE;
 CREATE CONSTRAINT ON (n:Semantic) ASSERT n.STN IS UNIQUE;
 CREATE CONSTRAINT ON (n:Semantic) ASSERT n.DEF IS UNIQUE;
@@ -19,7 +20,6 @@ CREATE INDEX FOR (n:Definition) ON (n.DEF);
 CREATE CONSTRAINT ON (n:NDC) ASSERT n.ATUI IS UNIQUE;
 CREATE CONSTRAINT ON (n:NDC) ASSERT n.NDC IS UNIQUE;
 CALL db.index.fulltext.createNodeIndex("Term_name",["Term"],["name"]);
-//MATCH (n:Term) WHERE size((n)--())=0 DELETE (n)
 
 // Mutate GENE_LOCATIONs from Strings to Integers
 MATCH (t:Term)-[r:gene_start_position|gene_end_position]-(i:Code {SAB:'GENE_LOCATION'})
