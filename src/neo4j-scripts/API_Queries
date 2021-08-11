@@ -273,8 +273,6 @@ match (gstart)-[:gene_start_position]-(gl_code)-[r:gene_end_position]-(gend:Term
 match (gl_code)-[:on_chromosome]-(gchrom:Term)
 return gstart.name,gend.name,gchrom.name,human_gene.CODE 
 
-
-
 ########## extend the above query to filter the gene list for gene expressed (by TPM) in the heart only heart-related UBERON CUI/CODEs
 
 'Artery - Aorta' - C0003956/0001496 - CODE isnt in UMLS
@@ -297,6 +295,48 @@ where gtex_term.lowerbound > 4
 return distinct human_gene.CODE 
 
 ########### same query as above but instead of filtering by gene expression in a specific tissue(s) (with TPM), filter by the eqtl p value
+
+with 'MP:0010403' as parent
+match (b:Code {CODE:parent,SAB:'MP'})--(a:Concept)<-[:SCO *1..]-(n:Concept)-[r]-(m:Code {SAB:'MP'}) 
+with  collect(n.CUI) + a.CUI as terms unwind terms as uterms
+with collect(distinct uterms) as phenos
+match (mp_concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+where mp_concept.CUI in phenos
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+with hgnc_concept,human_gene
+match (human_gene)-[:CODE]-(hgnc_concept)-[:gene_has_eqtl]-(gtex_concept:Concept)-[:eqtl_in_tissue]-(uberon_concept:Concept)-[:CODE]-(uberon_code:Code {SAB:'UBERON'})
+where uberon_code.CODE in ['0006566','0006631']
+with *
+match (gtex_concept)--(gtex_code:Code {SAB:'GTEX_EQTL'})-[:p_value]-(gtex_term:Term)
+where gtex_term.upperbound < .005 
+return distinct human_gene.CODE 
+
+
+
+
+#######################################
+##### Tetralogy of Fallot Query #######
+####################################### No need for recursive search here.
+
+There is no mouse model/phenotype for Tetralogy of Fallot. Just Use the 4 individuual phenotypes of Tet. 
+HP:0001629 / MP:0010402,  ventricular septal defect
+HP:0002623 / MP:0000273 overriding aortic valve, NOT mapped
+HP:0001667 / MP:0000276   heart right ventricle hypertrophy, NOT mapped
+HP:0001642 / MP:0006128 pulmonary valve stenosis
+
+Start the query with the MP terms bc 2 of the phenotypes are not mapped
+
+match (a:Code {SAB:'MP'})-[:CODE]-(mp_concept:Concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+where a.CODE in tet_phenos
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+with hgnc_concept,human_gene
+match (hgnc_concept)-[:CODE]-(gl_code:Code {SAB:'GENE_LOCATION'})
+with distinct human_gene,gl_code
+match (gstart)-[:gene_start_position]-(gl_code)-[r:gene_end_position]-(gend:Term)
+match (gl_code)-[:on_chromosome]-(gchrom:Term)
+return distinct gstart.name,gend.name,gchrom.name,human_gene.CODE 
+
+
 
 
 
