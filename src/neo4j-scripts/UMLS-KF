@@ -3,7 +3,7 @@
 #######################################################
 
 ####### Create index and unique constraints
-MATCH (n:Term) WHERE size((n)--())=0 DELETE (n)
+MATCH (n:Term) WHERE size((n)--())=0 DELETE (n);
 CREATE CONSTRAINT ON (n:Semantic) ASSERT n.TUI IS UNIQUE;
 CREATE CONSTRAINT ON (n:Semantic) ASSERT n.STN IS UNIQUE;
 CREATE CONSTRAINT ON (n:Semantic) ASSERT n.DEF IS UNIQUE;
