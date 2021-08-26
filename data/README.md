@@ -14,3 +14,5 @@
 ### 4. Genotype-Tissue Expression (GTEx) Portal https://gtexportal.org/home/datasets
         - GTEx_Analysis_v8_eQTL (all files in this directory, Too big for github)
         - GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_median_tpm.gct  (Too big for github)
+        
+### 5. Gene Annotation Data http://genome.ucsc.edu/cgi-bin/hgTables
