@@ -405,13 +405,45 @@ return distinct rs_id_term.name as rsid, eqtl_loc_term.name as eqtl_location, gs
 
 
 
+
+
+
+################
+
+combine steps 2 and 3:
+
+// filter by the 4 phenotypes of Tet
+with ['MP:0010402','MP:0000273','MP:0000276','MP:0006128'] as tet_phenos
+match (a:Code {SAB:'MP'})-[:CODE]-(mp_concept:Concept)-[r3]-(hcop_concept:Concept)-[r4]-(mouse_gene:Code {SAB:'HGNC_HCOP'})
+where a.CODE in tet_phenos
+// match mouse genes to human genes
+match (hcop_concept)-[r5]-(hgnc_concept:Concept)-[r6]-(human_gene:Code {SAB: 'HGNC'})
+with hgnc_concept,human_gene
+// match human genes to the uberon nodes to the gtex node, and filter by uberon codes
+match (human_gene)-[:CODE]-(hgnc_concept)-[:gene_has_median_expression]-(gtex_concept:Concept)-[:median_expression_in_tissue]-(uberon_concept:Concept)-[:CODE]-(uberon_code:Code {SAB:'UBERON'})
+where uberon_code.CODE in ['0006566','0006631']    // INSERT UBERON TISSUE CODES 
+with *
+// filter by gtex TPM
+match (gtex_concept)--(gtex_code:Code {SAB:'GTEX_EXP'})--(gtex_term:Term)
+where gtex_term.lowerbound > 1
+// get gene chrom and position location data
+// match (hgnc_concept)-[:CODE]-(gl_code:Code {SAB:'GENE_LOCATION'})
+// with distinct human_gene,gl_code
+// match (gstart)-[:gene_start_position]-(gl_code)-[r:gene_end_position]-(gend:Term)
+// match (gl_code)-[:on_chromosome]-(gchrom:Term)
+// return distinct gstart.name as start,gend.name as end,gchrom.name as chrom,human_gene.CODE as hgnc_id
+match (human_gene_2:Code {SAB:'HGNC'})--(b:Concept)-[:has_single_cell_expression]-(c:Concept)--(d:Code {SAB:'scHeart PMID: 31835037'})-[:log2fc]-(t:Term) 
+match (d)-[:p_value]-(t2:Term)
+where human_gene_2.CODE in collect(human_gene.CODE)
+return d.CODE,t.name,t2.name
+
+
 # Returning sc heart data info
 
-match (a:Code)--(b:Concept)-[:has_single_cell_expression]-(c:Concept)--(d:Code {SAB:'scHeart PMID: 31835037'})-[:log2fc]-(t:Term) 
+match (a:Code {SAB:'HGNC'})--(b:Concept)-[:has_single_cell_expression]-(c:Concept)--(d:Code {SAB:'scHeart PMID: 31835037'})-[:log2fc]-(t:Term) 
 match (d)-[:p_value]-(t2:Term)
 where a.CODE in ['HGNC:1093','HGNC:7400']
 return d.CODE,t.name,t2.name
-
 
 
 
