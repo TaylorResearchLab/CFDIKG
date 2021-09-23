@@ -51,8 +51,14 @@ SET  t.upperbound = toFloat(bin[1]);
 
 
 
+# Find number of nodes from each SAB:
 
-
+match (n:Code) where n.SAB in ['MP'] return  count(distinct n) 
+match (n:Code) where n.SAB in ['GTEX_EXP','GTEX_EQTL'] return  count(distinct n)
+match (n:Code)--(t:Term) where n.SAB in ['GENE_LOCATION'] return count(distinct t)
+match (n:Code)-[:CODE]-(a:Concept)-[r]-(b:Concept)-[:CODE]-(m:Code) where n.SAB = 'HGNC_HCOP' and m.SAB = 'MP' return  count(r)
+match (n:Code)-[:CODE]-(a:Concept)-[r]-(b:Concept)-[:CODE]-(m:Code) where n.SAB = 'HGNC' and m.SAB = 'HPO' return  count(r)
+match (n:Code)-[:CODE]-(a:Concept)-[r]-(b:Concept)-[:CODE]-(m:Code) where n.SAB = 'MP' and m.SAB = 'HPO' return  count(r)
 
 # Queries for the UMLS-KF (our data on top of UMLS)
 
