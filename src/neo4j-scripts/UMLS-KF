@@ -59,6 +59,7 @@ match (n:Code)--(t:Term) where n.SAB in ['GENE_LOCATION'] return count(distinct 
 match (n:Code)-[:CODE]-(a:Concept)-[r]-(b:Concept)-[:CODE]-(m:Code) where n.SAB = 'HGNC_HCOP' and m.SAB = 'MP' return  count(r)
 match (n:Code)-[:CODE]-(a:Concept)-[r]-(b:Concept)-[:CODE]-(m:Code) where n.SAB = 'HGNC' and m.SAB = 'HPO' return  count(r)
 match (n:Code)-[:CODE]-(a:Concept)-[r]-(b:Concept)-[:CODE]-(m:Code) where n.SAB = 'MP' and m.SAB = 'HPO' return  count(r)
+match (n:Code {SAB:'scHeart PMID: 31835037'})-[:CODE]-(a:Concept)  return count(distinct n) 
 
 # Queries for the UMLS-KF (our data on top of UMLS)
 
