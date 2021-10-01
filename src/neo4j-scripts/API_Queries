@@ -20,7 +20,7 @@ MATCH (UB_brain:Concept {CUI:'HC009101'})--(eqtls:Concept)--(eqtl_code:Code {SAB
 
 # Search eqtls by HGNC CUI (gene)
 #  Return number of eqtls that are connected to this HGNC Concept node
-MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX_EQTL'}) return count(eqtl_code)    # 26 correct!
+MATCH (gene:Concept {CUI:'C2828785'})--(eqtls:Concept)--(eqtl_code:Code {SAB: 'GTEX_EQTL'}) return count(distinct eqtl_code)    # 26 correct!
 
 # Search eqtls by Varaint/dbSNP CUI 
 # Return number of eqtls associated with this variation
