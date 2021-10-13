@@ -9,20 +9,19 @@ All genes associated with ASD (MP_00110403) and its child phenotypes.
 
 New Cypher Query:
 
-with 'MP:0010403' as parent    
-match (b:Code {CODE:parent,SAB:'MP'})<-[:CODE]-(a:Concept)<-[:SCO *1..]-(n:Concept)-[r]-(m:Code {SAB:'MP'}) 
-with  collect(n.CUI) + a.CUI as terms unwind terms as uterms
-with collect(distinct uterms) as phenos
-match (mp_concept)-[:disease_has_associated_gene]->(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code {SAB:'HGNC_HCOP'})
-where mp_concept.CUI in phenos
-match (hcop_concept)-[:has_human_ortholog]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code {SAB: 'HGNC'})
-with hgnc_concept,human_gene
-match (gene_symbol:Term)<-[:PREF_TERM]-(hgnc_concept)-[:CODE]->(gl_code:Code {SAB:'GENE_LOCATION'})
-with distinct human_gene,gl_code,gene_symbol
-match (gstart:Term)<-[:gene_start_position]-(gl_code)-[r:gene_end_position]->(gend:Term)
-match (gl_code)-[:on_chromosome]->(gchrom:Term)
-return distinct split(gene_symbol.name,' gene')[0] as symbol,gstart.name as start,gend.name as end,gchrom.name as chrom,human_gene.CODE as hgnc_id 
-
+WITH 'MP:0010403' AS parent    
+MATCH (P_code:Code {CODE:parent,SAB:'MP'})<-[:CODE]-(P_concept:Concept)<-[:SCO *1..]-(C_concept:Concept)-[:CODE]-(C_code:Code {SAB:'MP'}) 
+WITH  collect(C_concept.CUI) + P_concept.CUI AS terms UNWIND terms AS uterms
+WITH collect(DISTINCT uterms) AS phenos
+MATCH (mp_concept:Concept)-[:disease_has_associated_gene]->(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code {SAB:'HGNC_HCOP'})
+WHERE mp_concept.CUI IN phenos
+MATCH (hcop_concept)-[:has_human_ortholog]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code {SAB: 'HGNC'})
+WITH hgnc_concept,human_gene
+MATCH (gene_symbol:Term)<-[:PREF_TERM]-(hgnc_concept)-[:CODE]->(gl_code:Code {SAB:'GENE_LOCATION'})
+WITH DISTINCT human_gene,gl_code,gene_symbol
+MATCH (gstart:Term)<-[:gene_start_position]-(gl_code)-[:gene_end_position]->(gend:Term)
+MATCH (gl_code)-[:on_chromosome]->(gchrom:Term)
+RETURN DISTINCT split(gene_symbol.name,' gene')[0] AS symbol,gstart.name AS start_pos,gend.name as end_pos,gchrom.name AS chrom,human_gene.CODE AS hgnc_id 
 
 
 
