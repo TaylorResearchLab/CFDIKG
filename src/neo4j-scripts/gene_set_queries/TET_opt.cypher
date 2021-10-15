@@ -21,13 +21,13 @@ All genes associated with the 4 Tet Phenotypes.
 Cypher Query:  --> 195 ms.
 
 with ['MP:0010402','MP:0000273','MP:0000276','MP:0006128'] as phenos
-match (a:Code)<-[:CODE]-(mp_concept:Concept)-[:disease_has_associated_gene]->(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code)
-where a.CODE in phenos and mouse_gene.SAB = 'HGNC_HCOP' and a.SAB = 'MP'
+match (P_code:Code)<-[:CODE]-(mp_concept:Concept)-[:phenotype_has_associated_gene]->(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code)
+where P_code.CODE in phenos and mouse_gene.SAB = 'HGNC_HCOP' and P_code.SAB = 'MP'
 match (hcop_concept)-[:has_human_ortholog]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code) where human_gene.SAB = 'HGNC'
 with hgnc_concept,human_gene
 match (gene_symbol:Term)<-[:PREF_TERM]-(hgnc_concept)-[:CODE]->(gl_code:Code) where gl_code.SAB = 'GENE_LOCATION'
 with distinct human_gene,gl_code, gene_symbol
-match (gstart:Term)<-[:gene_start_position]-(gl_code)-[r:gene_end_position]->(gend:Term)
+match (gstart:Term)<-[:gene_start_position]-(gl_code)-[:gene_end_position]->(gend:Term)
 match (gl_code)-[:on_chromosome]->(gchrom:Term)
 return distinct split(gene_symbol.name,' gene')[0] as symbol,gstart.name as start,gend.name as end,gchrom.name as chrom,human_gene.CODE as hgnc_id
 
@@ -44,8 +44,8 @@ eQTLs (pvals < .05) associated with the 4 Tet phenotypes from genes that are exp
 Cypher Query:
 
 with ['MP:0010402','MP:0000273','MP:0000276','MP:0006128'] as phenos
-match (a:Code )-[:CODE]-(mp_concept:Concept)-[:disease_has_associated_gene]-(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code)
-where a.CODE in phenos and a.SAB = 'MP' and mouse_gene.SAB = 'HGNC_HCOP'
+match (P_code:Code )-[:CODE]-(mp_concept:Concept)-[:phenotype_has_associated_gene]-(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code)
+where P_code.CODE in phenos and P_code.SAB = 'MP' and mouse_gene.SAB = 'HGNC_HCOP'
 match (hcop_concept)-[:has_human_ortholog]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code) where human_gene.SAB = 'HGNC'
 with hgnc_concept,human_gene
 match (gene_symbol:Term)<-[:PREF_TERM]-(hgnc_concept)-[:CODE]->(gl_code:Code) where gl_code.SAB = 'GENE_LOCATION'
