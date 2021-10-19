@@ -21,14 +21,15 @@ All genes associated with the 4 Tet Phenotypes.
 Cypher Query:  --> 195 ms.
 
 with ['MP:0010402','MP:0000273','MP:0000276','MP:0006128'] as phenos
-match (P_code:Code)<-[:CODE]-(mp_concept:Concept)-[:phenotype_has_associated_gene]->(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code)
-where P_code.CODE in phenos and mouse_gene.SAB = 'HGNC_HCOP' and P_code.SAB = 'MP'
+match (code:Code {SAB:'MP'})<-[:CODE]-(mp_concept:Concept)-[:phenotype_has_associated_gene {SAB:'IMPC'}]->(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code)
+where code.CODE in phenos and mouse_gene.SAB = 'HGNC_HCOP'
 match (hcop_concept)-[:has_human_ortholog]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code) where human_gene.SAB = 'HGNC'
 with hgnc_concept,human_gene
-match (gene_symbol:Term)<-[:PREF_TERM]-(hgnc_concept)-[:CODE]->(gl_code:Code) where gl_code.SAB = 'GENE_LOCATION'
-with distinct human_gene,gl_code, gene_symbol
-match (gstart:Term)<-[:gene_start_position]-(gl_code)-[:gene_end_position]->(gend:Term)
-match (gl_code)-[:on_chromosome]->(gchrom:Term)
+MATCH (hgnc_concept)-[:CODE]->(gl_code:Code {SAB:'GENE_LOCATION'})
+MATCH (hgnc_concept)-[:PREF_TERM]->(gene_symbol:Term)with distinct human_gene,gl_code, gene_symbol
+MATCH (gl_code)-[:gene_start_position]->(gstart:Term)
+MATCH (gl_code)-[:gene_end_position]->(gend:Term)
+MATCH (gl_code)-[:on_chromosome]->(gchrom:Term)
 return distinct split(gene_symbol.name,' gene')[0] as symbol,gstart.name as start,gend.name as end,gchrom.name as chrom,human_gene.CODE as hgnc_id
 
 
@@ -44,14 +45,15 @@ eQTLs (pvals < .05) associated with the 4 Tet phenotypes from genes that are exp
 Cypher Query:
 
 with ['MP:0010402','MP:0000273','MP:0000276','MP:0006128'] as phenos
-match (P_code:Code )-[:CODE]-(mp_concept:Concept)-[:phenotype_has_associated_gene]-(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code)
-where P_code.CODE in phenos and P_code.SAB = 'MP' and mouse_gene.SAB = 'HGNC_HCOP'
+match (code:Code )-[:CODE]-(mp_concept:Concept)-[:phenotype_has_associated_gene]-(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code)
+where code.CODE in phenos and code.SAB = 'MP' and mouse_gene.SAB = 'HGNC_HCOP'
 match (hcop_concept)-[:has_human_ortholog]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code) where human_gene.SAB = 'HGNC'
 with hgnc_concept,human_gene
-match (gene_symbol:Term)<-[:PREF_TERM]-(hgnc_concept)-[:CODE]->(gl_code:Code) where gl_code.SAB = 'GENE_LOCATION'
-with distinct human_gene,gl_code, gene_symbol
-match (gstart:Term)<-[:gene_start_position]-(gl_code)-[r:gene_end_position]->(gend:Term)
-match (gl_code)-[:on_chromosome]->(gchrom:Term)
+MATCH (hgnc_concept)-[:CODE]->(gl_code:Code {SAB:'GENE_LOCATION'})
+MATCH (hgnc_concept)-[:PREF_TERM]->(gene_symbol:Term)with distinct human_gene,gl_code, gene_symbol
+MATCH (gl_code)-[:gene_start_position]->(gstart:Term)
+MATCH (gl_code)-[:gene_end_position]->(gend:Term)
+MATCH (gl_code)-[:on_chromosome]->(gchrom:Term)
 with *
 match (human_gene)<-[:CODE]-(hgnc_concept)-[:gene_has_eqtl]->(gtex_concept:Concept)-[:eqtl_in_tissue]->(uberon_concept:Concept)-[:CODE]->(uberon_code:Code)
 where uberon_code.CODE in ['0006566','0006631'] and uberon_code.SAB = 'UBERON'
@@ -72,24 +74,25 @@ All genes associated with the 4 Tet phenotypes that are expressed in the heart a
 
 Cypher Query:
 
-with ['MP:0010402','MP:0000273','MP:0000276','MP:0006128'] as tet_phenos
-match (a:Code)-[:CODE]-(mp_concept:Concept)-[:disease_has_associated_gene]->(hcop_concept:Concept)-[:CODE]->(mouse_gene:Code)
-where a.CODE in tet_phenos and a.SAB = 'MP' and mouse_gene.SAB = 'HGNC_HCOP'
-match (hcop_concept)-[:has_human_ortholog]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code) where human_gene.SAB = 'HGNC'
-with * 
-match (gene_symbol:Term)<-[:PREF_TERM]-(hgnc_concept)
-with hgnc_concept,human_gene, gene_symbol
-match (human_gene)<-[:CODE]-(hgnc_concept)-[:gene_has_median_expression]->(gtex_concept:Concept)-[:median_expression_in_tissue]->(uberon_concept:Concept)-[:CODE]->(uberon_code:Code)
-where uberon_code.SAB = 'UBERON' and uberon_code.CODE in ['0006566','0006631']    
-with *
-match (gtex_concept)-[:CODE]->(gtex_code:Code)-[:TPM]->(gtex_term:Term)
-where gtex_code.SAB = 'GTEX_EXP' and gtex_term.lowerbound > 10
-with *
-match (hgnc_concept)-[:CODE]->(gl_code:Code) where gl_code.SAB = 'GENE_LOCATION'
-with distinct human_gene,gl_code, gene_symbol
-match (gstart:Term)<-[:gene_start_position]-(gl_code)-[r:gene_end_position]->(gend:Term)
-match (gl_code)-[:on_chromosome]->(gchrom:Term)
-return distinct split(gene_symbol.name,' gene')[0] as symbol,gstart.name as start,gend.name as end,gchrom.name as chrom,human_gene.CODE as hgnc_id
+WITH ['MP:0010402','MP:0000273','MP:0000276','MP:0006128'] AS tet_phenos
+MATCH (code:Code)-[:CODE]-(mp_concept:Concept)-[:phenotype_has_associated_gene {SAB:'IMPC'}]->(hcop_concept:Concept)-[:has_human_ortholog {SAB:'HGNC__HGNC_HCOP'}]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code) 
+WHERE code.CODE IN tet_phenos AND code.SAB = 'MP' AND human_gene.SAB = 'HGNC'
+WITH * 
+MATCH (gene_symbol:Term)<-[:PREF_TERM]-(hgnc_concept)
+WITH hgnc_concept,human_gene, gene_symbol
+MATCH (human_gene)<-[:CODE]-(hgnc_concept)-[:gene_has_median_expression]->(gtex_concept:Concept)-[:median_expression_in_tissue]->(uberon_concept:Concept)-[:CODE]->(uberon_code:Code)
+WHERE uberon_code.SAB = 'UBERON' and uberon_code.CODE in ['0006566','0006631']    
+WITH *
+MATCH (gtex_concept)-[:CODE]->(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]->(gtex_term:Term)
+WHERE   gtex_term.lowerbound > 10
+WITH *
+MATCH (hgnc_concept)-[:CODE]->(gl_code:Code {SAB:'GENE_LOCATION'})
+MATCH (hgnc_concept)-[:PREF_TERM]->(gene_symbol:Term)
+WITH distinct human_gene,gl_code, gene_symbol
+MATCH (gl_code)-[:gene_start_position]->(gstart:Term)
+MATCH (gl_code)-[:gene_end_position]->(gend:Term)
+MATCH (gl_code)-[:on_chromosome]->(gchrom:Term)
+RETURN distinct split(gene_symbol.name,' gene')[0] AS symbol,gstart.name AS start,gend.name AS end,gchrom.name AS chrom,human_gene.CODE AS hgnc_id
 
 
 
@@ -104,8 +107,8 @@ Cardiac celltype (Asp) and gene log2fc levels associated with the 4 Tet phenotyp
 Cypher Query:  --> 21230 ms.
 
 with ['MP:0010402','MP:0000273','MP:0000276','MP:0006128'] as tet_phenos
-match (a:Code)-[:CODE]-(mp_concept:Concept)-[:disease_has_associated_gene]->(hcop_concept:Concept)-[:CODE]-(mouse_gene:Code)
-where a.CODE in tet_phenos and a.SAB = 'MP' and mouse_gene.SAB = 'HGNC_HCOP'
+match (code:Code)-[:CODE]-(mp_concept:Concept)-[:disease_has_associated_gene]->(hcop_concept:Concept)-[:CODE]-(mouse_gene:Code)
+where code.CODE in tet_phenos and code.SAB = 'MP' and mouse_gene.SAB = 'HGNC_HCOP'
 match (hcop_concept)-[:has_human_ortholog]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code) where human_gene.SAB = 'HGNC'
 With *
 match (gene_symbol:Term)<-[:PREF_TERM]-(hgnc_concept)
