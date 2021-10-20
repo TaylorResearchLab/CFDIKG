@@ -102,23 +102,19 @@ Cypher Query: --> 3552 ms.
 
 WITH 'MP:0010403' AS parent   
 MATCH (P_code:Code {CODE:parent,SAB:'MP'})<-[:CODE]-(P_concept:Concept)<-[:SCO *1.. {SAB:'MP'}]-(C_concept:Concept)
-WITH  COLLECT(C_concept.CUI) + P_concept.CUI AS terms UNWIND terms AS uterms
-WITH COLLECT(DISTINCT uterms) AS phenos
+WITH  COLLECT(C_concept.CUI) + P_concept.CUI AS terms UNWIND terms AS uterms WITH COLLECT(DISTINCT uterms) AS phenos
 MATCH (mp_concept)-[:phenotype_has_associated_gene {SAB:'IMPC'}]-(hcop_concept:Concept)-[:has_human_ortholog {SAB:'HGNC__HGNC_HCOP'}]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code {SAB:'HGNC'}) 
-WHERE mp_concept.CUI IN phenos
-WITH *
+WHERE mp_concept.CUI IN phenos WITH *
 MATCH (hgnc_concept)-[:PREF_TERM]->(gene_symbol:Term)
 WITH hgnc_concept,human_gene, gene_symbol
 MATCH (human_gene)<-[:CODE]-(hgnc_concept)-[:gene_has_median_expression]->(gtex_concept:Concept)-[:median_expression_in_tissue]->(uberon_concept:Concept)-[:CODE]->(uberon_code:Code)
-WHERE uberon_code.SAB = 'UBERON' AND uberon_code.CODE IN ['0006566','0006631']    
-WITH *
+WHERE uberon_code.SAB = 'UBERON' AND uberon_code.CODE IN ['0006566','0006631'] WITH *
 MATCH (gtex_concept)-[:CODE]->(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]->(gtex_term:Term)
 WHERE gtex_term.lowerbound > 10
 MATCH (human_gene:Code {SAB:'HGNC'})<-[:CODE]-(b:Concept)-[:has_single_cell_expression]->(c:Concept)-[:CODE]->(sc_code:Code {SAB:'scHeart PMID: 31835037'})-[:log2fc]->(sc_term:Term) 
-MATCH (sc_code)-[:p_value]->(pval_term:Term)
-WITH *, collect(human_gene.CODE) AS gene_list
+MATCH (sc_code)-[:p_value]->(pval_term:Term) WITH *, collect(human_gene.CODE) AS gene_list
 WHERE human_gene.CODE IN gene_list
-RETURN SPLIT(gene_symbol.name,' gene')[0] AS symbol, sc_code.CODE AS celltype_gene,sc_term.name AS log2fc, t2.lowerbound AS pval_lowerbound, t2.upperbound AS pval_upperbound 
+RETURN SPLIT(gene_symbol.name,' gene')[0] AS symbol, sc_code.CODE AS celltype_gene,sc_term.name AS log2fc, pval_term.lowerbound AS pval_lowerbound, pval_term.upperbound AS pval_upperbound 
 
 
 
