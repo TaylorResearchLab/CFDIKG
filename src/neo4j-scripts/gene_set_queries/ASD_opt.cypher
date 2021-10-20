@@ -11,11 +11,9 @@ New Cypher Query:
 
 WITH 'MP:0010403' AS parent    
 MATCH (P_code:Code {CODE:parent,SAB:'MP'})<-[:CODE]-(P_concept:Concept)<-[:SCO *1.. {SAB:'MP'}]-(C_concept:Concept)
-WITH  collect(C_concept.CUI) + P_concept.CUI AS terms UNWIND terms AS uterms
-WITH collect(DISTINCT uterms) AS phenos
+WITH  collect(C_concept.CUI) + P_concept.CUI AS terms UNWIND terms AS uterms WITH collect(DISTINCT uterms) AS phenos
 MATCH (mp_concept:Concept)-[:phenotype_has_associated_gene {SAB:'IMPC'}]->(hcop_concept:Concept)-[:has_human_ortholog {SAB:'HGNC__HGNC_HCOP'}]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code {SAB: 'HGNC'})
-WHERE mp_concept.CUI IN phenos
-WITH hgnc_concept,human_gene
+WHERE mp_concept.CUI IN phenos WITH hgnc_concept,human_gene
 MATCH (hgnc_concept)-[:CODE]->(gl_code:Code {SAB:'GENE_LOCATION'})
 MATCH (hgnc_concept)-[:PREF_TERM]->(gene_symbol:Term)
 WITH DISTINCT human_gene,gl_code,gene_symbol
@@ -41,22 +39,18 @@ WITH 'MP:0010403' AS parent
 MATCH (P_code:Code {CODE:parent,SAB:'MP'})<-[:CODE]-(P_concept:Concept)<-[:SCO *1..{SAB:'MP'}]-(C_concept:Concept)
 WITH  collect(C_concept.CUI) + P_concept.CUI AS terms UNWIND terms AS uterms WITH collect(distinct uterms) AS phenos
 MATCH (mp_concept)-[:phenotype_has_associated_gene {SAB:'IMPC'}]->(hcop_concept:Concept)-[:has_human_ortholog {SAB:'HGNC__HGNC_HCOP'}]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code {SAB: 'HGNC'})
-WHERE mp_concept.CUI IN phenos
-WITH hgnc_concept,human_gene
+WHERE mp_concept.CUI IN phenos WITH hgnc_concept,human_gene
 MATCH (hgnc_concept)-[:CODE]->(gl_code:Code {SAB:'GENE_LOCATION'})
 MATCH (hgnc_concept)-[:PREF_TERM]->(gene_symbol:Term)
 with distinct human_gene,gl_code, gene_symbol
 MATCH (gl_code)-[:gene_start_position]->(gstart:Term)
 MATCH (gl_code)-[:gene_end_position]->(gend:Term)
-MATCH (gl_code)-[:on_chromosome]->(gchrom:Term)
-WITH *
+MATCH (gl_code)-[:on_chromosome]->(gchrom:Term) WITH *
 MATCH (human_gene)-[:CODE]-(hgnc_concept)-[:gene_has_eqtl]->(gtex_concept:Concept)-[:eqtl_in_tissue]->(uberon_concept:Concept)-[:CODE]->(uberon_code:Code {SAB:'UBERON'})
-WHERE uberon_code.CODE IN ['0006566','0006631']
-WITH *
+WHERE uberon_code.CODE IN ['0006566','0006631'] WITH *
 MATCH (gtex_concept)-[:CODE]->(gtex_code:Code {SAB:'GTEX_EQTL'})-[:p_value]->(gtex_term:Term)
 WHERE gtex_term.upperbound < .05
-MATCH (eqtl_loc_term:Term)<-[:eqtl_location]-(gtex_code)-[:rs_id_dbSNP151_GRCh38p7]->(rs_id_term:Term)
-WITH * 
+MATCH (eqtl_loc_term:Term)<-[:eqtl_location]-(gtex_code)-[:rs_id_dbSNP151_GRCh38p7]->(rs_id_term:Term) WITH * 
 RETURN DISTINCT SPLIT(gene_symbol.name,' gene')[0] AS symbol,rs_id_term.name AS rsid, eqtl_loc_term.name AS eqtl_location, gstart.name AS start,gend.name AS end,gchrom.name AS chrom,human_gene.CODE AS hgnc_id,gtex_term.upperbound AS pval_upperbound, gtex_term.lowerbound AS pval_lowerbound
 
 
