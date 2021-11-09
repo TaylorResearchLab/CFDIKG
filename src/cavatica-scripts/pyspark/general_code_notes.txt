@@ -1,0 +1,3 @@
+.textFile()     # puts data into an RDD
+
+.collect()   # brings data to driver node, and you can print it?
