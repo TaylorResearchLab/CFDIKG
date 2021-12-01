@@ -20,8 +20,8 @@ WITH DISTINCT human_gene,gl_code,gene_symbol
 MATCH (gl_code)-[:gene_start_position]->(gstart:Term)
 MATCH (gl_code)-[:gene_end_position]->(gend:Term)
 MATCH (gl_code)-[:on_chromosome]->(gchrom:Term)
-RETURN DISTINCT split(gene_symbol.name,' gene')[0] AS symbol,gstart.name AS start_pos,gend.name as end_pos,gchrom.name AS chrom,human_gene.CODE AS hgnc_id 
-
+MATCH (gl_code)-[:strand]->(strand:Term)
+RETURN DISTINCT split(gene_symbol.name,' gene')[0] AS symbol,gstart.name AS start_pos,gend.name as end_pos,gchrom.name AS chrom,strand.name as strand,human_gene.CODE AS hgnc_id 
 
 
 
