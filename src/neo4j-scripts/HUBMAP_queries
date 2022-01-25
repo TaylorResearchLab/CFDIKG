@@ -19,3 +19,9 @@ MATCH (c1:Code {SAB:'HUBMAP'})-[:CODE]-(c2:Concept)-[:cluster_has_hubmap_node]-(
 MATCH (c0)-[r]-(c3:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET'})
 MATCH (c3)-[r1:hubmap_dataset_contains_tissue]-(c4:Concept)-[:CODE]-(tissue_code:Code)
 RETURN * limit 1
+
+
+# Show all tissue nodes of a dataset
+WITH '5ba6a5b81e95c93c26a33980f6e957d7' as study_id
+MATCH  (c0:Concept)-[r1:hubmap_dataset_contains_tissue]-(c3:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:study_id})
+RETURN *
