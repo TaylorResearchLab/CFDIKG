@@ -37,7 +37,16 @@ MATCH (cluster_code:Code {SAB:'HUBMAP CLUSTER'})-[r0]-(c0:Concept)-[r1]->(c1:Con
 MATCH (c0)-[r8]-(c6:Concept)-[:CODE]-(hubmap_code:Code {SAB:'HUBMAP'})-[r9]-(t:Term)
 RETURN split(hubmap_code.CODE,' ')[0] as study_id,  split(hubmap_code.CODE,' ')[-1] as hgnc_gene, split(cluster_code.CODE,' ')[-1] as cluster, t.name as exp_bin order by cluster limit 5
 
+
+# return study_id/dataset_id/donor_id
+WITH '046251c94ea0e79ee935dd3de57e093c' AS STUDY_ID
+MATCH (hcode:Code {SAB:'HUBMAP'})-[:CODE]-(hcui:Concept)-[r8]-(cluster_cui:Concept)-[r7]-(cluster_code:Code {SAB:'HUBMAP CLUSTER'})
+WHERE SPLIT(hcode.CODE,' ')[0] = STUDY_ID
+MATCH (cluster_cui:Concept)-[r1]->(dset_cui:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET'})
+MATCH (dset_cui)-[r2]-(donor_cui:Concept)-[:CODE]-(donor_code:Code {SAB:'HUBMAP DONOR'})
+RETURN  STUDY_ID, dataset_code.CODE AS DATASET_ID, donor_code.CODE AS DONOR_ID limit 1
+
 # return how many metadata cuis a dataset has
-WITH '5ba6a5b81e95c93c26a33980f6e957d7' as study_id
-MATCH (c0:Concept)<-[r1]-(c3:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:study_id}) where not r1.SAB in ['HUBMAP_DATASET__TISSUE','HUBMAP_CLUSTER__HUBMAP_DATASET']
+WITH '5ba6a5b81e95c93c26a33980f6e957d7' as dataset_id // this is dataset_id,
+MATCH (c0:Concept)<-[r1]-(c3:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:dataset_id}) where not r1.SAB in ['HUBMAP_DATASET__TISSUE','HUBMAP_CLUSTER__HUBMAP_DATASET']
 RETURN count(r1)
