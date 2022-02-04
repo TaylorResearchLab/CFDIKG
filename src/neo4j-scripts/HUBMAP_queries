@@ -50,3 +50,10 @@ RETURN  STUDY_ID, dataset_code.CODE AS DATASET_ID, donor_code.CODE AS DONOR_ID l
 WITH '5ba6a5b81e95c93c26a33980f6e957d7' as dataset_id // this is dataset_id,
 MATCH (c0:Concept)<-[r1]-(c3:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:dataset_id}) where not r1.SAB in ['HUBMAP_DATASET__TISSUE','HUBMAP_CLUSTER__HUBMAP_DATASET']
 RETURN count(r1)
+
+
+# JAG1
+WITH 'HGNC:6188' AS GENE
+MATCH (hgnc_code:Code{SAB:'HGNC',CODE:GENE})-[:CODE]-(hgnc_cui:Concept)-[r0:gene_expression_of_hubmap_study]-(hubmap_cui:Concept)-[:CODE]-(hubmap_code:Code {SAB:'HUBMAP'} )-[r1]-(t:Term)
+MATCH (hubmap_cui)-[:hubmap_node_belongs_to_cluster]-(cluster_cui:Concept)-[:cluster_of_dataset]-(dataset_cui:Concept)-[:sex_of_donor]-(sex_cui:Concept)-[:PREF_TERM]-(t2:Term)
+return GENE AS GENE, split(hubmap_code.CodeID,' ')[1] AS STUDY_ID, split(hubmap_code.CodeID,' ')[3] AS CLUSTER,t2.name AS GENDER, t.name AS EXP_BIN ORDER BY t.name DESCENDING
