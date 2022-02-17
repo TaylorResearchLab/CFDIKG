@@ -49,17 +49,25 @@ MATCH (eqtl:Code {SAB:'scHeart PMID: 31835037'})-[p:log2fc]-(t:Term) WITH t,spli
 SET t.lowerbound = toFloat(bin[0]) 
 SET  t.upperbound = toFloat(bin[1]);
 
-
+################################################################################
 
 # Find number of nodes from each SAB:
 
-match (n:Code) where n.SAB in ['MP'] return  count(distinct n) 
-match (n:Code) where n.SAB in ['GTEX_EXP','GTEX_EQTL'] return  count(distinct n)
-match (n:Code)--(t:Term) where n.SAB in ['GENE_LOCATION'] return count(distinct t)
-match (n:Code)-[:CODE]-(a:Concept)-[r]-(b:Concept)-[:CODE]-(m:Code) where n.SAB = 'HGNC_HCOP' and m.SAB = 'MP' return  count(r)
-match (n:Code)-[:CODE]-(a:Concept)-[r]-(b:Concept)-[:CODE]-(m:Code) where n.SAB = 'HGNC' and m.SAB = 'HPO' return  count(r)
-match (n:Code)-[:CODE]-(a:Concept)-[r]-(b:Concept)-[:CODE]-(m:Code) where n.SAB = 'MP' and m.SAB = 'HPO' return  count(r)
-match (n:Code {SAB:'scHeart PMID: 31835037'})-[:CODE]-(a:Concept)  return count(distinct n) 
+MATCH (c:Code)  
+WITH  
+  CASE WHEN (c.SAB = 'HGNC_HCOP') THEN 1 ELSE 0 END as ortho,  
+  CASE WHEN (c.SAB = 'GTEX_EQTL') THEN 1 ELSE 0 END as eqtl,  
+  CASE WHEN (c.SAB = 'GTEX_EXP') THEN 1 ELSE 0 END as exp,  
+  CASE WHEN (c.SAB = 'MP') THEN 1 ELSE 0 END as mp,  
+  CASE WHEN (c.SAB = 'HGNC') THEN 1 ELSE 0 END as hgnc,  
+  CASE WHEN (c.SAB = 'HPO') THEN 1 ELSE 0 END as hpo,  
+  CASE WHEN (c.SAB = 'UBERON') THEN 1 ELSE 0 END as uberon,  
+  CASE WHEN (c.SAB = 'DBSNP_151') THEN 1 ELSE 0 END as dbSNP,
+  CASE WHEN (c.SAB = 'scHeart PMID: 31835037') THEN 1 ELSE 0 END as scHeart,
+  CASE WHEN (c.SAB = 'HUBMAP') THEN 1 ELSE 0 END as hubmap
+RETURN sum(ortho), sum(eqtl),sum(exp),sum(mp),sum(hgnc),sum(hpo),sum(uberon),sum(dbSNP),sum(scHeart),sum(hubmap)
+
+
 
 # Queries for the UMLS-KF (our data on top of UMLS)
 
@@ -68,12 +76,8 @@ match (n:Code {SAB:'scHeart PMID: 31835037'})-[:CODE]-(a:Concept)  return count(
 #######################################
 
 # Check how many new nodes we added (nodes that have a unique identifier that starts with 'K')
+....
 
-### Concept
-match (concept: Concept) where concept.CUI starts with 'K' return count(concept)   # 3,401,693   (was 1,562,505 before adding 'GTEX_EXP'),  CORRECT
-
-### Code ###
-match (code: Code) where code.CodeID contains 'KC' return count(code)   # 2,724,391  (was 885,203)  why is this not the same as concepts count? B/c only the GTEX_EQTL and GTEX EXP have CodeIDs that contain 'KC'
 
  # Code by SAB
 match (hgnc_hcop: Code {SAB : 'HGNC HCOP'})  return count(hgnc_hcop) as hgnc_hcop_cnt    #  27,357  CORRECT
@@ -83,7 +87,6 @@ match (mp: Code {SAB : 'MP'})  return count(mp) as mp_cnt   # 14,274   CORRECT
 match (gtex_exp: Code {SAB : 'GTEX_EXP'}) return count(gtex_exp) as gtex_exp_cnt     #  1,839,188  CORRECT
 
 match (gtex_eqtl: Code {SAB : 'GTEX_EQTL'}) return count(gtex_eqtl) as gtex_eqtl_cnt   #  884,757  CORRECT
-
 
 match (dbsnp: Code {SAB : 'DBSNP_151'}) return count(dbsnp) as dbsnp_cnt   # 636,117 CORRECT, After adding the actual dbSNP data, this # is going to be much higher
 
