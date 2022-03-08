@@ -1,6 +1,6 @@
 cwlVersion: v1.0
 class: CommandLineTool
-id: pyspark-asd-parquet-filter
+id: asd_parquet_filter
 doc: 'Tool to filter a parquet file using a bed file'
 requirements:
   - class: ShellCommandRequirement
@@ -43,4 +43,5 @@ outputs:
     outputBinding:
       glob:  "*.parquet"
     doc: "Filtered parquet file"
+    
     
