@@ -9,10 +9,10 @@ requirements:
     listing:
       - entryname: asd_parquet_filter.py
         entry:
-          $include: ../scripts/asd_parquet_filter.py
+          $include: ./scripts/asd_parquet_filter.py
 
   - class: DockerRequirement
-    dockerPull: 'migbro/pyspark:3.1.2'
+    dockerPull: 'pgc-images.sbgenomics.com/d3b-bixu/pyspark:3.1.2'
   - class: ResourceRequirement
     ramMin: ${ return inputs.ram * 1000 }
     coresMin: $(inputs.cpu)
@@ -41,5 +41,6 @@ outputs:
   parquet_file:
     type: 'File'
     outputBinding:
-      glob: $(inputs.output_basename).parquet
+      glob:  "*.parquet"
     doc: "Filtered parquet file"
+    
