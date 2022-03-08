@@ -9,7 +9,7 @@ requirements:
     listing:
       - entryname: asd_parquet_filter.py
         entry:
-          $include: ../scripts/asd_parquet_filter.py
+          $include: ./asd_parquet_filter.py
 
   - class: DockerRequirement
     dockerPull: 'migbro/pyspark:3.1.2'
