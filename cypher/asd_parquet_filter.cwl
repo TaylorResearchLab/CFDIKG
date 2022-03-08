@@ -12,7 +12,7 @@ requirements:
           $include: ./asd_parquet_filter.py
 
   - class: DockerRequirement
-    dockerPull: 'migbro/pyspark:3.1.2'
+    dockerPull: 'pgc-images.sbgenomics.com/d3b-bixu/pyspark:3.1.2'
   - class: ResourceRequirement
     ramMin: ${ return inputs.ram * 1000 }
     coresMin: $(inputs.cpu)
