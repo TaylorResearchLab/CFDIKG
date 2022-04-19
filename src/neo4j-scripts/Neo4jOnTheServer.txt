@@ -27,6 +27,5 @@ https://neo4j.com/docs/operations-manual/current/configuration/file-locations/
 certificates  data  import  labs  plugins  run
 
   
-  
-### Starting a new graph db
-### Importing data
+ ### Importing data
+scp /Users/stearb/Desktop/FREEZE_temp/*.csv   stearb@ubuntu@3.92.205.102:/var/lib/neo4j/import/
