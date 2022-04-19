@@ -1,0 +1,32 @@
+
+
+### ssh onto server
+
+ssh ubuntu@3.92.205.102
+
+
+
+###  neo4j CLI 
+
+Usage: Neo4j <COMMAND>
+Neo4j database server CLI.
+Commands:
+  console             Start server in console.
+  start               Start server as a daemon.
+  stop                Stop the server daemon.
+  restart             Restart the server daemon.
+  status              Get the status of the server.
+  version, --version  Print version information and exit.
+  help, --help        Displays help information about the specified command
+  
+  
+### File Locations
+https://neo4j.com/docs/operations-manual/current/configuration/file-locations/
+
+/var/lib/neo4j is where the following folders are located: 
+certificates  data  import  labs  plugins  run
+
+  
+  
+### Starting a new graph db
+### Importing data
