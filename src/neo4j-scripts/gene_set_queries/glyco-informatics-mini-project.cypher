@@ -74,6 +74,22 @@ find total # of glycosyltransferases out of all genes as % and then compare that
 
 
 
+# HPO --> HGNC
+
+
+WITH 'HP:0001631' AS parent    
+MATCH (P_code:Code {CODE:parent,SAB:'HPO'})<-[:CODE]-(P_concept:Concept)<-[:isa *1.. {SAB:'HPO'}]-(C_concept:Concept)
+WITH  collect(C_concept.CUI) + P_concept.CUI AS terms UNWIND terms AS uterms WITH collect(DISTINCT uterms) AS phenos
+MATCH (hpo_concept:Concept)-[s]->(hgnc_concept:Concept)-[:CODE]->(human_gene:Code {SAB: 'HGNC'})
+WHERE hpo_concept.CUI IN phenos 
+WITH hgnc_concept,human_gene
+MATCH (hgnc_concept)-[:PREF_TERM]->(gene_symbol:Term)
+WITH DISTINCT human_gene,gene_symbol
+OPTIONAL MATCH  (human_gene)-[q]-(gly:Term)
+WHERE gly.name IN ['Glycosyltransferase','Glycan']
+RETURN DISTINCT split(gene_symbol.name,' gene')[0] AS symbol,human_gene.CODE AS hgnc_id, gly.name AS protein_type
+
+
 
 
 
