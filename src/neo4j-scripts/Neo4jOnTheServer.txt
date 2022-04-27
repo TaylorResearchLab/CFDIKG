@@ -33,3 +33,8 @@ certificates  data  import  labs  plugins  run
 scp /Users/stearb/Desktop/FREEZE_temp/*.csv   stearb@ubuntu@3.92.205.102:/var/lib/neo4j/import/
 
 
+
+
+bin/neo4j-admin import --nodes=Semantic="/var/lib/neo4j/import/TUIs.csv" --nodes=Concept="/var/lib/neo4j/import/CUIs.csv" --nodes=Code="/var/lib/neo4j/import/CODEs.csv" --nodes=Term="/var/lib/neo4j/import/SUIs.csv" --nodes=Definition="/var/lib/neo4j/import/DEFs.csv"  --relationships=ISA_STY="/var/lib/neo4j/import/TUIrel.csv" --relationships=STY="/var/lib/neo4j/import/CUI-TUIs.csv" --relationships="/var/lib/neo4j/import/CUI-CUIs.csv" --relationships=CODE="/var/lib/neo4j/import/CUI-CODEs.csv" --relationships="/var/lib/neo4j/import/CODE-SUIs.csv" --relationships=PREF_TERM="/var/lib/neo4j/import/CUI-SUIs.csv" --relationships=DEF="/var/lib/neo4j/import/DEFrel.csv"  --skip-bad-relationships --skip-duplicate-nodes
+
+
