@@ -170,10 +170,12 @@ match (a:Code {SAB:'GTEX_EQTL'})--(b:Concept) where not (b)-[:eqtl_in_gene]-(:Co
 match (gtex_exp:Concept)-[r0]-(gtex_exp_code:Code) where gtex_exp_code.SAB = 'GTEX_EXP' 
 match (gtex_exp)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code) where hgnc_code.SAB = 'HGNC'
 match (gtex_exp)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code) where ub_code.SAB = 'UBERON'
-return gtex_exp, gtex_exp_code, hgnc_concept,hgnc_code, ub_concept, ub_code,r0,r1,r2,r3,r4 limit 1
+return * limit 1
        
-# Return all GTEX EXP nodes associated with a specific tissue (UBERON code),   ie, venous blood
-match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX_EXP'}) return count(gtex_exp_code)        # 35,369   must check each tissue
+# Return all GTEX EXP nodes associated with a specific tissue (UBERON code),   ie, aorta 
+match (ub_code:Code {SAB:'UBERON',CODE:'0000947'})-[r0:CODE]-(ub_cui:Concept)-[r1:tissue_has_median_expression]-(gtex_exp_cui:Concept)-[r2:CODE]-(gtex_exp_code:Code {SAB:'GTEX_EXP'})-[r3]-(gtex_term:Term)
+return gtex_exp_code.CODE AS gtex, gtex_term.name AS exp limit 100
+
 
 # Return all GTEX EXP nodes associated with a specific gene (HGNC code),   ie, venous blood
 match (h:Concept {CUI:'HC005510'})--()--(gtex_exp_code:Code {SAB:'GTEX_EXP'}) return count(gtex_exp_code) 
