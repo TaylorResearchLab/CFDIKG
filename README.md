@@ -13,16 +13,13 @@ As of May 2021 the code will be sparse as we continue to update the repository. 
 
 ```
 .
-├── scglue                  # Main Python package
-├── data                    # Data files
-├── evaluation              # Method evaluation pipelines
-├── experiments             # Experiments and case studies
-├── tests                   # Unit tests for the Python package
+├── src                     # Main code
+|── data                    # Data that has been ingested (when it's small enough to fit on github otherwise links are provided)
+|── notebooks               # Jupyter notebooks for every data source ingestion workflow
+|──cavatica_apps            # Files related to the Cavatica App used in the workflow
+|── scripts                 # Python scripts  for every data source ingestion workflow
+|── images                  # Images for the repository
 ├── docs                    # Documentation files
-├── custom                  # Customized third-party packages
-├── packrat                 # Reproducible R environment via packrat
-├── env.yaml                # Reproducible Python environment via conda
-├── pyproject.toml          # Python package metadata
 ├── LICENSE
 └── README.md
 ```
