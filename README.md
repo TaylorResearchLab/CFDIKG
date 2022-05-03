@@ -13,7 +13,7 @@ As of May 2021 the code will be sparse as we continue to update the repository. 
 
 ```
 .
-├── src                     # Main code
+├── src                     # Cypher queries
 |── data                    # Data that has been ingested (when it's small enough to fit on github otherwise links are provided)
 |── notebooks               # Jupyter notebooks for every data source ingestion workflow
 |──cavatica_apps            # Files related to the Cavatica App used in the workflow
