@@ -7,6 +7,27 @@ As of May 2021 the code will be sparse as we continue to update the repository. 
 
 
 
+
+
+## Directory structure
+
+```
+.
+├── scglue                  # Main Python package
+├── data                    # Data files
+├── evaluation              # Method evaluation pipelines
+├── experiments             # Experiments and case studies
+├── tests                   # Unit tests for the Python package
+├── docs                    # Documentation files
+├── custom                  # Customized third-party packages
+├── packrat                 # Reproducible R environment via packrat
+├── env.yaml                # Reproducible Python environment via conda
+├── pyproject.toml          # Python package metadata
+├── LICENSE
+└── README.md
+```
+
+
 ## Basic Schema
 ### HumanPhenotype--MousePhenotype--MouseGenes--HumanGenes
 ![alt text](https://github.com/TaylorResearchLab/CFDIKG/blob/master/images/umls_nodes.png)
