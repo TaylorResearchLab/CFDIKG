@@ -7,11 +7,10 @@
 
 #### Return an example of the HUBMAP schema #### add cluster #s in CLUSTERS to return additional cluster nodes
 
-WITH '5ba6a5b81e95c93c26a33980f6e957d7' as DATASET_ID, '1785aae4f0fb8f13a56d79957d1cbedf' as DONOR_ID, ['10'] as CLUSTERS
-MATCH (cluster_code:Code {SAB:'HUBMAP CLUSTER'})-[r0]-(c0:Concept)-[r1]->(c1:Concept)-[r2]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:DATASET_ID}) where split(cluster_code.CODE,' ')[-1] IN CLUSTERS
-MATCH (c1)-[r7]->(c5) where r7.SAB = 'HUBMAP_DATASET__TISSUE'
-MATCH (c3)-[r5]-(c4:Concept)-[r6]-(donor_code:Code {SAB:'HUBMAP DONOR',CODE:DONOR_ID})
-RETURN * limit 5
+MATCH (c1:Code {SAB:'HUBMAPsc'})-[:CODE]-(c2:Concept)-[:cluster_has_hubmap_node]-(c0:Concept)-[:CODE]-(code_cluster:Code {SAB:'HUBMAPsc CLUSTER'})
+MATCH (c0)-[r]-(c3:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAPsc DATASET'})
+MATCH (c3)-[r1:hubmap_dataset_contains_tissue]-(c4:Concept)-[:CODE]-(tissue_code:Code)
+RETURN * limit 1
 
 
 # HUBMAP_NODE -->CLUSTER_NODE --> DATASET_NODE --> TISSUE_NODE
@@ -20,6 +19,7 @@ MATCH (c0)-[r]-(c3:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET'})
 MATCH (c3)-[r1:hubmap_dataset_contains_tissue]-(c4:Concept)-[:CODE]-(tissue_code:Code)
 RETURN * limit 1
 
+#
 
 # Show all tissue nodes of a dataset
 WITH '5ba6a5b81e95c93c26a33980f6e957d7' as study_id
