@@ -6,7 +6,7 @@
         - genotype-phenotype-assertions-ALL.csv
         - statistical-results-ALL.csv (Too big for github)
  
-    * JAX: http://www.informatics.jax.org/downloads/reports/index.html#pheno
+    * MGI (JAX): http://www.informatics.jax.org/downloads/reports/index.html#pheno
         - MGI_PhenoGenoMP.rpt (Table 5)  (Too big for github)
         - MGI_GenePheno.rpt (Table 9)    (Too big for github)
         - MGI_Geno_DiseaseDO.rpt (Table 10)
