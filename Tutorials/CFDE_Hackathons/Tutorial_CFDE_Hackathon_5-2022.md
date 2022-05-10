@@ -364,21 +364,13 @@ From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA
  10. Return HPO codes, phenotype names and number of phenotype for Kids First Patient
 
 ```graphql
-WITH 'PT_ZB5SBXFK' AS KF_ID
-MATCH (kfCode:Code {SAB:'KF',CODE: KF_ID})-[r0:CODE]-(kfCUI:Concept)-[r1:patient_has_phenotype]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]-(hgncCUI:Concept)-[r3:gene_has_eqtl]-(gtexEqtlCUI:Concept)-[r4:CODE]-(gtexEqtlCode:Code)
-MATCH (hpoCUI)-[r5:CODE]-(hpoCode {SAB:'HPO'})
-MATCH (hgncCUI)-[r6:CODE]-(hgncCode {SAB:'HGNC'})-[r7:PT]-(hgncTerm:Term)
-MATCH (gtexEqtlCode)-[r8:on_chromosome]-(eqtl_chrom:Term)
-MATCH (gtexEqtlCode)-[r9:eqtl_location]-(eqtl_loc:Term)
-MATCH (gtexEqtlCode)-[r10:p_value]-(eqtl_pval:Term)
-WHERE eqtl_pval.upperbound < 1e-10
-MATCH (gtexEqtlCode)-[r11:rs_id_dbSNP151_GRCh38p7]-(eqtl_rsID:Term)
-RETURN KF_ID, hpoCode.CODE AS hpo_code, 
-hgncTerm.name AS hgnc_symbol,
- eqtl_chrom.name AS eqtl_chromosome,
- eqtl_loc.name AS location,
- eqtl_rsID.name AS rsID, 
- eqtl_pval.name AS pvalue ORDER BY pvalue ASCENDING
+MATCH (kfCode:Code {SAB:'KF'})-[r0:CODE]-(kfCUI:Concept)-[r1:patient_has_phenotype]-(hpoCUI:Concept)-[:CODE]-(hpoCode:Code {SAB:'HPO'})-[r2:PT]-(hpoTerm:Term)
+WITH kfCode, collect(DISTINCT hpoTerm.name) AS hpo_terms, collect(DISTINCT hpoCode.CODE) AS hpo_codes 
+RETURN kfCode.CODE AS KF_ID,
+       size(hpo_terms) AS num_phenotypes,
+			 hpo_codes, hpo_terms 
+	     ORDER BY num_phenotypes 
+			 DESCENDING LIMIT 100
 ```
 
 ### **Level II queries**
