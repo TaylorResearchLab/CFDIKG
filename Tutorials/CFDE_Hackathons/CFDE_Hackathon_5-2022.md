@@ -21,7 +21,7 @@ password: Hu6K1d@n304j
 
 ### SCHEMA REFERENCE
 
-[Data Source Descriptions and Schema Reference](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/CFDIKG_Schema_5-2022.md)
+[Data Source Descriptions and Schema Reference](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/CFDIKG_Schema_5-2022.md TARGET="new")
 
 ### Introduction to Queries
 
