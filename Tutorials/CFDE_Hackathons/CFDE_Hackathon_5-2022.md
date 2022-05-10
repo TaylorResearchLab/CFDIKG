@@ -21,7 +21,7 @@ password: Hu6K1d@n304j
 
 ### SCHEMA REFERENCE
 
-[Data Source Descriptions and Schema Reference](https://www.notion.so/Data-Source-Descriptions-and-Schema-Reference-d632a867b5c94c5c92e1c31073e1fa73)
+[Data Source Descriptions and Schema Reference](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/CFDIKG_Schema_5-2022.md)
 
 ### Introduction to Queries
 
