@@ -10,9 +10,6 @@ Login for **Neo4j Bolt Interface**:
 
 [http://neo4j-hubkid.dev.hubmapconsortium.org:7474/browser](http://neo4j-hubkid.dev.hubmapconsortium.org:7474/browser)
 
-username: neo4j
-password: Hu6K1d@n304j
-
 **Jupyter Binder URL**:
 
 [https://mybinder.org/v2/gh/nih-cfde/2022-may-kg-binder/stable](https://mybinder.org/v2/gh/nih-cfde/2022-may-kg-binder/stable)
