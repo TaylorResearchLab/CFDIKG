@@ -25,6 +25,9 @@ Password to the Bolt interface will be distributed during tutorial session. If y
 ### Introduction to Queries
 
 All queries below will be done through the Bolt interface (linked up top) unless specifically noted to be in Python.
+ 
+ Python queries are based on the HuBMAP SMART API found here: https://smart-api.info/ui/dea4bf91545a51b3dc415ba37e2a9e4e#/
+ 
 
 Select specific datasets by specifying the SAB (source abbreviation) property on the Code node. Here we match on a HPO Code node and its corresponding Concept node. 
 
