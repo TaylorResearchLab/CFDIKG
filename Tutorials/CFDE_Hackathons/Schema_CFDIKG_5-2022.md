@@ -89,7 +89,7 @@ A Concept (blue), Code (purple) and Term (green) from HPO on the left and its co
 - Relationship SAB: **ClinVar**
 - Relationship Name: **gene_associated_with_disease_or_phenotype, disease_or_phenotype_associated_with_gene**
 
-![graph-5.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-5.svg)
+![graph-5.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-5.png)
 
 ### Connectivity Map (CMAP)
 
@@ -98,7 +98,7 @@ A Concept (blue), Code (purple) and Term (green) from HPO on the left and its co
 - Relationship SAB: **CMAP**
 - Relationship Name: **positively_correlated_with_chemical_or_drug, positively_correlated_with_gene, negatively_correlated_with_chemical_or_drug, negatively_correlated_with_gene**
 
-![graph-3.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-3.svg)
+![graph-3.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-3.png)
 
 ### LINCS L1000 Gene-Perturbagen Associations
 
@@ -107,7 +107,7 @@ A Concept (blue), Code (purple) and Term (green) from HPO on the left and its co
 - Relationship SAB: **LINCS L1000**
 - Relationship Name: **positively_correlated_with_chemical_or_drug, positively_correlated_with_gene, negatively_correlated_with_chemical_or_drug, negatively_correlated_with_gene**
     
-    ![graph-4.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-4.svg)
+    ![graph-4.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-4.png)
     
 
 ### UniProtKB Gene-Protein Associations
@@ -131,7 +131,7 @@ Schema is included with the Glygen schema on left side of diagram.
 - Relationship Name: **coexpressed_with**
 - Tissue where the co-expression is detected is in the SAB of the relationship  “coexpressed_with”
     
-    ![graph-2.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-2.svg)
+    ![graph-2.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-2.png)
     
 
 ### MSigDB
@@ -141,4 +141,4 @@ Schema is included with the Glygen schema on left side of diagram.
 - Relationship SAB: **MSigDB C1, MSigDB C2, MSigDB C3, MSigDB C8, MSigDB H**
 - Code SAB: **MSigDB_Systematic_Name**
 
-![graph.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph.svg)
+![graph.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph.png)
