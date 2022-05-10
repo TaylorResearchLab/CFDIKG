@@ -1,5 +1,5 @@
 # CFDIKG
-This is a "Common Fund" enabled knowledge graph built on a UMLS knowledge graph developed by Jonathan Silverstein.
+This is a "Common Fund" enabled knowledge graph,  built on a UMLS knowledge graph originally developed by Jonathan Silverstein.
 
 Supported by NIH R03 award 1R03OD030600-01, PIs: Deanne Taylor and Ryan Urbanowicz.
 
