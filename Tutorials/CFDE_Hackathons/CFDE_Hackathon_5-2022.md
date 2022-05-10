@@ -150,11 +150,11 @@ print('\nFirst few HGNC Codes:', hgnc_Codes[:3])
 print('\nTotal HGNC codes returned:',len(hgnc_Codes))
 ```
 
-![A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/HPO_HGNC.png)
+![A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/HPO_HGNC.png)
 
 A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.
 
-![Same as above but now showing multiple genes associated with the same HPO Code. ](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/HPO_HGNC_many_genes.png)
+![Same as above but now showing multiple genes associated with the same HPO Code. ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/HPO_HGNC_many_genes.png)
 
 Same as above but now showing multiple genes associated with the same HPO Code. 
 
@@ -213,7 +213,7 @@ mouse_genes = [i.replace('HCOP HCOP:','') for i in response_decoded]
 mouse_genes
 ```
 
-![HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  ](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/HGNC_HCOP.png)
+![HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/HGNC_HCOP.png)
 
 HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  
 
@@ -259,7 +259,7 @@ mp_code = [i.replace('MP ','') for i in response_decoded]
 print('MP Code: ', mp_code)
 ```
 
-![A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/HPO_MP.png)
+![A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/HPO_MP.png)
 
 A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.
 
@@ -313,7 +313,7 @@ ORDER BY Pval
 LIMIT 100
 ```
 
-![An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/GTEx_eQTL.png)
+![An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/GTEx_eQTL.png)
 
 An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL
 
@@ -353,7 +353,7 @@ RETURN DISTINCT split(hgnc_term.name,' ')[0] AS gene,
       cluster_num[1]+' '+cluster_num[2] AS cluster_num, hmDatasetCode.CODE AS hubmap_dataset,hubmap_term.name AS expression ORDER BY hubmap_dataset
 ```
 
-![From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/hubmap.png)
+![From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/hubmap.png)
 
 From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.
 
@@ -431,7 +431,7 @@ MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-
 RETURN ChEBITerm.name AS Compound,msigdbTerm.name AS Pathway, hgncTerm.name AS Gene
 ```
 
-![graph.svg](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/graph.svg)
+![graph.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/graph.svg)
 
 1. Find all HuBMAP clusters expressing more than one genes related to a human phenotype (using OMIM)
 
@@ -483,7 +483,7 @@ c.name AS Glycosylation_Type_Site_ProteinID,
 d.CODE AS Glycan
 ```
 
-![Untitled](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/Untitled.png)
+![Untitled](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/Untitled.png)
 
 1. Find all pathways in MSigDB linked to genes expressed in GTEx linked to human phenotypes. Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
 
@@ -497,7 +497,7 @@ WHERE r1.SAB CONTAINS 'MSigDB C2'
 RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubConcept,ubCode,ubTerm,hpoConcept,hpoCode LIMIT 1
 ```
 
-![graph-5.svg](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/graph-5.svg)
+![graph-5.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/graph-5.svg)
 
 **Graph theory-esque queries**
 
@@ -521,7 +521,7 @@ p = shortestPath((hgncConcept)-[r*]->(hpoConcept)) WHERE NONE(R IN r WHERE R.SAB
 RETURN  p AS Path
 ```
 
-![graph-4.svg](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/graph-4.svg)
+![graph-4.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/graph-4.svg)
 
 Note “coexpressed_with” is based on GTEx (click on table result as SAB). Codes are orange, terms are Blue, and concept nodes are in purple.
 
@@ -547,6 +547,6 @@ hgncTerm.name AS Gene_ID,
 length(p) AS Shortest_Path_Length LIMIT 10
 ```
 
-![graph.svg](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/graph%201.svg)
+![graph.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/graph%201.svg)
 
 Shows every gene (as Term nodes in blue) related to the HPO term (as Code node in orange), and finds the shortest paths (by Concept nodes — in purple)
