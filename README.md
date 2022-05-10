@@ -1,12 +1,11 @@
 # CFDIKG
 This is a "Common Fund" enabled knowledge graph,  built on a UMLS knowledge graph originally developed by Jonathan Silverstein.
 
-Supported by NIH R03 award 1R03OD030600-01, PIs: Deanne Taylor and Ryan Urbanowicz.
+First phase was developed with an NIH R03 award 1R03OD030600-01, PIs: Deanne Taylor and Ryan Urbanowicz.
 
-As of May 2021 the code will be sparse as we continue to update the repository. Please watch this repo as we expand and include more useful data and information.
+Extended this KG under a CFDE Partnership grant between HuBMAP DCC at U. Pittsburgh (Jonathan Silverstein) and the Kids First Data Resource at CHOP (Deanne Taylor).
 
-
-
+The code and database are consistently changing as we continue to update the repository. Please watch this repo as we expand and include more useful data and information. Check out our tutorials!
 
 
 ## Directory structure
