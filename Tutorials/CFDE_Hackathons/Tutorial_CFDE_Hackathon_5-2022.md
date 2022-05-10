@@ -22,6 +22,8 @@ Login for **Neo4j Bolt Interface**:
 
 ### Introduction to Queries
 
+All queries below will be done through the Bolt interface (linked up top) unless specifically noted to be in Python.
+
 Select specific datasets by specifying the SAB (source abbreviation) property on the Code node. Here we match on a HPO Code node and its corresponding Concept node. 
 
 Other SABs to try are: HGNC (human genes), HCOP (mouse genes), MP (mammalian phenotype), GTEX_EXP (GTEx expression data), GTEX_EQTL (GTEx eQTL data) 
