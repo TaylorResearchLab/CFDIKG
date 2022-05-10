@@ -2,7 +2,7 @@
 
 ## Logistics
 
-**Project GitHub** (updating often)
+**Main Project GitHub** (updating often)
 
 [https://github.com/TaylorResearchLab/CFDIKG](https://github.com/TaylorResearchLab/CFDIKG)
 
