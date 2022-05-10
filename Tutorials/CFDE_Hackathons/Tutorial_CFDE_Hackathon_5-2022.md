@@ -432,7 +432,7 @@ MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-
 RETURN ChEBITerm.name AS Compound,msigdbTerm.name AS Pathway, hgncTerm.name AS Gene
 ```
 
-![graph.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph.svg)
+![graph.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph.png)
 
 14. Find all HuBMAP clusters expressing more than one genes related to a human phenotype (using OMIM)
 
@@ -498,7 +498,7 @@ WHERE r1.SAB CONTAINS 'MSigDB C2'
 RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubConcept,ubCode,ubTerm,hpoConcept,hpoCode LIMIT 1
 ```
 
-![graph-5.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph-5.svg)
+![graph-5.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph-5.png)
 
 **Graph theory-esque queries**
 
@@ -522,7 +522,7 @@ p = shortestPath((hgncConcept)-[r*]->(hpoConcept)) WHERE NONE(R IN r WHERE R.SAB
 RETURN  p AS Path
 ```
 
-![graph-4.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph-4.svg)
+![graph-4.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph-4.png)
 
 Note “coexpressed_with” is based on GTEx (click on table result as SAB). Codes are orange, terms are Blue, and concept nodes are in purple.
 
@@ -548,6 +548,6 @@ hgncTerm.name AS Gene_ID,
 length(p) AS Shortest_Path_Length LIMIT 10
 ```
 
-![graph.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph%201.svg)
+![graph.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph%201.png)
 
 Shows every gene (as Term nodes in blue) related to the HPO term (as Code node in orange), and finds the shortest paths (by Concept nodes — in purple)
