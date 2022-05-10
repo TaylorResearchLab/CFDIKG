@@ -10,7 +10,7 @@ Login for **Neo4j Bolt Interface**:
 
 [http://neo4j-hubkid.dev.hubmapconsortium.org:7474/browser](http://neo4j-hubkid.dev.hubmapconsortium.org:7474/browser)
 
-Password to the Bolt interface will be distributed during tutorial session. If you want a user password to bolt, email taylordm at chop <dot> edu
+Password to the Bolt interface will be distributed during tutorial session. If you want a user password to the Bolt interface after the tutorial is over, email taylordm at chop <dot> edu
 
 **Jupyter Binder URL**:
 
