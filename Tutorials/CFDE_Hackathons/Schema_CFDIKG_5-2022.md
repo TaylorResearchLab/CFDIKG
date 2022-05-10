@@ -10,14 +10,14 @@
     
     Expression schema:
     
-    ![Human gene concept  (HGNC code), linked by expression to the GTEX expression value (green term) linked to the tissue (Uberon code)](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/GTEx_expression.png)
+    ![Human gene concept  (HGNC code), linked by expression to the GTEX expression value (green term) linked to the tissue (Uberon code)](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/GTEx_expression.png)
     
     Human gene concept  (HGNC code), linked by expression to the GTEX expression value (green term) linked to the tissue (Uberon code)
     
 
 eQTL schema:
 
-![An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/GTEx_eQTL.png)
+![An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/GTEx_eQTL.png)
 
 An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL
 
@@ -27,7 +27,7 @@ An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term 
 
 HuBMAP data schema example:
 
-![From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/hubmap.png)
+![From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/hubmap.png)
 
 From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.
 
@@ -37,7 +37,7 @@ From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA
 
 Schema and query example for HGNC-HCOP mouse
 
-![HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/HGNC_HCOP.png)
+![HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/HGNC_HCOP.png)
 
 HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  
 
@@ -64,7 +64,7 @@ See schema below for MP-HPO mappings for more.
 
 - OMIM and Orphanet are combined together. In the future we will be separating out HPO-to-gene sources.
 
-![A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/HPO_HGNC.png)
+![A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/HPO_HGNC.png)
 
 A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.
 
@@ -73,7 +73,7 @@ A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and H
 - The PheKnowLator tool,  [https://github.com/callahantiff/PheKnowLator](https://github.com/callahantiff/PheKnowLator) was used to map HPO terms to MP terms using semantic matching. Matches were then manually curated.
 - Schema for MP← → HPO mappings:
 
-![A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/HPO_MP.png)
+![A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/HPO_MP.png)
 
 A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.
 
@@ -89,7 +89,7 @@ A Concept (blue), Code (purple) and Term (green) from HPO on the left and its co
 - Relationship SAB: **ClinVar**
 - Relationship Name: **gene_associated_with_disease_or_phenotype, disease_or_phenotype_associated_with_gene**
 
-![graph-5.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/graph-5.svg)
+![graph-5.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-5.svg)
 
 ### Connectivity Map (CMAP)
 
@@ -98,7 +98,7 @@ A Concept (blue), Code (purple) and Term (green) from HPO on the left and its co
 - Relationship SAB: **CMAP**
 - Relationship Name: **positively_correlated_with_chemical_or_drug, positively_correlated_with_gene, negatively_correlated_with_chemical_or_drug, negatively_correlated_with_gene**
 
-![graph-3.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/graph-3.svg)
+![graph-3.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-3.svg)
 
 ### LINCS L1000 Gene-Perturbagen Associations
 
@@ -107,7 +107,7 @@ A Concept (blue), Code (purple) and Term (green) from HPO on the left and its co
 - Relationship SAB: **LINCS L1000**
 - Relationship Name: **positively_correlated_with_chemical_or_drug, positively_correlated_with_gene, negatively_correlated_with_chemical_or_drug, negatively_correlated_with_gene**
     
-    ![graph-4.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/graph-4.svg)
+    ![graph-4.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-4.svg)
     
 
 ### UniProtKB Gene-Protein Associations
@@ -122,7 +122,7 @@ Schema is included with the Glygen schema on left side of diagram.
 - Information on human protein glycosylation types/sites and the associated glycans were obtained and ingested from the Glygen project portal:
 - [https://data.glygen.org](https://data.glygen.org/)
 
-![Untitled](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/Untitled.png)
+![Untitled](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/Untitled.png)
 
 ### GTEx Gene Co-Expression
 
@@ -131,7 +131,7 @@ Schema is included with the Glygen schema on left side of diagram.
 - Relationship Name: **coexpressed_with**
 - Tissue where the co-expression is detected is in the SAB of the relationship  “coexpressed_with”
     
-    ![graph-2.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/graph-2.svg)
+    ![graph-2.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph-2.svg)
     
 
 ### MSigDB
@@ -141,4 +141,4 @@ Schema is included with the Glygen schema on left side of diagram.
 - Relationship SAB: **MSigDB C1, MSigDB C2, MSigDB C3, MSigDB C8, MSigDB H**
 - Code SAB: **MSigDB_Systematic_Name**
 
-![graph.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/graph.svg)
+![graph.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/schema_images/graph.svg)
