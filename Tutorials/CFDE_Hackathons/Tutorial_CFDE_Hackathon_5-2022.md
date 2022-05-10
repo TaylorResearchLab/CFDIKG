@@ -550,4 +550,4 @@ length(p) AS Shortest_Path_Length LIMIT 10
 
 ![graph.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph%201.png)
 
-Shows every gene (as Term nodes in blue) related to the HPO term (as Code node in orange), and finds the shortest paths (by Concept nodes — in purple)
+Shows every gene (as Term nodes in blue) related to the HPO term (as Code node in orange), and finds the shortest paths (by Concept nodes — in purple) ([CLICK FOR SVG](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph%201.svg)
