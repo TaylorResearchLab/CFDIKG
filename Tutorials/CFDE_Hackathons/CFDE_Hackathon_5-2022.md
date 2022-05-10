@@ -88,7 +88,7 @@ MATCH (gtex_cui)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code {SAB:'UBERON'})
 RETURN * LIMIT 1
 ```
 
-![GTEx_expression.png](CFDE%20May%2010th%20Hackathon%20d15f1f28138c4857b71c5657e1eb91fd/GTEx_expression.png)
+![GTEx_expression.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/images/GTEx_expression.png)
 
 1. Given a HPO (phenotype) term, return all linked gene names by leveraging the HPO-to-gene links in Jax. #Need SAB to relationships
 
