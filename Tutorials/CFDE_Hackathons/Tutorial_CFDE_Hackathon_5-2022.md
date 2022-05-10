@@ -91,7 +91,7 @@ RETURN * LIMIT 1
 
 ![GTEx_expression.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression.png)
 
-1. Given a HPO (phenotype) term, return all linked gene names by leveraging the HPO-to-gene links in Jax. #Need SAB to relationships
+2. Given a HPO (phenotype) term, return all linked gene names by leveraging the HPO-to-gene links in Jax. #Need SAB to relationships
 
 ```graphql
 WITH 'HP:0001631' AS HPO_CODE
@@ -159,7 +159,7 @@ A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and H
 
 Same as above but now showing multiple genes associated with the same HPO Code. 
 
-1. Given an HGNC (gene) name, give the mouse gene name from HCOP
+3. Given an HGNC (gene) name, give the mouse gene name from HCOP
 
 ```graphql
 WITH 'BRCA1' as gene_name
@@ -218,7 +218,7 @@ mouse_genes
 
 HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  
 
-1. Given an HPO code, return the corresponding MP code if known
+4. Given an HPO code, return the corresponding MP code if known
 
 ```graphql
 WITH 'HP:0001631' AS HPO_CODE
@@ -264,7 +264,7 @@ print('MP Code: ', mp_code)
 
 A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.
 
-1. Starting with a human gene, find all (drug) compounds that affect expression of that gene in a LINCs dataset (binary relationship: upregulated or downregulated). The time/dosage/cell type variables in LINCS have been collapsed. In cases of conflicts (up or down) the data includes both up and down links. In the future we can include all data from LINCs.
+5. Starting with a human gene, find all (drug) compounds that affect expression of that gene in a LINCs dataset (binary relationship: upregulated or downregulated). The time/dosage/cell type variables in LINCS have been collapsed. In cases of conflicts (up or down) the data includes both up and down links. In the future we can include all data from LINCs.
 
 ```graphql
 //Returns a table (not a graphic view)
@@ -291,7 +291,7 @@ MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:COD
 RETURN DISTINCT hgncTerm.name AS Gene_Symbol, type(r2) AS Correlation, ChEBITerm.name AS Compound
 ```
 
-1. Return all non-zero GTEx expression levels  for a specific tissue type, listed by top TPM (LIMIT 100)
+6. Return all non-zero GTEx expression levels  for a specific tissue type, listed by top TPM (LIMIT 100)
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -301,7 +301,7 @@ WHERE gtex_term.lowerbound > 0
 RETURN  ub_term.name AS tissue, hgnc_term.name AS gene_symbol ,gtex_term.name AS TPM ORDER BY TPM DESCENDING limit 100
 ```
 
-1. Return all significant (adj p val < .05 or lower) GTEx eQTLs for a specific tissue, listed by smallest pvalue (LIMIT 100). The eQTL data schema is shown as a result of the query.
+7. Return all significant (adj p val < .05 or lower) GTEx eQTLs for a specific tissue, listed by smallest pvalue (LIMIT 100). The eQTL data schema is shown as a result of the query.
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -318,7 +318,7 @@ LIMIT 100
 
 An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL
 
-1. The query below is exactly the same as the one above but returns additional fields related to the eQTLs
+8. The query below is exactly the same as the one above but returns additional fields related to the eQTLs
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -341,7 +341,7 @@ ORDER BY Pval
 LIMIT 100
 ```
 
-1. Return all HuBMAP clusters/samples that express a certain gene above a defined threshold. 
+9. Return all HuBMAP clusters/samples that express a certain gene above a defined threshold. 
 
 ```graphql
 WITH 'BRCA1' AS  gene_name, .2 AS threshold
@@ -382,7 +382,7 @@ hgncTerm.name AS hgnc_symbol,
 
 Level II queries contain information from 2 Common Fund datasets.
 
-1. Given a subject ID in KF, find all the HPO terms for  that patient, and then find all genes associated with those HPO terms, then  find all cis-eQTLs related to those genes. Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
+11. Given a subject ID in KF, find all the HPO terms for  that patient, and then find all genes associated with those HPO terms, then  find all cis-eQTLs related to those genes. Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
 
 ```graphql
 WITH 'PT_1J582GQE' AS KF_ID
@@ -402,7 +402,7 @@ hgncTerm.name AS hgnc_symbol,
  eqtl_pval.name AS pvalue LIMIT 100
 ```
 
-1. Start with a compound in LINCs, find all human genes related to that compound and then all the tissues in GTEx with those genes TPM > a user-specified threshold.
+12. Start with a compound in LINCs, find all human genes related to that compound and then all the tissues in GTEx with those genes TPM > a user-specified threshold.
 
 ```graphql
 //Returns a table containing compund generic name correlated with genes with higher than threshold expression level in different tissues
@@ -414,7 +414,7 @@ WHERE gtex_term.lowerbound > MIN_EXP
 RETURN DISTINCT ChEBITerm.name AS Compound, hgncTerm.name AS GENE, ub_term.name AS Tissue, gtex_term.lowerbound AS Expresseion_Level ORDER BY Expresseion_Level ASCENDING
 ```
 
-1. Find intersection between MSigDB Hallmark pathways given a target LINCS compound through genes associated with those entities
+13. Find intersection between MSigDB Hallmark pathways given a target LINCS compound through genes associated with those entities
 
 ```graphql
 //Returns the graph linkage of MSigDB hallmark pathways associated with their signature genes regulated by a compound in LINCS L1000
@@ -434,7 +434,7 @@ RETURN ChEBITerm.name AS Compound,msigdbTerm.name AS Pathway, hgncTerm.name AS G
 
 ![graph.svg](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph.svg)
 
-1. Find all HuBMAP clusters expressing more than one genes related to a human phenotype (using OMIM)
+14. Find all HuBMAP clusters expressing more than one genes related to a human phenotype (using OMIM)
 
 ```graphql
 WITH 'HP:0000023' AS hpo_code, 0 as gene_exp_threshold, .75 AS overlap_perc
@@ -469,7 +469,7 @@ RETURN  hm_hgnc_cuis.CUI
 
 **Level III queries**
 
-1. Starting with a given OMIM human phenotype, glycans will be extracted in association with Human genes
+15. Starting with a given OMIM human phenotype, glycans will be extracted in association with Human genes
 
 ```graphql
 //Returns a table (not a graphic view)
@@ -486,7 +486,7 @@ d.CODE AS Glycan
 
 ![Untitled](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/Untitled.png)
 
-1. Find all pathways in MSigDB linked to genes expressed in GTEx linked to human phenotypes. Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
+16. Find all pathways in MSigDB linked to genes expressed in GTEx linked to human phenotypes. Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
 
 ```graphql
 //Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
@@ -502,7 +502,7 @@ RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubCon
 
 **Graph theory-esque queries**
 
-1. Shortest path between an HPO term and a gene and return everything on the path and the path length, with and without using MSigDB. 
+17. Shortest path between an HPO term and a gene and return everything on the path and the path length, with and without using MSigDB. 
 
 ```graphql
 //With MSigDB relatioships
@@ -526,7 +526,7 @@ RETURN  p AS Path
 
 Note “coexpressed_with” is based on GTEx (click on table result as SAB). Codes are orange, terms are Blue, and concept nodes are in purple.
 
-1. Shortest path between an HPO term and all genes and return everything on the path and the path length
+18. Shortest path between an HPO term and all genes and return everything on the path and the path length
 
 ```graphql
 //Given an HPO term find shortest paths with all HGNC genes
