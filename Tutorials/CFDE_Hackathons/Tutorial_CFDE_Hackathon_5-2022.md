@@ -431,36 +431,15 @@ RETURN ChEBITerm.name AS Compound,msigdbTerm.name AS Pathway, hgncTerm.name AS G
 
 14. Find all HuBMAP clusters expressing more than one genes related to a human phenotype (using OMIM)
 - STILL WORKING ON THIS QUERY
+	
+	
 ```graphql
-WITH 'HP:0000023' AS hpo_code, 0 as gene_exp_threshold, .75 AS overlap_perc
-MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:hpo_code})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]-(hgncCUI:Concept)-[r3:PREF_TERM]-(hgncTerm:Term) 
-WITH collect(hgncCUI.CUI) AS gene_CUIs, gene_exp_threshold,overlap_perc
-MATCH (HM_hgncCUI:Concept)-[r4:gene_expression_of_hubmap_study]-(hubmapCUI:Concept)-[r5:CODE]-(hubmapCode:Code {SAB:'HUBMAPsc'})-[r6:CODE]-(hubmapTerm:Term) 
-WHERE hubmapTerm.lowerbound > gene_exp_threshold
-WITH gene_CUIs, collect(HM_hgncCUI.CUI) AS hm_gene_CUIs, gene_exp_threshold
-WITH [x IN hm_gene_CUIs WHERE x IN gene_CUIs] AS overlap
-RETURN overlap
-
-WITH 'HP:0000023' AS hpo_code, 0.3 as gene_exp_threshold, .75 AS overlap_perc
-MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:hpo_code})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]-(hgncCUI:Concept)-[r3:PREF_TERM]-(hgncTerm:Term) 
-WITH  hgncTerm, collect(hgncCUI.CUI) AS hpo_hgnc_cuis,hgncCUI, gene_exp_threshold
-MATCH (hgncCUI)-[r4:gene_expression_of_hubmap_study]-(hubmapCUI:Concept)-[r5:CODE]-(hubmapCode:Code {SAB:'HUBMAPsc'})-[r6]-(hubmapTerm:Term) 
-WHERE hubmapTerm.lowerbound > gene_exp_threshold
-WITH collect( DISTINCT hgncCUI) AS hm_hgnc_cuis,hpo_hgnc_cuis,  gene_exp_threshold
-RETURN size(hpo_hgnc_cuis),size(hm_hgnc_cuis)
-```
-
-```graphql
-// return all genes that are related to the hpo term 
-// AND are expressed higher than thresh. just need to return study/dataset id
-// and cluster
-WITH 'HP:0000023' AS hpo_code, 0.3 as gene_exp_threshold, .75 AS overlap_perc
-MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:hpo_code})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]-(hgncCUI:Concept)-[r3:PREF_TERM]-(hgncTerm:Term) 
-MATCH (hgncCUI)-[r4:gene_expression_of_hubmap_study]-(hubmapCUI:Concept)-[r5:CODE]-(hubmapCode:Code {SAB:'HUBMAPsc'})-[r6]-(hubmapTerm:Term) 
-WHERE hubmapTerm.lowerbound > gene_exp_threshold
-WITH  DISTINCT hgncCUI AS hm_hgnc_cuis
-RETURN  hm_hgnc_cuis.CUI
-```
+WITH 'HP:0000023' AS hpo_code
+MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {SAB:'HPO'})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]->(hgncCUI:Concept)-[r3:gene_expression_of_hubmap_study]->(hubmap_cui:Concept)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code) 
+WITH split(hmClusterCode.CODE,' ')[0] AS hubmap_study_id, split(hmClusterCode.CODE,' ')[1] AS cluster
+RETURN hubmap_study_id,cluster limit 10	
+```	
+	
 
 **Level III queries**
 
