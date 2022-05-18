@@ -429,9 +429,7 @@ RETURN ChEBITerm.name AS Compound,msigdbTerm.name AS Pathway, hgncTerm.name AS G
 
 ![graph.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph.png)
 
-14. Find all HuBMAP clusters expressing more than one genes related to a human phenotype (using OMIM)
-- STILL WORKING ON THIS QUERY
-	
+14. Find all HuBMAP clusters expressing at least one gene related to a human phenotype (using OMIM)	
 	
 ```graphql
 WITH 'HP:0000023' AS hpo_code
