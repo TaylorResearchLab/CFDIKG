@@ -1,8 +1,9 @@
-# CFDE May 10th Hackathon
+# June 9, 2021 CFDE Tutorial
 
-Our goal is to eventually build a user interface (UI) to allow for queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
+Our goal is to both grow the database and build a user interface (UI) to allow for queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
 
-However, for this demonstration,  we'll be showing you the queries that will operate behind the UI.
+For this demonstration,  we'll be showing you the queries that will operate behind the UI.
+
 
 ## Just some logistics
 
@@ -10,25 +11,19 @@ However, for this demonstration,  we'll be showing you the queries that will ope
 
 [https://github.com/TaylorResearchLab/CFDIKG](https://github.com/TaylorResearchLab/CFDIKG)
 
-If you'd like access to the database to recreate this tutorial, please contact Deanne Taylor and Jonathan Silverstein.
+If you'd like access to the database to recreate this demonstration, please contact Deanne Taylor and Jonathan Silverstein.
 
 ### SUPPLEMENTAL INFO
 
 <A HREF="https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/Schema_CFDIKG_5-2022.md" target="new"> May 2022 Data Source Descriptions and Schema Reference</a> (right click to open in new window)
 
-<A HREF="https://neo4j.com/developer/cypher/guide-cypher-basics/" target="new"> Getting started with Cypher (neo4j) </a>
+<A HREF="https://neo4j.com/developer/cypher/guide-cypher-basics/" target="new"> Getting started with Cypher (neo4j) </a> (right click to open in new window)
 
-<A HREF="https://smart-api.info/ui/dea4bf91545a51b3dc415ba37e2a9e4e#/" target="new"> Python queries are based on the HuBMAP SMART API found here</A>
+<A HREF="https://smart-api.info/ui/dea4bf91545a51b3dc415ba37e2a9e4e#/" target="new"> Python queries are based on the HuBMAP SMART API found here</A> (right click to open in new window)
  
-
-
-
-
-
 ## Introduction to the graph database ("PetaGraph")
 
-
-
+The graph database's model operates on unified biomedical concepts.  There are multiple ways of classifying the same biomedical term, but in this model there is one central unifying term for multiple terminology systems. For example, a human gene concept from Gencode v37 can be represented by several IDs depending on the originating database, but they are all representing the same gene concept.
 
 ###Introduction to queries in neo4j
 
