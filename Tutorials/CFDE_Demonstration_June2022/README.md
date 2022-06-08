@@ -25,7 +25,7 @@ If you'd like access to the database to recreate this demonstration, please cont
 
 PetaGraph's model operates on unified biomedical concepts.  There are multiple ways of classifying the same biomedical term, but in this model there is one central unifying concept per conceptual item, from multiple terminology systems. For example, a human gene concept from Gencode v37 can be represented by several IDs depending on the originating database, but they are all representing the same gene concept node.
 
-###Examples to try
+### Examples to try
 
 Queries into a neo4j database operate on Cypher, parallel to how relational databases use SQL.
 
@@ -33,7 +33,7 @@ The schema structures data based on the idea of concept nodes as mentioned above
 Here, we show the code node (CHEBI ID, purple), for acyclovir.  Here, a "preferred term" (brown) reports the preferred name for the drug.
 A similar structure is used for items such as gene names, ontologies, and other systems, as well as experimental data. 
 
-*Example to try:*
+**Simple Example #1:**
 
 ```graphql
 MATCH (a:Term)<--(b:Concept)
@@ -49,9 +49,11 @@ RETURN * LIMIT 1
 ![example_dataset.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/example_dataset.png)
 
 
-*Example to try:* Let's select specific datasets by specifying the SAB (source abbreviation) property on the Code node. Here we match on a HPO Code node and its corresponding Concept node. 
+**Simple Example #2:**  Learn about SABs (source abbreviations). 
 
-Other SABs to try are: HGNC (human genes), HCOP (mouse genes), MP (mammalian phenotype), GTEX_EXP (GTEx expression data), GTEX_EQTL (GTEx eQTL data) 
+Let's select specific datasets by specifying the SAB (source abbreviation) property on the Code node. Here we match on a HPO Code node and its corresponding Concept node. 
+
+Other SABs to try are: HGNC (human genes), HGNC_HCOP (mouse genes), MP (mammalian phenotype), GTEX_EXP (GTEx expression data), GTEX_EQTL (GTEx eQTL data) 
 
  We can control how many ‘instances’ of the pattern are returned by using the LIMIT keyword. 
 
@@ -59,49 +61,18 @@ Other SABs to try are: HGNC (human genes), HCOP (mouse genes), MP (mammalian phe
 MATCH (a:Concept)-[r:CODE]->(b:Code {SAB:"HPO"}) RETURN * LIMIT 5
 ```
 
-Examples: 
+**Simple Example #3:** 
 
 Get the preferred term of a concept
 
+```graphql
 MATCH (a:Concept{CUI:"C0001367"})-[:PREF_TERM]->(b:Term) RETURN *
-
-General graph structure with Semantic Types
-
-```graphql
-//with semantic types
-MATCH (a:Term)<--(b:Concept)
--->(c:Code)-[d:PT]->(a),
-(f:Definition)<--(b)-->
-(g:Semantic)-->(h:Semantic),
-(b)-[i:isa]->(j:Concept)
-WHERE b.CUI = d.CUI
-AND c.SAB = i.SAB
-RETURN * LIMIT 1
 ```
 
-Recursive search in ontologies (here HPO), collect all HPO terms one level down from the parent Term (here HP:0001631, atrial septal defects), find all genes associated with these phenotypes and find whether or not these genes are Glycosyltransferases or Glycans or neither.
 
-```graphql
-WITH 'HP:0001631' AS parent_hpo
-MATCH (co1:Code {CODE:parent_hpo})<-[:CODE]-(c1:Concept)-[a]-(c2:Concept)-[:CODE]->(P_code:Code {SAB:'MP'})
-MATCH (P_code)<-[:CODE]-(P_concept:Concept)<-[:isa  *0..1 {SAB:'MP'}]-(C_concept:Concept)
-WITH  collect(C_concept.CUI) + P_concept.CUI AS terms UNWIND terms AS uterms WITH collect(DISTINCT uterms) AS phenos
-MATCH (mp_concept:Concept)-[r:CODE]->(mp_code:Code)
-WHERE mp_concept.CUI in phenos
-MATCH (mp_concept:Concept)-[s]->(hgnc_hcop_Concept:Concept)-[:has_mouse_ortholog]-(hgnc_concept:Concept)-[:CODE]-(human_gene:Code {SAB:'HGNC'}) 
-WITH hgnc_concept,human_gene
-MATCH (hgnc_concept)-[:PREF_TERM]->(gene_symbol:Term)
-WITH DISTINCT human_gene,gene_symbol
-OPTIONAL MATCH  (human_gene)-[q]-(gly:Term)
-WHERE gly.name IN ['Glycosyltransferase','Glycan']
-RETURN DISTINCT split(gene_symbol.name,' gene')[0] AS symbol,human_gene.CODE AS hgnc_id, gly.name AS protein_type
-```
+## More Complex Queries
 
-## Queries to try
-
-### Level I **queries**
-
-Level 1 queries only include (generally) one dataset.
+### Level I queries: One CFDE dataset
 
 1. Display the structure of the GTEx expression data.  Return 1 (LIMIT 1) GTEx CUI, and expression and tissue codes and Term (binned TPM).   This will display the  actual nodes, so its best to execute this query in the Bolt interface (the website GUI). If executed with cypher-shell (on the command line) or via the api, you’ll have several json objects returned. 
 
