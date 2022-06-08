@@ -21,15 +21,24 @@ If you'd like access to the database to recreate this demonstration, please cont
 
 <A HREF="https://smart-api.info/ui/dea4bf91545a51b3dc415ba37e2a9e4e#/" target="new"> Python queries are based on the HuBMAP SMART API found here</A> (right click to open in new window)
  
-## Introduction to the graph database ("PetaGraph")
+## Introduction to PetaGraph, our experimental data-enriched version of the HuBMAP/UMLS database.
 
-The graph database's model operates on unified biomedical concepts.  There are multiple ways of classifying the same biomedical term, but in this model there is one central unifying term for multiple terminology systems. For example, a human gene concept from Gencode v37 can be represented by several IDs depending on the originating database, but they are all representing the same gene concept.
+PetaGraph's model operates on unified biomedical concepts.  There are multiple ways of classifying the same biomedical term, but in this model there is one central unifying term for multiple terminology systems. For example, a human gene concept from Gencode v37 can be represented by several IDs depending on the originating database, but they are all representing the same gene concept.
 
 ###Introduction to queries in neo4j
 
-Queries operate on the graph database
+Queries into a neo4j database operate on Cypher, parallel to how relational databases use SQL.
 
-Select specific datasets by specifying the SAB (source abbreviation) property on the Code node. Here we match on a HPO Code node and its corresponding Concept node. 
+Here's how we structure our data:
+
+![example_dataset.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/example_dataset.png)
+
+
+
+
+
+
+Example: Let's select specific datasets by specifying the SAB (source abbreviation) property on the Code node. Here we match on a HPO Code node and its corresponding Concept node. 
 
 Other SABs to try are: HGNC (human genes), HCOP (mouse genes), MP (mammalian phenotype), GTEX_EXP (GTEx expression data), GTEX_EQTL (GTEx eQTL data) 
 
