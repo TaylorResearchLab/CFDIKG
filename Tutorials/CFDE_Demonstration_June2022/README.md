@@ -23,22 +23,33 @@ If you'd like access to the database to recreate this demonstration, please cont
  
 ## Introduction to PetaGraph, our experimental data-enriched version of the HuBMAP/UMLS database.
 
-PetaGraph's model operates on unified biomedical concepts.  There are multiple ways of classifying the same biomedical term, but in this model there is one central unifying term for multiple terminology systems. For example, a human gene concept from Gencode v37 can be represented by several IDs depending on the originating database, but they are all representing the same gene concept.
+PetaGraph's model operates on unified biomedical concepts.  There are multiple ways of classifying the same biomedical term, but in this model there is one central unifying concept per conceptual item, from multiple terminology systems. For example, a human gene concept from Gencode v37 can be represented by several IDs depending on the originating database, but they are all representing the same gene concept node.
 
-###Introduction to queries in neo4j
+###Examples to try
 
 Queries into a neo4j database operate on Cypher, parallel to how relational databases use SQL.
 
-Here's how we structure our data:
+The schema structures data based on the idea of concept nodes as mentioned above. Concept nodes (shown here in orange) are those unifying principles that can support connections to multiple terminology systems (with IDs as "Codes"). In the example shown below, the central orange concept ID represents "acyclovir" which can have several IDs, found in databases such as ChEMBL, CHEBI, DrugBank, PubChem etc. 
+Here, we show the code node (CHEBI ID, purple), for acyclovir.  Here, a "preferred term" (brown) reports the preferred name for the drug.
+A similar structure is used for items such as gene names, ontologies, and other systems, as well as experimental data. 
+
+*Example to try:*
+
+```graphql
+MATCH (a:Term)<--(b:Concept)
+-->(c:Code)-[d:PT]->(a),
+(f:Definition)<--(b)-->
+(g:Semantic)-->(h:Semantic),
+(b)-[i:isa]->(j:Concept)
+WHERE b.CUI = d.CUI
+AND c.SAB = i.SAB
+RETURN * LIMIT 1
+```
 
 ![example_dataset.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/example_dataset.png)
 
 
-
-
-
-
-Example: Let's select specific datasets by specifying the SAB (source abbreviation) property on the Code node. Here we match on a HPO Code node and its corresponding Concept node. 
+*Example to try:* Let's select specific datasets by specifying the SAB (source abbreviation) property on the Code node. Here we match on a HPO Code node and its corresponding Concept node. 
 
 Other SABs to try are: HGNC (human genes), HCOP (mouse genes), MP (mammalian phenotype), GTEX_EXP (GTEx expression data), GTEX_EQTL (GTEx eQTL data) 
 
