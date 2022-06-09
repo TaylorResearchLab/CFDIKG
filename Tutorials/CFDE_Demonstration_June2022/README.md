@@ -74,7 +74,7 @@ MATCH (a:Concept{CUI:"C0001367"})-[:PREF_TERM]->(b:Term) RETURN *
 
 ### Level I queries: One CFDE dataset
 
-1. Display the structure of the GTEx expression data.  Return 1 (LIMIT 1) GTEx CUI, and expression and tissue codes and Term (binned TPM).   This will display the  actual nodes, so its best to execute this query in the Bolt interface (the website GUI). If executed with cypher-shell (on the command line) or via the api, you’ll have several json objects returned. 
+1. Display the structure of the GTEx expression data.  Return 1 (LIMIT 1) GTEx CUI, and expression and tissue codes and Term (binned TPM).   This will display the  actual nodes as a graph.  If executed with cypher-shell (on the command line) or via the api, you’ll have several json objects returned. 
 
 ```graphql
 MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]-(gtex_term:Term)
@@ -94,57 +94,6 @@ RETURN hgnc_code.CODE AS HGNC_ID, hgnc_term.name AS GENE_SYMBOL
 
 ```
 
-Same query as above — but with the HuBMAP API to the same KG. Jupyter Notebook time!  If you’re of a Python mind, open up the Jupyter binder link above and paste in the following code block, or if you like you can do this locally on your own machine. If you’re doing this locally, ou’ll need to install the requests library noted in the import statement below.
-
-```python
-# Python
-# For Jupyter Binder interface, Python accessing the Smart API at HuBMAP.
-# Use the Codes-Concepts endpoint to return the HPO concept
-# that corresponds to this HPO code
-import requests
-
-BASE_URL = 'https://ontology.api.hubmapconsortium.org/'
-headers = {'Accept': 'application/json'}
-
-response = requests.get(BASE_URL+'codes/HPO HP:0001631/concepts',headers=headers)
-response_decoded = response.json()
-
-print('\nServer response: ', response_decoded)  #print the response
-
-# Grab the HPO concept
-hpoCUI = response_decoded[0]['concept']
-
-# Use the Concepts-Concepts endpoint to return all 
-# Concepts that have a relationship with this HPO Concept
-response = requests.get(BASE_URL+f'concepts/{hpoCUI}/concepts',headers=headers)
-response_decoded = response.json() 
-
-# Select the Concepts that have 'gene_associated_with_phenotype' Relationships. 
-# This will give us just the HGNC Concepts
-hgncCUI_list = [i['concept'] for i in response_decoded if i['relationship'] == 'gene_associated_with_phenotype']
-
-print('\nFirst few HGNC Concept IDs: ',hgncCUI_list[:3])
-
-# Loop through the list of HGNC Concept IDs and use the Concepts-Codes endpoint 
-# to return each corresponding HGNC Code
-codeIDs = []
-for n in range(0,20): #limit by 20 to save us some hang time
-    hgncCUI=hgncCUI_list[n]
-    response = requests.get(BASE_URL+f'concepts/{hgncCUI}/codes',headers=headers)
-    codeIDs.extend(response.json())
-    
-# Select just the CodeIDs that have the 'HGNC' prefix
-hgnc_CodeIDs = [codeID for codeID in codeIDs if codeID.startswith('HGNC')]
-
-print('First few HGNC CodeIDs:',hgnc_CodeIDs[:3])
-
-# Finally, remove the 'HGNC ' prefix from the CodeIDs, we want just the HGNC Codes
-hgnc_Codes = [codeID.replace('HGNC ','') for codeID in hgnc_CodeIDs]
-
-print('\nFirst few HGNC Codes:', hgnc_Codes[:3])
-print('\nTotal HGNC codes returned:',len(hgnc_Codes))
-```
-
 ![A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/HPO_HGNC.png)
 
 A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.
@@ -161,52 +110,6 @@ MATCH (hgnc_term:Term {name:gene_name+' gene'})-[:MTH_ACR]-(hgnc_code:Code {SAB:
 RETURN *
 ```
 
-Same query as above — but Jupyter Notebook time!  If you’re of a Python mind, open up the Jupyter binder link above and paste in the following code block:
-
-```python
-#Python
-import requests
-
-BASE_URL = 'https://ontology.api.hubmapconsortium.org/'
-headers = {'Accept': 'application/json'}
-
-gene_name = 'BRCA1'
-
-# Use the Terms-Codes endpoint to return the HPO concept
-# that corresponds to this HPO code
-response = requests.get(BASE_URL+f'/terms/{gene_name}/codes',headers=headers)
-response_decoded = response.json()
-print('\nServer response: ', response_decoded)
-
-# grab just the HGNC code (it will have 'HGNC' as a prefix)
-BRCA1_HGNC_CodeID = [codeID['code'] for codeID in response_decoded if codeID['code'].startswith('HGNC')][0]
-
-print('BRCA1 HGNC ID =',BRCA1_HGNC_CodeID)
-
-# Use the Codes-Concepts endpoint to return the HPO concept
-# that corresponds to this HPO code
-response = requests.get(BASE_URL+f'codes/{BRCA1_HGNC_CodeID}/concepts',headers=headers)
-response_decoded = response.json()
-
-# We are querying for a single concept here so no need to filter, we can just grab the concept diectly 
-BRCA1_concept = response_decoded[0]['concept']
-
-# Use the Concepts-Concepts endpoint to return all 
-# Concepts that have a relationship with the BRCA1  Concept
-response = requests.get(BASE_URL+f'concepts/{BRCA1_concept}/concepts',headers=headers)
-response_decoded = response.json()
-
-# Select the mouse ortholog Concept, it will be connected to the human
-# BRCA1 concept by the 'has_human_ortholog' relationship
-BRCA1_mouse_concept = [i['concept'] for i in response_decoded if  i['relationship'] == 'has_human_ortholog'][0]
-
-response = requests.get(BASE_URL+f'concepts/{BRCA1_mouse_concept}/codes',headers=headers)
-response_decoded = response.json()
-
-# Lastly, remove the prefix from the mouse gene codeID
-mouse_genes = [i.replace('HCOP HCOP:','') for i in response_decoded]
-mouse_genes
-```
 
 ![HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/HGNC_HCOP.png)
 
@@ -218,40 +121,6 @@ HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and it
 WITH 'HP:0001631' AS HPO_CODE
 MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:HPO_CODE})-[r1:CODE]-(hpo_concept)-[r2:has_mouse_phenotype]-(mp_concept:Concept)-[r3:CODE]-(mp_code:Code {SAB:'MP'})-[r4:Term]-(mpTerm:Term)
 RETURN *
-```
-
-Same query as above — but Jupyter Notebook time!  If you’re of a Python mind, open up the Jupyter binder link above and paste in the following code block:
-
-```python
-import requests
-
-BASE_URL = 'https://ontology.api.hubmapconsortium.org/'
-headers = {'Accept': 'application/json'}
-
-hpo_search = 'HP:0001631'
-
-hpo_code='HPO ' + hpo_search #SAB plus search term are needed in the query.
-
-response = requests.get(BASE_URL+f'codes/{hpo_code}/concepts',headers=headers)
-response_decoded = response.json()
-
-hpo_concept_id = response_decoded[0]['concept']
-
-# Use the Concepts-Concepts endpoint to return all 
-# Concepts that have a relationship with this HPO Concept
-response = requests.get(BASE_URL+f'concepts/{hpo_concept_id}/concepts',headers=headers)
-response_decoded = response.json() 
-
-# Filter the returned concepts by the 'has_human_phenotype' relationship. This is the 
-# relationship that connects the HPO and MP concepts 
-mp_concept = [i['concept'] for i in response_decoded if i['relationship'] == 'has_human_phenotype'][0]
-
-response = requests.get(BASE_URL+f'concepts/{mp_concept}/codes',headers=headers)
-response_decoded = response.json()
-
-# Lastly, remove the prefix from the mouse gene codeID
-mp_code = [i.replace('MP ','') for i in response_decoded]
-print('MP Code: ', mp_code)
 ```
 
 ![A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/HPO_MP.png)
@@ -266,7 +135,6 @@ A Concept (blue), Code (purple) and Term (green) from HPO on the left and its co
 WITH 'A2M' AS GENE_NAME
 MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:CODE]-(hgnc_concept:Concept)-[r2 {SAB:'LINCS L1000'}]->(ChEBI_concept:Concept)-[r3:CODE]->(ChEBICode:Code {SAB:'CHEBI'}),(ChEBI_concept:Concept)-[:PREF_TERM]->(ChEBITerm:Term)
 RETURN DISTINCT hgncTerm.name AS Gene_Symbol, type(r2) AS Correlation, ChEBITerm.name AS Compound 
-
 ```
 
 ```graphql
