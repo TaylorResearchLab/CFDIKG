@@ -522,7 +522,7 @@ RETURN  p AS Path
 
 Note “coexpressed_with” is based on GTEx (click on table result as SAB). Codes are orange, terms are Blue, and concept nodes are in purple.
 
-18. Shortest path between an HPO term and all genes and return everything on the path and the path length
+17. Shortest path between an HPO term and all genes and return everything on the path and the path length
 
 ```graphql
 //Given an HPO term find shortest paths with all HGNC genes
