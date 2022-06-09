@@ -486,7 +486,7 @@ MATCH (m:Code {CODE:'HP:0001631'})<-[:CODE]-(n:Concept)<-[r:isa*..1 {SAB:'HPO'}]
 (w)-[:CODE]->(d) WHERE q.CUI IN PHS 
 RETURN * LIMIT 1
 ```
-![Protein_Glycan1.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/Protein_Glycan1.png)
+![Protein_Glycan2.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/Protein_Glycan2.png)
 
 
 Table return of the above query.
