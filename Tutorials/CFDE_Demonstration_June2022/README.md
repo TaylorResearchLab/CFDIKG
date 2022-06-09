@@ -11,10 +11,6 @@ Here's some numbers representing datasets in PetaGraph that are important for th
 ![summary_table.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/summary_table.png)
 
 
-
-
-
-
 Our goal is to eventually build a user interface (UI) to allow for queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
 
 For this demonstration,  we'll be showing you the queries that will operate behind the UI.
@@ -229,14 +225,25 @@ MATCH (ub_term:Term {name:tissuename})-[r0:PT]-(ub_code:Code {SAB:'UBERON'})-[r1
 MATCH (gtex_eqtl_cui)-[r5:gene_has_eqtl]-(hgnc_cui:Concept)-[r6:PREF_TERM]-(hgnc_term:Term)
 MATCH (gtex_eqtl_code)-[:variant_id]-(eqtl_varid:Term)
 WHERE eqtl_pval.upperbound < 0.05
-RETURN  ub_term.name AS uberon_tissue, hgnc_term.name AS gene_symbol,eqtl_varid.name as Variant_ID, eqtl_pval.name AS Pval  
-ORDER BY Pval
-LIMIT 100
+RETURN  * LIMIT 1
 ```
 
 ![An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_eQTL.png)
 
 An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL
+
+Return a more comprehensive table of the above. 
+
+```graphql
+WITH 'aorta' AS tissuename
+MATCH (ub_term:Term {name:tissuename})-[r0:PT]-(ub_code:Code {SAB:'UBERON'})-[r1:CODE]-(ub_cui:Concept)-[r2:tissue_has_eqtl]-(gtex_eqtl_cui:Concept)-[r3:CODE]-(gtex_eqtl_code:Code {SAB:'GTEX_EQTL'})-[r4:p_value]-(eqtl_pval:Term) 
+MATCH (gtex_eqtl_cui)-[r5:gene_has_eqtl]-(hgnc_cui:Concept)-[r6:PREF_TERM]-(hgnc_term:Term)
+MATCH (gtex_eqtl_code)-[:variant_id]-(eqtl_varid:Term)
+WHERE eqtl_pval.upperbound < 0.05
+RETURN  ub_term.name AS uberon_tissue, hgnc_term.name AS gene_symbol,eqtl_varid.name as Variant_ID, eqtl_pval.name AS Pval  
+ORDER BY Pval
+LIMIT 100
+```
 
 7. The query below is exactly the same as the one above but returns additional fields related to the eQTLs
 
