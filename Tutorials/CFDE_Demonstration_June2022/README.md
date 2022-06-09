@@ -253,6 +253,8 @@ RETURN  ub_term.name AS tissue, hgnc_term.name AS gene_symbol ,gtex_term.name AS
 
 6. Return a significant (adj p val < .05 or lower) GTEx eQTL for 'aorta' as a specific tissue with p<0.05. The eQTL data schema is shown as a result of the query.
 
+Note on the right side of the figure below, you can see that the eQTL Code ID is named as a triple (rsID-tissue-gene) and the results are stored as binned p-values and chromosome location. Those are linked to concept codes in the SNP, the tissue, and the gene.
+
 
 ```graphql
 WITH 'aorta' AS tissuename
