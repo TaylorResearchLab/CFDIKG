@@ -357,7 +357,13 @@ hgncTerm.name AS hgnc_symbol,
  eqtl_pval.name AS pvalue LIMIT 100
 ```
 
-12. Start with a compound in LINCs, find all human genes related to that compound and then all the tissues in GTEx with those genes TPM > a user-specified threshold.
+11. Can we identify GTEx tissues that are most likely to be affected by a specific chemical compound measured in the LINCs project?
+
+For this query, we need to find those tissues actually expressing a gene whose expression is affected by a compound, mosapride. 
+
+We use the LINCS dataset to find those genes that are affected by mosapride, and then we find all the tissues in GTEx with those genes TPM > a user-specified threshold. 
+
+This is limited to 2 results for graphing purposes. The query after this one returns the full table.
 
 ```graphql
 //Returns a table containing compund generic name correlated with genes with higher than threshold expression level in different tissues
@@ -366,7 +372,24 @@ MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-
 (gtex_exp_cui:Concept)-[:CODE]->(gtex_exp_code:Code {SAB:'GTEX_EXP'})-[]->(gtex_term:Term),
 (hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]-(hgncTerm:Term)
 WHERE gtex_term.lowerbound > MIN_EXP 
-RETURN DISTINCT ChEBITerm.name AS Compound, hgncTerm.name AS GENE, ub_term.name AS Tissue, gtex_term.lowerbound AS Expresseion_Level ORDER BY Expresseion_Level ASCENDING
+RETURN * LIMIT 2
+```
+![GTEx tissues likely affected by a compound ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_mosapride_GTEx.png)
+
+
+
+
+
+Return the full table
+
+```graphql
+//Returns a table containing compund generic name correlated with genes with higher than threshold expression level in different tissues
+WITH 'mosapride' AS COMPOUND_NAME, 5 AS MIN_EXP 
+MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-[:CODE]-(ChEBIconcept:Concept)-[r1 {SAB:'LINCS L1000'}]->(hgncConcept:Concept)-[:gene_has_median_expression]-(gtex_exp_cui:Concept)-[:tissue_has_median_expression]-(ub_cui:Concept)-[:PREF_TERM]->(ub_term:Term),
+(gtex_exp_cui:Concept)-[:CODE]->(gtex_exp_code:Code {SAB:'GTEX_EXP'})-[]->(gtex_term:Term),
+(hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]-(hgncTerm:Term)
+WHERE gtex_term.lowerbound > MIN_EXP 
+RETURN DISTINCT ChEBITerm.name AS Compound, hgncTerm.name AS GENE, ub_term.name AS Tissue, gtex_term.lowerbound AS Expression_Level ORDER BY Expression_Level ASCENDING
 ```
 
 13. Find intersection between MSigDB Hallmark pathways given a target LINCS compound through genes associated with those entities
