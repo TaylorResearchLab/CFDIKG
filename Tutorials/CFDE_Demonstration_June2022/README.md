@@ -189,10 +189,8 @@ RETURN *
 A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.
 
 
-
 4. Starting with a human gene, find all (drug) compounds that affect expression of that gene in a LINCs dataset (binary relationship: upregulated or downregulated). The time/dosage/cell type variables in LINCS have been collapsed. In cases of conflicts (up or down) the data includes both up and down links. In the future we can include all data from LINCs.
 
-![LINCs_vs_genes.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_vs_genes.png)
 
 ```graphql
 //LINCS L1000, all positively or negatively correlated relatioships
@@ -200,6 +198,9 @@ WITH 'A2M' AS GENE_NAME
 MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:CODE]-(hgnc_concept:Concept)-[r2 {SAB:'LINCS L1000'}]->(ChEBI_concept:Concept)-[r3:CODE]->(ChEBICode:Code {SAB:'CHEBI'}),(ChEBI_concept:Concept)-[:PREF_TERM]->(ChEBITerm:Term)
 RETURN * LIMIT 1
 ```
+
+
+![LINCs_vs_genes.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_vs_genes.png)
 
 
 
