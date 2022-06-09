@@ -1,4 +1,7 @@
 # June 9, 2021 CFDE Demonstration
+
+Deanne Taylor, Ben Stear, Taha Moheseni Ahooyi, Jonathan Silverstein
+
 ## Building blocks of queries on a CFDE-data populated property graph
 
 For this tutorial/demonstration we'll be using a knowledge graph we're tentatively calling "PetaGraph."
@@ -14,7 +17,6 @@ Here's numbers representing some of the datasets in PetaGraph that are important
 Our goal is to eventually build a user interface (UI) to allow for queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
 
 For this demonstration,  we'll be showing you the queries that will operate behind the UI.
-
 
 
 ## SUPPLEMENTAL INFO
@@ -59,7 +61,6 @@ RETURN * LIMIT 1
 ```
 
 ![example_dataset.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/example_dataset.png)
-
 
 **Simple Example #2:**  Learn about SABs (source abbreviations). 
 
@@ -189,8 +190,15 @@ RETURN *
 A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.
 
 
-4. Starting with a human gene, find all (drug) compounds that affect expression of that gene in a LINCs dataset (binary relationship: upregulated or downregulated). The time/dosage/cell type variables in LINCS have been collapsed. In cases of conflicts (up or down) the data includes both up and down links. In the future we can include all data from LINCs.
+4. Starting with a human gene, find all (drug) compounds that affect expression of that gene in a LINCs dataset (binary relationship: upregulated or downregulated). 
 
+The time/dosage/cell type variables in LINCS have been collapsed. 
+
+In cases of conflicts (up or down) the data includes both up and down links as shown in the figure below.
+
+In the future we can include all data from LINCs.
+
+Query on the LINCS L1000 dataset:
 
 ```graphql
 //LINCS L1000, all positively or negatively correlated relatioships
@@ -199,12 +207,9 @@ MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:COD
 RETURN * LIMIT 1
 ```
 
-
 ![LINCs_vs_genes.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_vs_genes.png)
 
-
-
-Same query as above but returning a table.
+Same query as above,  but returning a table:
 
 ```graphql
 //Returns a table (not a graphic view)
@@ -213,14 +218,7 @@ WITH 'A2M' AS GENE_NAME
 MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:CODE]-(hgnc_concept:Concept)-[r2 {SAB:'LINCS L1000'}]->(ChEBI_concept:Concept)-[r3:CODE]->(ChEBICode:Code {SAB:'CHEBI'}),(ChEBI_concept:Concept)-[:PREF_TERM]->(ChEBITerm:Term)
 RETURN DISTINCT hgncTerm.name AS Gene_Symbol, type(r2) AS Correlation, ChEBITerm.name AS Compound 
 ```
-
-```graphql
-//Returns a table (not a graphic view)
-//All positively correlated relatioships in CMAP and LINCS L1000
-WITH 'RAFT1' AS GENE_NAME
-MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:CODE]-(hgnc_concept:Concept)<-[r2:positively_correlated_with_gene]-(ChEBI_concept:Concept)-[r3:CODE]->(ChEBICode:Code {SAB:'CHEBI'}),(ChEBI_concept:Concept)-[:PREF_TERM]->(ChEBITerm:Term)
-RETURN DISTINCT ChEBITerm.name AS Compound, type(r2) AS Correlation, hgncTerm.name AS Gene_Symbol, r2.SAB AS Source
-```
+Query  on the CMAP dataset:
 
 ```graphql
 //Returns a table (not a graphic view)
@@ -230,7 +228,19 @@ MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:COD
 RETURN DISTINCT hgncTerm.name AS Gene_Symbol, type(r2) AS Correlation, ChEBITerm.name AS Compound
 ```
 
-5. Return all non-zero GTEx expression levels  for a specific tissue type, listed by top TPM (LIMIT 100)
+Query on both CMAP and LINCS L1000
+
+```graphql
+//Returns a table (not a graphic view)
+//All positively correlated relatioships in CMAP and LINCS L1000
+WITH 'RAFT1' AS GENE_NAME
+MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:CODE]-(hgnc_concept:Concept)<-[r2:positively_correlated_with_gene]-(ChEBI_concept:Concept)-[r3:CODE]->(ChEBICode:Code {SAB:'CHEBI'}),(ChEBI_concept:Concept)-[:PREF_TERM]->(ChEBITerm:Term)
+RETURN DISTINCT ChEBITerm.name AS Compound, type(r2) AS Correlation, hgncTerm.name AS Gene_Symbol, r2.SAB AS Source
+```
+
+5. Return all non-zero GTEx expression levels for a specific tissue type, listed by top TPM (LIMIT 100)
+
+Returns a table:
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -240,7 +250,9 @@ WHERE gtex_term.lowerbound > 0
 RETURN  ub_term.name AS tissue, hgnc_term.name AS gene_symbol ,gtex_term.name AS TPM ORDER BY TPM DESCENDING limit 100
 ```
 
+
 6. Return a significant (adj p val < .05 or lower) GTEx eQTL for 'aorta' as a specific tissue with p<0.05. The eQTL data schema is shown as a result of the query.
+
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -338,7 +350,6 @@ RETURN kfCode.CODE AS KF_ID,
 	     ORDER BY num_phenotypes 
 			 DESCENDING LIMIT 100
 ```
-
 
 
 ### Level II queries: Combining information from 2 Common Fund datasets.
