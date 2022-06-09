@@ -301,7 +301,10 @@ RETURN DISTINCT split(hgnc_term.name,' ')[0] AS gene,
 
 From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.
 
- 9. Return HPO codes, phenotype names and number of phenotype for Kids First Patient
+ 9. How many phenotypes are present for a study subject in the Kids First project?
+ 
+ 
+ Return HPO codes, phenotype names and number of phenotype for each Kids First subject in the knowledge graph
 
 ```graphql
 MATCH (kfCode:Code {SAB:'KF'})-[r0:CODE]-(kfCUI:Concept)-[r1:patient_has_phenotype]-(hpoCUI:Concept)-[:CODE]-(hpoCode:Code {SAB:'HPO'})-[r2:PT]-(hpoTerm:Term)
@@ -313,11 +316,16 @@ RETURN kfCode.CODE AS KF_ID,
 			 DESCENDING LIMIT 100
 ```
 
-### **Level II queries**
 
-Level II queries contain information from 2 Common Fund datasets.
 
-10. Given a subject ID in KF, find all the HPO terms for  that patient, and then find all genes associated with those HPO terms, then  find all cis-eQTLs related to those genes. Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
+### Level II queries: Combining information from 2 Common Fund datasets.
+
+10. Given a subject's Kids First ID, can we find all the HPO terms related to that subject, and then find all genes associated with those HPO terms, then  find all cis-eQTLs related to those genes. Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
+
+
+![From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/KF_phenotype_eqtl.png)
+
+
 
 ```graphql
 WITH 'PT_1J582GQE' AS KF_ID
