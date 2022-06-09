@@ -72,7 +72,7 @@ MATCH (a:Concept{CUI:"C0001367"})-[:PREF_TERM]->(b:Term) RETURN *
 
 ## More Complex Queries
 
-### Level I queries: One CFDE dataset
+### Basic "Level 1" queries
 
 1. Exploring GTEx experimental data.  
 
@@ -99,7 +99,9 @@ RETURN * LIMIT 1
 ![GTEx_expression_2.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression_2.png)
 
 
-Next, let's add the concept code for the tisuse related to this TPM value and gene. This also displays the current graph structure of all the GTEx expression concept code relations:  HGNC gene <-> TPM value <-> Uberon ID.  
+Next, let's add the concept code for the tissue related to this TPM value and gene. 
+
+
 
 ```graphql
 MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]-(gtex_term:Term)
@@ -110,7 +112,14 @@ RETURN * LIMIT 1
 
 ![GTEx_expression.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression.png)
 
-2. Given a HPO (phenotype) term, return all linked gene names by leveraging the HPO-to-gene links curated by Peter Robinson's group at Jax. The phenotype<->gene relationships are obtained from Orphanet and OMIM. A future iteration of this graph will indicate which are from Orphanet, and which are from OMIM.
+This query also displays the current graph structure of all the GTEx expression concept code relations:  HGNC gene <-> TPM value <-> Uberon ID.  It can be used to help build additional queries combining GTEx data with other datasets in the knowledge graph.
+
+
+2. Can we find all phenotype-gene relationships given a certain phenotype?
+
+For instance, given a HPO (phenotype) term, can we return all linked gene names?
+
+We can accomplish this by leveraging the HPO-to-gene links in the knowledge graph, imported from the HPO-to-gene relationship list curated by Peter Robinson's group at Jax. That list was derived from Orphanet and OMIM. 
 
 ```graphql
 WITH 'HP:0001631' AS HPO_CODE
@@ -118,6 +127,12 @@ MATCH (hpoTerm:Term)-[:PT]-(hpoCode:Code {CODE: HPO_CODE})-[r1:CODE]-(hpo_concep
 RETURN * LIMIT 10
 
 ```
+
+![A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/HPO_HGNC.png)
+
+A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.
+
+
 Instead of a limited graph visual,  can obtain all the genes associated with a phenotype in a table by asking for specific outputs in the RETURN statement:
 
 ```graphql
@@ -127,16 +142,9 @@ RETURN hgnc_code.CODE AS HGNC_ID, hgnc_term.name AS GENE_SYMBOL
 
 ```
 
+3. Relate mouse to human data. 
 
-![A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/HPO_HGNC.png)
-
-A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.
-
-![Same as above but now showing multiple genes associated with the same HPO Code. ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/HPO_HGNC_many_genes.png)
-
-Same as above but now showing multiple genes associated with the same HPO Code. 
-
-3. Given an HGNC (gene) name, give the mouse gene name from HCOP
+Given an HGNC (gene) name, give the mouse gene name from HCOP
 
 ```graphql
 WITH 'BRCA1' as gene_name
@@ -144,12 +152,12 @@ MATCH (hgnc_term:Term {name:gene_name+' gene'})-[:MTH_ACR]-(hgnc_code:Code {SAB:
 RETURN *
 ```
 
-
 ![HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/HGNC_HCOP.png)
 
 HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  
 
-4. Given an HPO code, return the corresponding MP code if known
+
+How about phenotypes?  Given an HPO code, return the corresponding MP code if known
 
 ```graphql
 WITH 'HP:0001631' AS HPO_CODE
@@ -161,7 +169,9 @@ RETURN *
 
 A Concept (blue), Code (purple) and Term (green) from HPO on the left and its corresponding MP Concept, Code and Term on the right.
 
-5. Starting with a human gene, find all (drug) compounds that affect expression of that gene in a LINCs dataset (binary relationship: upregulated or downregulated). The time/dosage/cell type variables in LINCS have been collapsed. In cases of conflicts (up or down) the data includes both up and down links. In the future we can include all data from LINCs.
+
+
+4. Starting with a human gene, find all (drug) compounds that affect expression of that gene in a LINCs dataset (binary relationship: upregulated or downregulated). The time/dosage/cell type variables in LINCS have been collapsed. In cases of conflicts (up or down) the data includes both up and down links. In the future we can include all data from LINCs.
 
 ```graphql
 //Returns a table (not a graphic view)
