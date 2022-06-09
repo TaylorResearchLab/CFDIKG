@@ -403,7 +403,7 @@ MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-
 RETURN * LIMIT 1
 ```
 
-![GTEx tissues likely affected by a compound ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_mosapride_MSIGDB.png)
+![Pathways related to LINCS compounds ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_mosapride_MSIGDB.png)
 
 
 Return a table based on the above with all pathways affected.
@@ -423,17 +423,19 @@ Here we just use HP:0001631, Atrial Septal Defect.
 
 ```graphql
 WITH 'HP:0001631' AS HPO_CODE
-MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:HPO_CODE})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]->(hgncCUI:Concept)-[r3:gene_expression_of_hubmap_study]->(hubmap_cui:Concept)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code) 
-RETURN *  LIMIT 1
+MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:HPO_CODE})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]->(hgncCUI:Concept)-[r3:gene_expression_of_hubmap_study]->(hubmap_cui:Concept)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code)
+MATCH (hmClusterCUI:Concept)-[r7:cluster_of_dataset]-(hmDatasetCUI:Concept)-[r8:hubmap_dataset_contains_tissue]-(tissueCUI:Concept)-[r9:CODE]-(tissueCode:Code)-[r10:PT]-(tissueTerm:Term)
+RETURN * limit  1
 ```
 
-![Protein_Glycan1.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/Protein_Glycan1.png)
+![hubmap_phenoptype.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hubmap_phenoptype.png)
 
 Return a table of the above, split by HuBMAP cluster ID.
 
 ```graphql
 WITH 'HP:0001631' AS HPO_CODE
-MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:HPO_CODE})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]->(hgncCUI:Concept)-[r3:gene_expression_of_hubmap_study]->(hubmap_cui:Concept)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code) 
+MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:HPO_CODE})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]->(hgncCUI:Concept)-[r3:gene_expression_of_hubmap_study]->(hubmap_cui:Concept)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code)
+MATCH (hmClusterCUI:Concept)-[r7:cluster_of_dataset]-(hmDatasetCUI:Concept)-[r8:hubmap_dataset_contains_tissue]-(tissueCUI:Concept)-[r9:CODE]-(tissueCode:Code)-[r10:PT]-(tissueTerm:Term)
 WITH split(hmClusterCode.CODE,' ')[0] AS hubmap_study_id, split(hmClusterCode.CODE,' ')[1] AS cluster
 RETURN hubmap_study_id,cluster limit 10	
 ```	
@@ -470,11 +472,11 @@ c.name AS Glycosylation_Type_Site_ProteinID,
 d.CODE AS Glycan
 ```
 
-15. I'm interested in finding out any relationships betwen human phenotypes and gene pathways/genesets. Which human phenotypes are associated with MSigDB genesets/pathways, using gene-tissue expression information in GTEx?
+15. I'm interested in finding relationships betwen human phenotypes and gene pathways/genesets. Which human phenotypes are associated with MSigDB genesets/pathways, using gene-tissue expression information in GTEx?
 
 Find all pathways in MSigDB linked to genes expressed in GTEx tissues that are known to be linked to human phenotypes.
 
-Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
+Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes. For the graphic, we "LIMIT 1". Table format query below will return many more.
 
 ```graphql
 //Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
@@ -483,10 +485,27 @@ MATCH (ubCode:Code {SAB:'UBERON'})-[:CODE]-(ubConcept:Concept)-[]-(hpoConcept)-[
 (hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]->(hgncTerm:Term),
 (hpoCode:Code {SAB:'HPO'})<-[:CODE]-(hpoConcept)
 WHERE r1.SAB CONTAINS 'MSigDB C2'
-RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubConcept,ubCode,ubTerm,hpoConcept,hpoCode LIMIT 1
+RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubConcept,
+ubCode,ubTerm,hpoConcept,hpoCode
 ```
 
 ![hpo_gtex_msigdb.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hpo_gtex_msigdb.png)
+
+
+
+```graphql
+//Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
+MATCH (ubCode:Code {SAB:'UBERON'})-[:CODE]-(ubConcept:Concept)-[]-(hpoConcept)-[:phenotype_associated_with_gene {SAB:'HGNC__HPO'}]-(hgncConcept:Concept)-[r1]->(msigdbConcept:Concept)-[:PREF_TERM]->(msigdbTerm:Term),
+(hgncConcept:Concept)-[:gene_has_median_expression]-(gtex_exp_cui:Concept)-[:tissue_has_median_expression]-(ubConcept:Concept)-[:PREF_TERM]->(ubTerm:Term),
+(hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]->(hgncTerm:Term),
+(hpoCode:Code {SAB:'HPO'})<-[:CODE]-(hpoConcept)
+WHERE r1.SAB CONTAINS 'MSigDB C2'
+RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubConcept, 
+ubCode,ubTerm,hpoConcept,hpoCode LIMIT 100
+```
+
+
+
 
 **Graph theory-esque queries**
 
