@@ -496,11 +496,9 @@ ubCode,ubTerm,hpoConcept,hpoCode LIMIT 100
 ```
 
 
+16. I hypothesize that LGR6, a stem cell regulation gene, may have some relationship to heart development. How is the human phenotype of Atrial Septal Defects related to LGR6 in the knowledge graph?
 
-
-**Graph theory-esque queries**
-
-17. Shortest path between an HPO term and a gene and return everything on the path and the path length, with and without using MSigDB. 
+Shortest path between an HPO term and a gene and return everything on the path and the path length, with and without using MSigDB. 
 
 ```graphql
 //With MSigDB relatioships
@@ -520,7 +518,7 @@ p = shortestPath((hgncConcept)-[r*]->(hpoConcept)) WHERE NONE(R IN r WHERE R.SAB
 RETURN  p AS Path
 ```
 
-![graph-4.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph-4.png)
+![hpo_to_gene_path.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hpo_to_gene_path.png)
 
 Note “coexpressed_with” is based on GTEx (click on table result as SAB). Codes are orange, terms are Blue, and concept nodes are in purple.
 
