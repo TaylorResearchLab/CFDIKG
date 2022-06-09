@@ -6,7 +6,7 @@ For this tutorial/demonstration we'll be using a knowledge graph we're tentative
 PetaGraph is populated with the HuBMAP UMLS ontology graph, with CFDE data introduced within it. 
 Additional data from mouse and human will be introduced this summer, as will some changes to the schema.
 
-Here's some numbers representing datasets in PetaGraph that are important for this demonstration:
+Here's numbers representing some of the datasets in PetaGraph that are important for this demonstration:
 
 ![summary_table.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/summary_table.png)
 
