@@ -1,19 +1,33 @@
 # June 9, 2021 CFDE Tutorial
+##Building blocks of queries on a CFDE-data populated property graph
 
-Our goal is to both grow the database and build a user interface (UI) to allow for queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
+For this tutorial/demonstration we'll be using the PetaGraph knowledge graph stored in a neo4j database.
+
+PetaGraph is populated with the HuBMAP UMLS ontology graph, with CFDE data introduced within it. 
+Additional data from mouse and human will be introduced this summer, as will some changes to the schema.
+
+Here's some numbers representing datasets in PetaGraph that are important for this demonstration:
+
+![summary_table.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/summary_table.png)
+
+
+
+
+
+
+Our goal is to eventually build a user interface (UI) to allow for queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
 
 For this demonstration,  we'll be showing you the queries that will operate behind the UI.
 
 
-## Just some logistics
+
+## SUPPLEMENTAL INFO
 
 **Main Project GitHub** (updating often)
 
 [https://github.com/TaylorResearchLab/CFDIKG](https://github.com/TaylorResearchLab/CFDIKG)
 
 If you'd like access to the database to recreate this demonstration, please contact Deanne Taylor and Jonathan Silverstein.
-
-### SUPPLEMENTAL INFO
 
 <A HREF="https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/Schema_CFDIKG_5-2022.md" target="new"> May 2022 Data Source Descriptions and Schema Reference</a> (right click to open in new window)
 
@@ -157,7 +171,7 @@ RETURN *
 HGNC Concept (blue), Code (purple) and Term (green) from HGNC on the left and its corresponding Mouse gene Concept and code on the right  
 
 
-How about phenotypes?  Given an HPO code, return the corresponding MP code if known
+How about mapping mouse to human phenotypes?  Given an HPO code, return the corresponding MP code if known
 
 ```graphql
 WITH 'HP:0001631' AS HPO_CODE
@@ -197,7 +211,7 @@ MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:COD
 RETURN DISTINCT hgncTerm.name AS Gene_Symbol, type(r2) AS Correlation, ChEBITerm.name AS Compound
 ```
 
-6. Return all non-zero GTEx expression levels  for a specific tissue type, listed by top TPM (LIMIT 100)
+5. Return all non-zero GTEx expression levels  for a specific tissue type, listed by top TPM (LIMIT 100)
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -207,7 +221,7 @@ WHERE gtex_term.lowerbound > 0
 RETURN  ub_term.name AS tissue, hgnc_term.name AS gene_symbol ,gtex_term.name AS TPM ORDER BY TPM DESCENDING limit 100
 ```
 
-7. Return all significant (adj p val < .05 or lower) GTEx eQTLs for a specific tissue, listed by smallest pvalue (LIMIT 100). The eQTL data schema is shown as a result of the query.
+6. Return all significant (adj p val < .05 or lower) GTEx eQTLs for a specific tissue, listed by smallest pvalue (LIMIT 100). The eQTL data schema is shown as a result of the query.
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -224,7 +238,7 @@ LIMIT 100
 
 An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL
 
-8. The query below is exactly the same as the one above but returns additional fields related to the eQTLs
+7. The query below is exactly the same as the one above but returns additional fields related to the eQTLs
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -247,7 +261,7 @@ ORDER BY Pval
 LIMIT 100
 ```
 
-9. Return all HuBMAP clusters/samples that express a certain gene above a defined threshold. 
+8. Return all HuBMAP clusters/samples that express a certain gene above a defined threshold. 
 
 ```graphql
 WITH 'BRCA1' AS  gene_name, .2 AS threshold
@@ -264,7 +278,7 @@ RETURN DISTINCT split(hgnc_term.name,' ')[0] AS gene,
 
 From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.
 
- 10. Return HPO codes, phenotype names and number of phenotype for Kids First Patient
+ 9. Return HPO codes, phenotype names and number of phenotype for Kids First Patient
 
 ```graphql
 MATCH (kfCode:Code {SAB:'KF'})-[r0:CODE]-(kfCUI:Concept)-[r1:patient_has_phenotype]-(hpoCUI:Concept)-[:CODE]-(hpoCode:Code {SAB:'HPO'})-[r2:PT]-(hpoTerm:Term)
@@ -280,7 +294,7 @@ RETURN kfCode.CODE AS KF_ID,
 
 Level II queries contain information from 2 Common Fund datasets.
 
-11. Given a subject ID in KF, find all the HPO terms for  that patient, and then find all genes associated with those HPO terms, then  find all cis-eQTLs related to those genes. Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
+10. Given a subject ID in KF, find all the HPO terms for  that patient, and then find all genes associated with those HPO terms, then  find all cis-eQTLs related to those genes. Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
 
 ```graphql
 WITH 'PT_1J582GQE' AS KF_ID
