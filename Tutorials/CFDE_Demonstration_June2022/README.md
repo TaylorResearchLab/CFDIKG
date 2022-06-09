@@ -30,6 +30,8 @@ If you'd like access to the database to recreate this demonstration, please cont
 <A HREF="https://neo4j.com/developer/cypher/guide-cypher-basics/" target="new"> Getting started with Cypher (neo4j) </a> (right click to open in new window)
 
 <A HREF="https://smart-api.info/ui/dea4bf91545a51b3dc415ba37e2a9e4e#/" target="new"> Python queries are based on the HuBMAP SMART API found here</A> (right click to open in new window)
+
+<A HREF="https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Demonstration_June2022/PetaGeneSABs.csv", target="new"> SAB list in PetaGraph</A> 
  
 ## Introduction to PetaGraph, our experimental data-enriched version of the HuBMAP/UMLS database.
 
