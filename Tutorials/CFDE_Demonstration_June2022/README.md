@@ -31,14 +31,7 @@ If you'd like access to the database to recreate this demonstration, please cont
 
 <A HREF="https://smart-api.info/ui/dea4bf91545a51b3dc415ba37e2a9e4e#/" target="new"> Python queries are based on the HuBMAP SMART API found here</A> (right click to open in new window)
 
-The Source Abbreviations (SABs) in the graph can be viewed here:
-
 <A HREF="https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Demonstration_June2022/PetaGeneSABs.csv", target="new"> SAB list in PetaGraph</A> 
-
-Some of them are shown in this table. There's >170 different SABs in the database.
-
-![https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/summary_table.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Demonstration_June2022/SAB_examples.png)
-
  
 ## Introduction to PetaGraph, our experimental data-enriched version of the HuBMAP/UMLS database.
 
@@ -198,6 +191,19 @@ A Concept (blue), Code (purple) and Term (green) from HPO on the left and its co
 
 
 4. Starting with a human gene, find all (drug) compounds that affect expression of that gene in a LINCs dataset (binary relationship: upregulated or downregulated). The time/dosage/cell type variables in LINCS have been collapsed. In cases of conflicts (up or down) the data includes both up and down links. In the future we can include all data from LINCs.
+
+![LINCs_vs_genes.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_vs_genes.png)
+
+```graphql
+//LINCS L1000, all positively or negatively correlated relatioships
+WITH 'A2M' AS GENE_NAME
+MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:CODE]-(hgnc_concept:Concept)-[r2 {SAB:'LINCS L1000'}]->(ChEBI_concept:Concept)-[r3:CODE]->(ChEBICode:Code {SAB:'CHEBI'}),(ChEBI_concept:Concept)-[:PREF_TERM]->(ChEBITerm:Term)
+RETURN * LIMIT 1
+```
+
+
+
+Same query as above but returning a table.
 
 ```graphql
 //Returns a table (not a graphic view)
