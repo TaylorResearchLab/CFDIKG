@@ -416,8 +416,6 @@ MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-
 RETURN ChEBITerm.name AS Compound,msigdbTerm.name AS Pathway, hgncTerm.name AS Gene
 ```
 
-![graph.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph.png)
-
 13. Can we find a HuBMAP cluster expressing genes that are also related to a specific human phenotype?
 
 Find all HuBMAP clusters expressing at least one gene related to a particular human phenotype (using OMIM).
