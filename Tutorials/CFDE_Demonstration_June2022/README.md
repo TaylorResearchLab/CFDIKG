@@ -440,7 +440,7 @@ RETURN hubmap_study_id,cluster limit 10
 	
 **Level III queries**
 
-15. There is evidence that heart defects could be related to changes in developmental programs due to dysregulation of glycosylation.  What glycans are predicted to be found on genes associated with Atrial Septal Defects?
+14. There is evidence that heart defects could be related to changes in developmental programs due to dysregulation of glycosylation.  What glycans are predicted to be found on genes associated with Atrial Septal Defects?
 
 
 ```graphql
@@ -454,7 +454,7 @@ RETURN * limit 1
 ![Protein_Glycan1.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/Protein_Glycan1.png)
 
 
-Table return of the above.
+Table return of the above query.
 
 
 ```graphql
@@ -470,9 +470,7 @@ c.name AS Glycosylation_Type_Site_ProteinID,
 d.CODE AS Glycan
 ```
 
-![Untitled](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/Untitled.png)
-
-16. Find all pathways in MSigDB linked to genes expressed in GTEx linked to human phenotypes. Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
+15. Find all pathways in MSigDB linked to genes expressed in GTEx linked to human phenotypes. Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
 
 ```graphql
 //Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
@@ -484,7 +482,7 @@ WHERE r1.SAB CONTAINS 'MSigDB C2'
 RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubConcept,ubCode,ubTerm,hpoConcept,hpoCode LIMIT 1
 ```
 
-![graph-5.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph-5.png)
+![hpo_gtex_msigdb.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hpo_gtex_msigdb.png)
 
 **Graph theory-esque queries**
 
