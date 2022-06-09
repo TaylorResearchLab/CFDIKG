@@ -217,7 +217,7 @@ WHERE gtex_term.lowerbound > 0
 RETURN  ub_term.name AS tissue, hgnc_term.name AS gene_symbol ,gtex_term.name AS TPM ORDER BY TPM DESCENDING limit 100
 ```
 
-6. Return all significant (adj p val < .05 or lower) GTEx eQTLs for a specific tissue, listed by smallest pvalue (LIMIT 100). The eQTL data schema is shown as a result of the query.
+6. Return a significant (adj p val < .05 or lower) GTEx eQTL for 'aorta' as a specific tissue with p<0.05. The eQTL data schema is shown as a result of the query.
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -230,9 +230,9 @@ RETURN  * LIMIT 1
 
 ![An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_eQTL.png)
 
-An UBERON Concept, Code and Term (top left), an HGNC Concept and preferred Term (top right) and GTEx eQTL Concept, Code and Terms (center). The GTEx Terms shown here represent a binned  p-value and variant ID for the eQTL
+An UBERON Concept, Code and Term,  an HGNC Concept and preferred Term,  and GTEx eQTL Concept, Code and Terms. The GTEx eQTL terms shown here represent a binned  p-value and variant ID for the eQTL itself.
 
-Return a more comprehensive table of the above. 
+Next,  a table of all the significant (adj p val < .05 or lower) GTEx eQTLs for a specific tissue, listed by smallest pvalue (LIMIT 100). 
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -245,7 +245,7 @@ ORDER BY Pval
 LIMIT 100
 ```
 
-7. The query below is exactly the same as the one above but returns additional fields related to the eQTLs
+7. The query below is exactly the same as the last one above but returns additional fields related to the eQTLs in a table:
 
 ```graphql
 WITH 'aorta' AS tissuename
@@ -268,7 +268,23 @@ ORDER BY Pval
 LIMIT 100
 ```
 
-8. Return all HuBMAP clusters/samples that express a certain gene above a defined threshold. 
+8. Return HuBMAP clusters related to a certain gene
+
+In this next query we limit to one cluster for demonstration purposes.
+Return clusters that express BRCA1 (or any gene as you like).
+
+```graphql
+WITH 'BRCA1' AS  gene_name, .2 AS threshold
+MATCH (hgnc_term:Term {name:gene_name+' gene'})-[r0:MTH_ACR]-(hgnc_code:Code {SAB:'HGNC'})-[r1:CODE]-(hgnc_cui:Concept)-[r2]-(hubmap_cui:Concept)-[r3:CODE]-(cs:Code {SAB:'HUBMAPsc'})-[r4:normed_gene_expression_per_cluster]-(hubmap_term) 
+WHERE hubmap_term.lowerbound > threshold
+MATCH (hubmap_cui)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code)
+WITH *, split(hmClusterCode.CODE,' ') AS cluster_num
+MATCH (hmClusterCUI)-[r7:cluster_of_dataset]-(hmDatasetCUI)-[r8:CODE]-(hmDatasetCode:Code)
+RETURN * LIMIT 1
+```
+
+
+Return a table with all HuBMAP clusters/samples that express a certain gene above a defined value threshold. 
 
 ```graphql
 WITH 'BRCA1' AS  gene_name, .2 AS threshold
@@ -281,7 +297,7 @@ RETURN DISTINCT split(hgnc_term.name,' ')[0] AS gene,
       cluster_num[1]+' '+cluster_num[2] AS cluster_num, hmDatasetCode.CODE AS hubmap_dataset,hubmap_term.name AS expression ORDER BY hubmap_dataset
 ```
 
-![From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hubmap.png)
+![From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hubmap2.png)
 
 From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.
 
