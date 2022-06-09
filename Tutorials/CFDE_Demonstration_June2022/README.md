@@ -342,7 +342,7 @@ RETURN DISTINCT split(hgnc_term.name,' ')[0] AS gene,
  9. How many phenotypes are present for a study subject in the Kids First project?
  
  
- Return HPO codes, phenotype names and number of phenotype for each Kids First subject in the knowledge graph
+ Returns a table: HPO codes, phenotype names and number of phenotype for each Kids First subject in the knowledge graph
 
 ```graphql
 MATCH (kfCode:Code {SAB:'KF'})-[r0:CODE]-(kfCUI:Concept)-[r1:patient_has_phenotype]-(hpoCUI:Concept)-[:CODE]-(hpoCode:Code {SAB:'HPO'})-[r2:PT]-(hpoTerm:Term)
@@ -372,9 +372,13 @@ MATCH (gtexEqtlCode)-[r11:rs_id_dbSNP151_GRCh38p7]-(eqtl_rsID:Term)
 RETURN * LIMIT 1
 ```
 
+
 ![Example of an HPO term related to a subject and the genes associated with that HPO term, and then the GTEx eQTL associated with a gene](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/KF_phenotype_eqtl.png)
 
-Return a table like above with all HPO terms and associated genes, GTEx cis-EQTL Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
+From the left side, the patient ID ("PT...") connects to the phenotype, then to the gene, then to the eqtl concept with p-value.
+
+
+Next, return a table like above with all HPO terms and associated genes, GTEx cis-EQTL Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
 
 ```graphql
 WITH 'PT_1J582GQE' AS KF_ID
@@ -400,7 +404,9 @@ For this query, we need to find those tissues actually expressing a gene whose e
 
 We use the LINCS dataset to find those genes that are affected by mosapride, and then we find all the tissues in GTEx with those genes TPM > a user-specified threshold. 
 
-This is limited to 2 results for graphing purposes. The query after this one returns the full table.
+This was limited to 2 results to show how additional connections can be made in the graph automatically (in this case, the continuous physiology between vagina & uterus). 
+
+The query after this one returns the full table.
 
 ```graphql
 //Returns a table containing compund generic name correlated with genes with higher than threshold expression level in different tissues
@@ -412,6 +418,7 @@ WHERE gtex_term.lowerbound > MIN_EXP
 RETURN * LIMIT 2
 ```
 ![GTEx tissues likely affected by a compound ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_mosapride_GTEx.png)
+
 
 For all tissues affected by mosapride, return the full table
 
@@ -430,7 +437,6 @@ RETURN DISTINCT ChEBITerm.name AS Compound, hgncTerm.name AS GENE, ub_term.name 
 
 Here we find an intersection between MSigDB Hallmark pathways given a target LINCS compound, by using genes associated with those entities
 
-
 ```graphql
 //Returns the graph linkage of MSigDB hallmark pathways associated with their 
 //signature genes regulated by a compound in LINCS L1000
@@ -441,7 +447,6 @@ RETURN * LIMIT 1
 ```
 
 ![Pathways related to LINCS compounds ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_mosapride_MSIGDB.png)
-
 
 Return a table based on the above with all pathways affected.
 
@@ -468,18 +473,18 @@ RETURN * limit  1
 ![hubmap_phenoptype.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hubmap_phenoptype.png)
 
 	
-**Level III queries**
+### **Level III queries**
 
-14. There is evidence that heart defects could be related to changes in developmental programs due to dysregulation of glycosylation.  What glycans are predicted to be found on genes associated with Atrial Septal Defects?
+14. There is evidence that heart defects could be related to changes in developmental programs due to dysregulation of glycosylation.  What glycans are predicted to be found on proteins (and where) from genes associated with Atrial Septal Defects?
 
 
 ```graphql
 //Starting with HPO human phenotypes, glycans will be extracted in association with Human genes
 MATCH (m:Code {CODE:'HP:0001631'})<-[:CODE]-(n:Concept)<-[r:isa*..1 {SAB:'HPO'}]-(o:Concept) WITH collect(n.CUI)+o.CUI AS T UNWIND T AS UT WITH collect(DISTINCT UT) AS PHS MATCH (q:Concept)-[:phenotype_associated_with_gene {SAB:'HGNC__HPO'}]->(t:Concept)-[:has_product]->(u:Concept)-[:has_site]->(v:Concept)-[:binds_glycan]->(w:Concept),
-(t)-[:CODE]->(:Code)-[:SYN]->(a:Term),
+(t)-[:CODE]->(r2:Code)-[:SYN]->(a:Term),
 (u)-[:CODE]->(b:Code),(v)-[:PREF_TERM]->(c:Term),
 (w)-[:CODE]->(d) WHERE q.CUI IN PHS 
-RETURN * limit 1
+RETURN * LIMIT 1
 ```
 ![Protein_Glycan1.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/Protein_Glycan1.png)
 
@@ -491,7 +496,7 @@ Table return of the above query.
 //Returns a table (not a graphic view)
 //Starting with HPO human phenotypes, glycans will be extracted in association with Human genes
 MATCH (m:Code {CODE:'HP:0001631'})<-[:CODE]-(n:Concept)<-[r:isa*..1 {SAB:'HPO'}]-(o:Concept) WITH collect(n.CUI)+o.CUI AS T UNWIND T AS UT WITH collect(DISTINCT UT) AS PHS MATCH (q:Concept)-[:phenotype_associated_with_gene {SAB:'HGNC__HPO'}]->(t:Concept)-[:has_product]->(u:Concept)-[:has_site]->(v:Concept)-[:binds_glycan]->(w:Concept),
-(t)-[:CODE]->(:Code)-[:SYN]->(a:Term),
+(t)-[:CODE]->(r2:Code)-[:SYN]->(a:Term),
 (u)-[:CODE]->(b:Code),(v)-[:PREF_TERM]->(c:Term),
 (w)-[:CODE]->(d) WHERE q.CUI IN PHS 
 RETURN DISTINCT a.name AS Gene, 
