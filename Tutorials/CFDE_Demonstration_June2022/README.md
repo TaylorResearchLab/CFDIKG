@@ -103,7 +103,7 @@ RETURN * LIMIT 1
 
 ![GTEx_expression_1.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression_1.png)
 
-You can see from the image where I've moused over the Code node (purple) that this node represents an Ensembl ID + a tissue descriptor. The term associated with this code node is a binned TPM value ranging between 9 and 10 which can be used to select or display TPM ranges of interest. In a future release of this knowledge graph, the numerical type values will also be shown. 
+You can see from the above image, where I've moused over the Code node (purple), that this node represents an Ensembl ID + a tissue descriptor. The term associated with this code node is a binned TPM value ranging between 9 and 10 which can be used to select or display TPM ranges of interest. In a future release of this knowledge graph, the numerical type values will also be shown. 
 
 Let's add the concept node of the gene represented by this TPM value: 
 
@@ -125,6 +125,8 @@ MATCH (gtex_cui)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code {SAB:'HGNC'})
 MATCH (gtex_cui)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code {SAB:'UBERON'}) 
 RETURN * LIMIT 1
 ```
+
+![GTEx_expression.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression_2.png)
 
 
 This query also displays the current graph structure of all the GTEx expression concept code relations:  HGNC gene <-> TPM value <-> Uberon ID.  It can be used to help build additional queries combining GTEx data with other datasets in the knowledge graph.
