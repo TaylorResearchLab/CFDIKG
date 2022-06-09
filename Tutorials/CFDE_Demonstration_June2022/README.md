@@ -86,9 +86,15 @@ MATCH (a:Concept{CUI:"C0001367"})-[:PREF_TERM]->(b:Term) RETURN *
 
 1. Exploring GTEx experimental data.  
 
-Let's look at an example of a tissue-gene pair expression data point from the GTEx project. We will select out TPM data (transcripts per million) which are used to quantify how much of a gene is expressed within a sample.
+Let's look at an example of a tissue-gene pair expression data point from the GTEx project.
+
+Here we will select out TPM data (transcripts per million) which are used to quantify how much of a gene is expressed within a sample.
 
 In our query, we use "Limit 1" to prevent us from returning all the GTEx TPM values in the DB.
+
+To make each GTEx TPM point unique, we store each TPM value as a tissue-gene pair.
+
+This example just extracts tissue-gene pairs and the TPM associated with that tissue-gene pair.
 
 ```graphql
 MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]-(gtex_term:Term)
