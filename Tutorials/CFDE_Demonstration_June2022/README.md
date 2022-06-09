@@ -319,10 +319,11 @@ WITH *, split(hmClusterCode.CODE,' ') AS cluster_num
 MATCH (hmClusterCUI)-[r7:cluster_of_dataset]-(hmDatasetCUI)-[r8:CODE]-(hmDatasetCode:Code)
 RETURN * LIMIT 1
 ```
-![From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hubmap2.png)
+![hubmap2.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hubmap2.png)
 
+From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.
 
-Return a table with all HuBMAP clusters/samples that express a certain gene above a defined value threshold. 
+Same query as above, this time return a table with all HuBMAP clusters/samples that express a certain gene above a defined value threshold. 
 
 ```graphql
 WITH 'BRCA1' AS  gene_name, .2 AS threshold
@@ -337,7 +338,6 @@ RETURN DISTINCT split(hgnc_term.name,' ')[0] AS gene,
 
 
 
-From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.
 
  9. How many phenotypes are present for a study subject in the Kids First project?
  
