@@ -129,7 +129,7 @@ RETURN * LIMIT 1
 ![GTEx_expression.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression.png)
 
 
-This query also displays the current graph structure of all the GTEx expression concept code relations:  HGNC gene <-> TPM value <-> Uberon ID.  It can be used to help build additional queries combining GTEx data with other datasets in the knowledge graph.
+This query represented by the plot above also displays the current graph structure of all the GTEx expression concept code relations:  HGNC gene <-> TPM value <-> Uberon ID.  It can be used to help build additional queries combining GTEx data with other datasets in the knowledge graph.
 
 
 2. Can we find all phenotype-gene relationships given a certain phenotype?
