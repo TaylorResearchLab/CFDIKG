@@ -470,7 +470,7 @@ c.name AS Glycosylation_Type_Site_ProteinID,
 d.CODE AS Glycan
 ```
 
-15. I'm interested in finding out which human phenotypes are associated with specific MSigDB genesets/pathways, using what genes are expressed in certain tissues in GTEx.
+15. I'm interested in finding out any relationships betwen human phenotypes and gene pathways/genesets. Which human phenotypes are associated with MSigDB genesets/pathways, using gene-tissue expression information in GTEx?
 
 Find all pathways in MSigDB linked to genes expressed in GTEx tissues that are known to be linked to human phenotypes.
 
