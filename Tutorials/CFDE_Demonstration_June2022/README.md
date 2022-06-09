@@ -85,7 +85,7 @@ RETURN * LIMIT 1
 
 ![GTEx_expression.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression.png)
 
-2. Given a HPO (phenotype) term, return all linked gene names by leveraging the HPO-to-gene links in Jax. #Need SAB to relationships
+2. Given a HPO (phenotype) term, return all linked gene names by leveraging the HPO-to-gene links curated by Peter Robinson's group at Jax. The phenotype<->gene relationships are obtained from Orphanet and OMIM. A future iteration of this graph will indicate which are from Orphanet, and which are from OMIM.
 
 ```graphql
 WITH 'HP:0001631' AS HPO_CODE
