@@ -419,7 +419,7 @@ RETURN ChEBITerm.name AS Compound,msigdbTerm.name AS Pathway, hgncTerm.name AS G
 13. Can we find a HuBMAP cluster expressing genes that are also related to a specific human phenotype?
 
 Find all HuBMAP clusters expressing at least one gene related to a particular human phenotype (using OMIM).
-Here we just use HP:0001631, Atrial Septal Defect. 
+Here we just use HP:0001631, Atrial Septal Defect. To gain more relationships, change the limit and check out the table ("Text") view on the left of the query interface.
 
 ```graphql
 WITH 'HP:0001631' AS HPO_CODE
@@ -430,15 +430,6 @@ RETURN * limit  1
 
 ![hubmap_phenoptype.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hubmap_phenoptype.png)
 
-Return a table of the above, split by HuBMAP cluster ID.
-
-```graphql
-WITH 'HP:0001631' AS HPO_CODE
-MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:HPO_CODE})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]->(hgncCUI:Concept)-[r3:gene_expression_of_hubmap_study]->(hubmap_cui:Concept)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code)
-MATCH (hmClusterCUI:Concept)-[r7:cluster_of_dataset]-(hmDatasetCUI:Concept)-[r8:hubmap_dataset_contains_tissue]-(tissueCUI:Concept)-[r9:CODE]-(tissueCode:Code)-[r10:PT]-(tissueTerm:Term)
-WITH split(hmClusterCode.CODE,' ')[0] AS hubmap_study_id, split(hmClusterCode.CODE,' ')[1] AS cluster
-RETURN hubmap_study_id,cluster limit 10	
-```	
 	
 **Level III queries**
 
