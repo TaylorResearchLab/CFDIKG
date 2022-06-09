@@ -470,7 +470,11 @@ c.name AS Glycosylation_Type_Site_ProteinID,
 d.CODE AS Glycan
 ```
 
-15. Find all pathways in MSigDB linked to genes expressed in GTEx linked to human phenotypes. Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
+15. I'm interested in finding out which human phenotypes are associated with specific MSigDB genesets/pathways, using what genes are expressed in certain tissues in GTEx.
+
+Find all pathways in MSigDB linked to genes expressed in GTEx tissues that are known to be linked to human phenotypes.
+
+Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
 
 ```graphql
 //Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
