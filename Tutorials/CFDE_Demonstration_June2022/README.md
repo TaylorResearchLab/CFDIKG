@@ -394,11 +394,9 @@ RETURN DISTINCT ChEBITerm.name AS Compound, hgncTerm.name AS GENE, ub_term.name 
 Here we find an intersection between MSigDB Hallmark pathways given a target LINCS compound, by using genes associated with those entities
 
 
-
-
-
 ```graphql
-//Returns the graph linkage of MSigDB hallmark pathways associated with their signature genes regulated by a compound in LINCS L1000
+//Returns the graph linkage of MSigDB hallmark pathways associated with their 
+//signature genes regulated by a compound in LINCS L1000
 WITH 'mosapride' AS COMPOUND_NAME
 MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-[:CODE]-(ChEBIconcept:Concept)-[r1 {SAB:'LINCS L1000'}]->(hgncConcept:Concept)-[r2 {SAB:'MSigDB H'}]->(msigdbConcept:Concept)-[:PREF_TERM]->(msigdbTerm:Term),
 (hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]->(hgncTerm:Term)
@@ -408,7 +406,7 @@ RETURN * LIMIT 1
 ![GTEx tissues likely affected by a compound ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_mosapride_MSIGDB.png)
 
 
-Return a table on the above.
+Return a table based on the above with all pathways affected.
 
 ```graphql
 //Returns a list of MSigDB hallmark pathways regulated by the given LINCS compound
@@ -420,23 +418,48 @@ RETURN ChEBITerm.name AS Compound,msigdbTerm.name AS Pathway, hgncTerm.name AS G
 
 ![graph.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph.png)
 
-14. Find all HuBMAP clusters expressing at least one gene related to a human phenotype (using OMIM)	
-	
+13. Can we find a HuBMAP cluster expressing genes that are also related to a specific human phenotype?
+
+Find all HuBMAP clusters expressing at least one gene related to a particular human phenotype (using OMIM).
+Here we just use HP:0001631, Atrial Septal Defect. 
+
 ```graphql
-WITH 'HP:0000023' AS hpo_code
-MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {SAB:'HPO'})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]->(hgncCUI:Concept)-[r3:gene_expression_of_hubmap_study]->(hubmap_cui:Concept)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code) 
+WITH 'HP:0001631' AS HPO_CODE
+MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:HPO_CODE})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]->(hgncCUI:Concept)-[r3:gene_expression_of_hubmap_study]->(hubmap_cui:Concept)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code) 
+RETURN *  LIMIT 1	
+```
+
+Return a table of the above, split by HuBMAP cluster ID.
+
+```graphql
+WITH 'HP:0001631' AS HPO_CODE
+MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:HPO_CODE})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]->(hgncCUI:Concept)-[r3:gene_expression_of_hubmap_study]->(hubmap_cui:Concept)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code) 
 WITH split(hmClusterCode.CODE,' ')[0] AS hubmap_study_id, split(hmClusterCode.CODE,' ')[1] AS cluster
 RETURN hubmap_study_id,cluster limit 10	
 ```	
 	
-
 **Level III queries**
 
-15. Starting with a given OMIM human phenotype, glycans will be extracted in association with Human genes
+15. There is evidence that heart defects could be related to changes in developmental programs due to dysregulation of glycosylation.  What glycans are predicted to be found on genes associated with Atrial Septal Defects?
+
+
+```graphql
+//Starting with HPO human phenotypes, glycans will be extracted in association with Human genes
+MATCH (m:Code {CODE:'HP:0001631'})<-[:CODE]-(n:Concept)<-[r:isa*..1 {SAB:'HPO'}]-(o:Concept) WITH collect(n.CUI)+o.CUI AS T UNWIND T AS UT WITH collect(DISTINCT UT) AS PHS MATCH (q:Concept)-[:phenotype_associated_with_gene {SAB:'HGNC__HPO'}]->(t:Concept)-[:has_product]->(u:Concept)-[:has_site]->(v:Concept)-[:binds_glycan]->(w:Concept),
+(t)-[:CODE]->(:Code)-[:SYN]->(a:Term),
+(u)-[:CODE]->(b:Code),(v)-[:PREF_TERM]->(c:Term),
+(w)-[:CODE]->(d) WHERE q.CUI IN PHS 
+RETURN * limit 1
+```
+![Protein_Glycan1.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/Protein_Glycan1.png)
+
+
+Table return of the above.
+
 
 ```graphql
 //Returns a table (not a graphic view)
-//Starting with a given OMIM human phenotype, glycans will be extracted in association with Human genes
+//Starting with HPO human phenotypes, glycans will be extracted in association with Human genes
 MATCH (m:Code {CODE:'HP:0001631'})<-[:CODE]-(n:Concept)<-[r:isa*..1 {SAB:'HPO'}]-(o:Concept) WITH collect(n.CUI)+o.CUI AS T UNWIND T AS UT WITH collect(DISTINCT UT) AS PHS MATCH (q:Concept)-[:phenotype_associated_with_gene {SAB:'HGNC__HPO'}]->(t:Concept)-[:has_product]->(u:Concept)-[:has_site]->(v:Concept)-[:binds_glycan]->(w:Concept),
 (t)-[:CODE]->(:Code)-[:SYN]->(a:Term),
 (u)-[:CODE]->(b:Code),(v)-[:PREF_TERM]->(c:Term),
