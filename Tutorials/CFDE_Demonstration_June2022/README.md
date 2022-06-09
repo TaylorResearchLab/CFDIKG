@@ -82,7 +82,7 @@ Let's look at an example of a tissue-gene pair in GTEx -- we use "Limit 1" to pr
 MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]-(gtex_term:Term)
 RETURN * LIMIT 1
 ```
-![GTEx_expression_1.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression.png)
+![GTEx_expression_1.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression_1.png)
 
 You can see from the image where I've moused over the Code node (purple) that this node represents an Ensembl ID + a tissue descriptor. Te term associated with that code is an expression value range between 9 and 10 TPM, thus categorical. In future iterations of this knowledge graph, the numerical values will also be available. 
 
@@ -94,7 +94,7 @@ MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]-(gte
 MATCH (gtex_cui)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code {SAB:'HGNC'})
 RETURN * LIMIT 1
 ```
-![GTEx_expression_2.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression.png)
+![GTEx_expression_2.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression_2.png)
 
 
 Now let's add the tissue classification by Uberon, and display the full structure of the GTEx expression data.  Return 1 GTEx CUI (using LIMIT 1), and expression and tissue codes and Term (binned TPM).    
@@ -124,8 +124,6 @@ MATCH (hpoTerm:Term)-[:PT]-(hpoCode:Code {CODE: HPO_CODE})-[r1:CODE]-(hpo_concep
 RETURN hgnc_code.CODE AS HGNC_ID, hgnc_term.name AS GENE_SYMBOL
 
 ```
-
-
 
 
 ![A Concept (blue), Code (purple) and Term (green) node from HPO (left side) and HGNC (right side) and the bidirectional relationships between the two Concept nodes.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/HPO_HGNC.png)
