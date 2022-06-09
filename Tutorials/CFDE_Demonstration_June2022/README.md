@@ -488,6 +488,10 @@ RETURN * LIMIT 1
 ```
 ![Protein_Glycan2.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/Protein_Glycan2.png)
 
+The glycan is attached to a O-link location on the protein, which is connected to the gene ID, and then to the HPO id.
+In the figure above you can see the identity of the glycan on the far right, shown by selecting it in the interface here.
+Or you can create a table and see all the results --
+
 
 Table return of the above query.
 
