@@ -513,7 +513,9 @@ d.CODE AS Glycan
 
 Find all pathways in MSigDB linked to genes expressed in GTEx tissues that are known to be linked to human phenotypes.
 
-Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes. For the graphic, we "LIMIT 1". Table format query below will return many more.
+Returns HPO terms associated with tissue-specific GTEx genes within MSigDB pathways.
+
+For the graphic, we "LIMIT 1". Table format query below will return many more.
 
 ```graphql
 //Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
@@ -522,12 +524,10 @@ MATCH (ubCode:Code {SAB:'UBERON'})-[:CODE]-(ubConcept:Concept)-[]-(hpoConcept)-[
 (hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]->(hgncTerm:Term),
 (hpoCode:Code {SAB:'HPO'})<-[:CODE]-(hpoConcept)
 WHERE r1.SAB CONTAINS 'MSigDB C2'
-RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubConcept,
-ubCode,ubTerm,hpoConcept,hpoCode
+RETURN * LIMIT 1
 ```
 
 ![hpo_gtex_msigdb.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hpo_gtex_msigdb.png)
-
 
 
 ```graphql
@@ -541,10 +541,10 @@ RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubCon
 ubCode,ubTerm,hpoConcept,hpoCode LIMIT 100
 ```
 
-
-16. I hypothesize that LGR6, a stem cell regulation gene, may have some relationship to heart development. How is the human phenotype of Atrial Septal Defects related to LGR6 in the knowledge graph?
+16. I hypothesize that HNRNPH2, a heterogeneous nuclear ribonucleoprotein that regulates RNA processing, may have some relationship to heart development. How is the human phenotype of Atrial Septal Defects related to LGR6 in the knowledge graph?
 
 Shortest path between an HPO term and a gene and return everything on the path and the path length, with and without using MSigDB. 
+Shortest paths aren't always the best paths, and there are queries that can be done ordering all paths by size, for example.
 
 ```graphql
 //With MSigDB relatioships
