@@ -424,8 +424,9 @@ Here we just use HP:0001631, Atrial Septal Defect.
 ```graphql
 WITH 'HP:0001631' AS HPO_CODE
 MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:HPO_CODE})-[r1:CODE]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]->(hgncCUI:Concept)-[r3:gene_expression_of_hubmap_study]->(hubmap_cui:Concept)-[r5:hubmap_node_belongs_to_cluster]-(hmClusterCUI:Concept)-[r6:CODE]-(hmClusterCode:Code) 
-RETURN *  LIMIT 1	
+RETURN *  LIMIT 1
 ```
+
 ![LINCS_mosapride_MSIGDB.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_mosapride_MSIGDB.png)
 
 Return a table of the above, split by HuBMAP cluster ID.
