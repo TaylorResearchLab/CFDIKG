@@ -320,12 +320,24 @@ RETURN kfCode.CODE AS KF_ID,
 
 ### Level II queries: Combining information from 2 Common Fund datasets.
 
-10. Given a subject's Kids First ID, can we find all the HPO terms related to that subject, and then find all genes associated with those HPO terms, then  find all cis-eQTLs related to those genes. Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
+10. Given a subject's Kids First ID, can we find all the HPO terms related to that subject, and then find all genes associated with those HPO terms, then  find GTEx cis-eQTLs related to those genes. 
 
+```graphql
+WITH 'PT_1J582GQE' AS KF_ID
+MATCH (kfCode:Code {SAB:'KF',CODE: KF_ID})-[r0:CODE]-(kfCUI:Concept)-[r1:patient_has_phenotype]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]-(hgncCUI:Concept)-[r3:gene_has_eqtl]-(gtexEqtlCUI:Concept)-[r4:CODE]-(gtexEqtlCode:Code)
+MATCH (hpoCUI)-[r5:CODE]-(hpoCode)
+MATCH (hgncCUI)-[r6:CODE]-(hgncCode {SAB:'HGNC'})-[r7:PT]-(hgncTerm:Term)
+MATCH (gtexEqtlCode)-[r8:on_chromosome]-(eqtl_chrom:Term)
+MATCH (gtexEqtlCode)-[r9:eqtl_location]-(eqtl_loc:Term)
+MATCH (gtexEqtlCode)-[r10:p_value]-(eqtl_pval:Term)
+WHERE eqtl_pval.upperbound < 1e-10
+MATCH (gtexEqtlCode)-[r11:rs_id_dbSNP151_GRCh38p7]-(eqtl_rsID:Term)
+RETURN * LIMIT 1
+```
 
-![From left to right (Concepts are orange): A tissue Concept (could be UBERON, FMA or SNOMED) , HuBMAP dataset Concept, HuBMAP cluster Concept (most datasets have between 10 and 20 clusters), HuBMAP expression Concept and a HGNC Concept.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/KF_phenotype_eqtl.png)
+![Example of an HPO term related to a subject and the genes associated with that HPO term, and then the GTEx eQTL associated with a gene](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/KF_phenotype_eqtl.png)
 
-
+Return a table like above with all HPO terms and associated genes, GTEx cis-EQTL Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
 
 ```graphql
 WITH 'PT_1J582GQE' AS KF_ID
