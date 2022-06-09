@@ -1,7 +1,7 @@
 # June 9, 2021 CFDE Tutorial
 ##Building blocks of queries on a CFDE-data populated property graph
 
-For this tutorial/demonstration we'll be using the PetaGraph knowledge graph stored in a neo4j database.
+For this tutorial/demonstration we'll be using a knowledge graph we're tentatively calling "PetaGraph."
 
 PetaGraph is populated with the HuBMAP UMLS ontology graph, with CFDE data introduced within it. 
 Additional data from mouse and human will be introduced this summer, as will some changes to the schema.
