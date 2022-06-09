@@ -76,18 +76,20 @@ MATCH (a:Concept{CUI:"C0001367"})-[:PREF_TERM]->(b:Term) RETURN *
 
 1. Exploring GTEx experimental data.  
 
-Let's look at an example of a tissue-gene pair in GTEx -- we use "Limit 1" to prevent us from returning ALL the experimental pairs in the DB!  
+Let's look at an example of a tissue-gene pair expression data point from the GTEx project. We will select out TPM data (transcripts per million) which are used to quantify how much of a gene is expressed within a sample.
+
+In our query, we use "Limit 1" to prevent us from returning all the GTEx TPM values in the DB.
 
 ```graphql
 MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]-(gtex_term:Term)
 RETURN * LIMIT 1
 ```
+
 ![GTEx_expression_1.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression_1.png)
 
-You can see from the image where I've moused over the Code node (purple) that this node represents an Ensembl ID + a tissue descriptor. Te term associated with that code is an expression value range between 9 and 10 TPM, thus categorical. In future iterations of this knowledge graph, the numerical values will also be available. 
+You can see from the image where I've moused over the Code node (purple) that this node represents an Ensembl ID + a tissue descriptor. The term associated with this code node is a binned TPM value ranging between 9 and 10 which can be used to select or display TPM ranges of interest. In a future release of this knowledge graph, the numerical type values will also be shown. 
 
-
-Now, let's add the gene it's connected to:
+Let's add the concept node of the gene represented by this TPM value: 
 
 ```graphql
 MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]-(gtex_term:Term)
@@ -97,7 +99,7 @@ RETURN * LIMIT 1
 ![GTEx_expression_2.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/GTEx_expression_2.png)
 
 
-Now let's add the tissue classification by Uberon, and display the full structure of the GTEx expression data.  Return 1 GTEx CUI (using LIMIT 1), and expression and tissue codes and Term (binned TPM).    
+Next, let's add the concept code for the tisuse related to this TPM value and gene. This also displays the current graph structure of all the GTEx expression concept code relations:  HGNC gene <-> TPM value <-> Uberon ID.  
 
 ```graphql
 MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]-(gtex_term:Term)
