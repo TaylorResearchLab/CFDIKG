@@ -1,5 +1,5 @@
-# June 9, 2021 CFDE Tutorial
-##Building blocks of queries on a CFDE-data populated property graph
+# June 9, 2021 CFDE Demonstration
+## Building blocks of queries on a CFDE-data populated property graph
 
 For this tutorial/demonstration we'll be using a knowledge graph we're tentatively calling "PetaGraph."
 
