@@ -376,11 +376,7 @@ RETURN * LIMIT 2
 ```
 ![GTEx tissues likely affected by a compound ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_mosapride_GTEx.png)
 
-
-
-
-
-Return the full table
+For all tissues affected by mosapride, return the full table
 
 ```graphql
 //Returns a table containing compund generic name correlated with genes with higher than threshold expression level in different tissues
@@ -392,15 +388,27 @@ WHERE gtex_term.lowerbound > MIN_EXP
 RETURN DISTINCT ChEBITerm.name AS Compound, hgncTerm.name AS GENE, ub_term.name AS Tissue, gtex_term.lowerbound AS Expression_Level ORDER BY Expression_Level ASCENDING
 ```
 
-13. Find intersection between MSigDB Hallmark pathways given a target LINCS compound through genes associated with those entities
+
+12. Can we find genesets ("pathways") in the MSigDB resource, that may be affected by mosapride based on data from LINCS?
+
+Here we find an intersection between MSigDB Hallmark pathways given a target LINCS compound, by using genes associated with those entities
+
+
+
+
 
 ```graphql
 //Returns the graph linkage of MSigDB hallmark pathways associated with their signature genes regulated by a compound in LINCS L1000
 WITH 'mosapride' AS COMPOUND_NAME
 MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-[:CODE]-(ChEBIconcept:Concept)-[r1 {SAB:'LINCS L1000'}]->(hgncConcept:Concept)-[r2 {SAB:'MSigDB H'}]->(msigdbConcept:Concept)-[:PREF_TERM]->(msigdbTerm:Term),
 (hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]->(hgncTerm:Term)
-RETURN ChEBITerm,ChEBIconcept,hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm LIMIT 1
+RETURN * LIMIT 1
 ```
+
+![GTEx tissues likely affected by a compound ](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/LINCS_mosapride_MSIGDB.png)
+
+
+Return a table on the above.
 
 ```graphql
 //Returns a list of MSigDB hallmark pathways regulated by the given LINCS compound
