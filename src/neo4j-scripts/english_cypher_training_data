@@ -1,0 +1,38 @@
+
+
+########################################################
+##### Cypher queries and their english translation #####
+########################################################
+
+
+## How many codes are there from the <SAB> dataset?
+match (hgnc_hcop: Code {SAB : 'HGNC'})  return count(hgnc_hcop) as hgnc_hcop_cnt 
+
+## How many codes are there from the 'MP' dataset?
+match (mp: Code {SAB : 'MP'})  return count(mp) as mp_cnt 
+
+## ^ This pattern can be extended for any SAB
+
+
+
+
+# What phenotypes are related to <GENE>? enter name of gene or HGNC code?
+
+# What genes are related to <PHENOTYPE> enter name of phenotype or HPO code?
+
+
+
+# what are the gene expression levels for <TISSUE>? enter name of tissue or UBERON code? 
+match (ub_code:Code {SAB:'UBERON',CODE:'0000947'})-[r0:CODE]-(ub_cui:Concept)-[r1:tissue_has_median_expression]-(gtex_exp_cui:Concept)-[r2:CODE]-(gtex_exp_code:Code {SAB:'GTEX_EXP'})-[r3]-(gtex_term:Term)
+return gtex_exp_code.CODE AS gtex, gtex_term.name AS exp limit 100
+
+
+
+
+
+
+
+
+
+
+
