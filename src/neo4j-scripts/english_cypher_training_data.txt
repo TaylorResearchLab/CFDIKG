@@ -16,13 +16,14 @@ match (mp: Code {SAB : 'MP'})  return count(mp) as mp_cnt
 
 
 
-# What phenotypes are related to <GENE>? enter name of gene or HGNC code?
+# What phenotypes are related to <GENE>? (enter name of gene or HGNC code?)
+match (gene:Code {CODE:'HGNC:9787'})--(gene_C:Concept)-[r]-(hpo_C:Concept)-[c:CODE]-(hpo:Code {SAB: 'HPO'})-[]-(hpo_term:Term)  return distinct hpo_term.name
 
-# What genes are related to <PHENOTYPE> enter name of phenotype or HPO code?
+# What genes are related to <PHENOTYPE> (enter name of phenotype or HPO code?)
+match (hpo:Code {CODE:'HP:0025579'})--(hpo_C:Concept)-[r]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC'})-[:MTH_ACR]-(gene_term:Term)   
+return distinct gene_term.name
 
-
-
-# what are the gene expression levels for <TISSUE>? enter name of tissue or UBERON code? 
+# what are the gene expression levels for <TISSUE>? (enter name of tissue or UBERON code?)
 match (ub_code:Code {SAB:'UBERON',CODE:'0000947'})-[r0:CODE]-(ub_cui:Concept)-[r1:tissue_has_median_expression]-(gtex_exp_cui:Concept)-[r2:CODE]-(gtex_exp_code:Code {SAB:'GTEX_EXP'})-[r3]-(gtex_term:Term)
 return gtex_exp_code.CODE AS gtex, gtex_term.name AS exp limit 100
 
