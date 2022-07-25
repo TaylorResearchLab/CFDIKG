@@ -29,6 +29,36 @@ return gtex_exp_code.CODE AS gtex, gtex_term.name AS exp limit 100
 
 
 
+# Return all tiissue codes associated with a HUBMAP dataset ID. (More dataset IDs: 2dca1bf5832a4102ba780e9e54f6c350, 8776e9183d5f85d90535a0b1b3b4e32a, 17be751d961c5baf6c1dbe2e70c5d93c)
+WITH '5ba6a5b81e95c93c26a33980f6e957d7' as study_id
+MATCH (tissue_code)-[:CODE]-(tissue_cui:Concept)-[r1:hubmap_dataset_contains_tissue]-(:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:study_id})
+RETURN DISTINCT tissue_code.CodeID
+
+
+# Return how many metadata Codes associated with a HUBMAP dataset
+WITH '5ba6a5b81e95c93c26a33980f6e957d7' as dataset_id // this is dataset_id,
+MATCH (meta_code:Code)-[r0:CODE]-(meta_cui:Concept)<-[r1]-(dataset_cui:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:dataset_id}) where not r1.SAB in ['HUBMAP_DATASET__TISSUE','HUBMAP_CLUSTER__HUBMAP_DATASET','HUBMAP_DONOR__HUBMAP_DATSET']
+RETURN  distinct meta_code.CodeID
+
+
+# Show a GTEX EXP Concept node, with its HGNC and UBERON Concept nodes connections, along with all three of their Code nodes
+match (gtex_exp:Concept)-[r0]-(gtex_exp_code:Code) where gtex_exp_code.SAB = 'GTEX_EXP' 
+match (gtex_exp)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code) where hgnc_code.SAB = 'HGNC'
+match (gtex_exp)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code) where ub_code.SAB = 'UBERON'
+return * limit 1
+
+
+# SHOW EQTL triple
+match (eqtl:Code {SAB:'GTEX_EQTL'})-[r]-(c:Concept)
+match (c)-[*1]-(cc:Concept) return c,cc limit 3
+
+# SHOW EXP double
+match (eqtl:Code {SAB:'GTEX_EXP'})-[r]-(c:Concept)
+match (c)-[*1]-(cc:Concept) return c,cc limit 2
+
+
+
+
 
 
 
