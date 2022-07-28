@@ -58,7 +58,10 @@ match (c)-[*1]-(cc:Concept) return c,cc limit 2
 
 
 
-
+# How many genes in with expression greater than .8 are there in the heart/kidney/brain?
+# Return all genes in the heart/kidney/brain that have gene expresion greater than .8
+# Return all eQTLs for the genes in the heart with gene expression greater than .8
+# Return all eQTLs for gene HGNC:24102.
 
 
 
