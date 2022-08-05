@@ -4,7 +4,8 @@ Deanne Taylor, Ben Stear, Taha Mohseni Ahooyi, Jonathan Silverstein
 
 Access this page at https://tinyurl.com/CFDE-Sept2022-KF-HuBMAP 
 
-## Petagraph, a knowledge graph for integrating Common Fund data at the level of the data point
+## HuBMAP-KF CFDE Collaboration
+### Petagraph, a knowledge graph for integrating Common Fund data at the level of the data point
 
 Hello, my name is Deanne Taylor, and I'll be presenting on the CFDE collaboration between HuBMAP and Kids First.
 
