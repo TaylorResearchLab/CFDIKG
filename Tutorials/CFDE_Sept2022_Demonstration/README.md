@@ -69,39 +69,7 @@ c.name AS Glycosylation_Type_Site_ProteinID,
 d.CODE AS Glycan
 ```
 
-Question 2: I'm interested in finding relationships betwen human phenotypes and gene pathways/genesets. Which human phenotypes are associated with MSigDB genesets/pathways, using gene-tissue expression information in GTEx?
-
-Find all pathways in MSigDB linked to genes expressed in GTEx tissues that are known to be linked to human phenotypes.
-
-Returns HPO terms associated with tissue-specific GTEx genes within MSigDB pathways.
-
-For the graphic, we "LIMIT 1". Table format query below will return many more.
-
-```graphql
-//Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
-MATCH (ubCode:Code {SAB:'UBERON'})-[:CODE]-(ubConcept:Concept)-[]-(hpoConcept)-[:phenotype_associated_with_gene {SAB:'HGNC__HPO'}]-(hgncConcept:Concept)-[r1]->(msigdbConcept:Concept)-[:PREF_TERM]->(msigdbTerm:Term),
-(hgncConcept:Concept)-[:gene_has_median_expression]-(gtex_exp_cui:Concept)-[:tissue_has_median_expression]-(ubConcept:Concept)-[:PREF_TERM]->(ubTerm:Term),
-(hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]->(hgncTerm:Term),
-(hpoCode:Code {SAB:'HPO'})<-[:CODE]-(hpoConcept)
-WHERE r1.SAB CONTAINS 'MSigDB C2'
-RETURN * LIMIT 1
-```
-
-![hpo_gtex_msigdb.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hpo_gtex_msigdb.png)
-
-
-```graphql
-//Returns HPO terms associated with genes and GTEx tissues MSigDB pathways associated with the genes
-MATCH (ubCode:Code {SAB:'UBERON'})-[:CODE]-(ubConcept:Concept)-[]-(hpoConcept)-[:phenotype_associated_with_gene {SAB:'HGNC__HPO'}]-(hgncConcept:Concept)-[r1]->(msigdbConcept:Concept)-[:PREF_TERM]->(msigdbTerm:Term),
-(hgncConcept:Concept)-[:gene_has_median_expression]-(gtex_exp_cui:Concept)-[:tissue_has_median_expression]-(ubConcept:Concept)-[:PREF_TERM]->(ubTerm:Term),
-(hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]->(hgncTerm:Term),
-(hpoCode:Code {SAB:'HPO'})<-[:CODE]-(hpoConcept)
-WHERE r1.SAB CONTAINS 'MSigDB C2'
-RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubConcept, 
-ubCode,ubTerm,hpoConcept,hpoCode LIMIT 100
-```
-
-Question 3. I hypothesize that HNRNPH2, a heterogeneous nuclear ribonucleoprotein that regulates RNA processing, may have some relationship to heart development that may affect subject phenotypes in Kids First. How are human phenotypes in Kids First related to HNRNPH2 in the knowledge graph?
+Question 2. A researcher hypothesizes that HNRNPH2, a heterogeneous nuclear ribonucleoprotein that regulates RNA processing, may have some relationship to heart development.  How are any human phenotypes in Kids First related to HNRNPH2 in the knowledge graph?
 
 We start with Atrial Septal Defects in Kids First data. We would be able to iterate through every Kids First phenotype.
 
