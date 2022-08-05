@@ -35,7 +35,7 @@ PetaGraph's model operates on unified biomedical concepts.  There are multiple w
 ### CFDE Queries on Petagraph
 
 	
-There is evidence that heart defects could be related to changes in developmental programs due to dysregulation of glycosylation.  What glycans are predicted to be found on proteins (and where on the proteins) from genes associated with a Kids First patient with a phenotype such as Atrial Septal Defect?
+Question 1: There is evidence that heart defects could be related to changes in developmental programs due to dysregulation of glycosylation.  What glycans are predicted to be found on proteins (and where on the proteins) from genes associated with a Kids First patient with a phenotype such as Atrial Septal Defect?
 
 
 ```graphql
@@ -69,7 +69,7 @@ c.name AS Glycosylation_Type_Site_ProteinID,
 d.CODE AS Glycan
 ```
 
-15. I'm interested in finding relationships betwen human phenotypes and gene pathways/genesets. Which human phenotypes are associated with MSigDB genesets/pathways, using gene-tissue expression information in GTEx?
+Question 2: I'm interested in finding relationships betwen human phenotypes and gene pathways/genesets. Which human phenotypes are associated with MSigDB genesets/pathways, using gene-tissue expression information in GTEx?
 
 Find all pathways in MSigDB linked to genes expressed in GTEx tissues that are known to be linked to human phenotypes.
 
@@ -101,9 +101,11 @@ RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubCon
 ubCode,ubTerm,hpoConcept,hpoCode LIMIT 100
 ```
 
-16. I hypothesize that HNRNPH2, a heterogeneous nuclear ribonucleoprotein that regulates RNA processing, may have some relationship to heart development. How is the human phenotype of Atrial Septal Defects related to LGR6 in the knowledge graph?
+Question 3. I hypothesize that HNRNPH2, a heterogeneous nuclear ribonucleoprotein that regulates RNA processing, may have some relationship to heart development that may affect subject phenotypes in Kids First. How are human phenotypes in Kids First related to HNRNPH2 in the knowledge graph?
 
-Shortest path between an HPO term and a gene and return everything on the path and the path length, with and without using MSigDB. 
+We start with Atrial Septal Defects in Kids First data. We would be able to iterate through every Kids First phenotype.
+
+Return the shortest path between an HPO term and a gene and return everything on the path and the path length, with and without using MSigDB. 
 Shortest paths aren't always the best paths, and there are queries that can be done ordering all paths by size, for example.
 
 ```graphql
@@ -128,31 +130,6 @@ RETURN  p AS Path
 
 Note “coexpressed_with” is based on GTEx (click on table result as SAB). Codes are orange, terms are Blue, and concept nodes are in purple.
 
-17. Shortest path between an HPO term and all genes and return everything on the path and the path length
-
-```graphql
-//Given an HPO term find shortest paths with all HGNC genes
-WITH 'HP:0001631' AS HPO_CODE
-MATCH (hpoCode:Code {CODE:HPO_CODE})<-[:CODE]-(hpoConcept:Concept),
-(hgncCode:Code {SAB:'HGNC'})<-[:CODE]-(hgncConcept:Concept)-[:PREF_TERM]->(hgncTerm:Term),
-p = shortestPath((hgncConcept)-[*]->(hpoConcept)) 
-RETURN hpoCode, hgncTerm, p LIMIT 10
-```
-
-```graphql
-//Given an HPO term find shortest paths with all HGNC genes and return it as table
-WITH 'HP:0001631' AS HPO_CODE
-MATCH (hpoCode:Code {CODE:HPO_CODE})<-[:CODE]-(hpoConcept:Concept),
-(hgncCode:Code {SAB:'HGNC'})<-[:CODE]-(hgncConcept:Concept)-[:PREF_TERM]->(hgncTerm:Term),
-p = shortestPath((hgncConcept)-[*]->(hpoConcept)) 
-RETURN hpoCode.CODE AS HPO_Accession, 
-hgncTerm.name AS Gene_ID, 
-length(p) AS Shortest_Path_Length LIMIT 10
-```
-
-![graph.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph%201.png)
-
-Shows every gene (as Term nodes in blue) related to the HPO term (as Code node in orange), and finds the shortest paths (by Concept nodes — in purple) [Click for zoomable SVG, then right-click on new image and open in new window.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph%201.svg)
 
 
 ## SUPPLEMENTAL INFO
