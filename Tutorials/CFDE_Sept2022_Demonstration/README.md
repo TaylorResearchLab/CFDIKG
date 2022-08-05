@@ -10,7 +10,7 @@ Hello, my name is Deanne Taylor, and I'll be presenting on the CFDE collaboratio
 
 Our goal in this project was to develop a Knowledge Graph to integrate CFDE datasets at the level of the data points. This would allow biomedical researchers to ask questions of this interconnected data,  by utilizing simple, complex and artificial intelligence queries and analyses. 
 
-The HuBMAP project (Jonathan Silvestein) developed an ontology (classification) graph based on the Unified Medical Language Service (UMLS) plus some other ontology sources.  The Kids First project (Taylor group) then integrated Common Fund data into the ontology knowledge graph, to create a system we call Petagraph.
+Jonathan Silvestein at the HuBMAP project developed an ontology (classification) graph based on the Unified Medical Language System (UMLS), and also included other ontology sources. This ontology graph is a collection of classification and annotation systems.  Myself and my group as part of the Kids First contribution, began adding Common Fund Data points into the annotation environment to create a knowledge graph system we call Petagraph.
 
 Another goal is to eventually build a user interface (UI) to allow for exploration and queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
 
