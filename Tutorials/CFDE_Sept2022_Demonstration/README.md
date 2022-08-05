@@ -9,9 +9,9 @@ Access this page at https://tinyurl.com/CFDE-Sept2022-KF-HuBMAP
 
 Hello, my name is Deanne Taylor, and I'll be presenting on the CFDE collaboration between HuBMAP and Kids First.
 
-Our goal in this project was to develop a Knowledge Graph to integrate CFDE datasets at the level of the data points. This would allow biomedical researchers to ask questions of this interconnected data,  by utilizing simple, complex and artificial intelligence queries and analyses. 
+Our goal in this project was to develop a Knowledge Graph to integrate Common Fund datasets at the level of the data points. This would allow biomedical researchers to ask questions of this interconnected data,  by utilizing simple, complex and artificial intelligence queries and analyses. 
 
-## This project was only made possible with CFDE support!
+## This project was only made possible with Common Fund Data Ecosystem activities and support!
 
 
 ### CFDE Queries on Petagraph
