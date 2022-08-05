@@ -1,15 +1,17 @@
-# June 9, 2021 CFDE Demonstration
+# September 2022 CFDE Demonstration
 
 Deanne Taylor, Ben Stear, Taha Moheseni Ahooyi, Jonathan Silverstein
 
 ## Building blocks of queries on a CFDE-data populated property graph
 
-For this tutorial/demonstration we'll be using a knowledge graph we're tentatively calling "PetaGraph."
+For this tutorial/demonstration we'll be using a knowledge graph we're calling "PetaGraph."
+It was developed as a collaboration between HuBMAP's Jonathan Silverstein and Deanne Taylor's group as part of Kids First.
 
-PetaGraph is populated with the HuBMAP UMLS ontology graph, with CFDE data introduced within it. 
-Additional data from mouse and human will be introduced this summer, as will some changes to the schema.
+The goal is to allow the actual data within CFDE to interoperate within a connected Knowledge Graph, so that plots, queries, and algorithms can be designed against it for biomedical reserach purposes.
 
-Here's numbers representing some of the datasets in PetaGraph that are important for this demonstration:
+PetaGraph is populated with the HuBMAP UMLS ontology graph, and the Taylor group integrated several sources of CFDE data into the ontology graph. 
+
+Here's numbers representing some of the CFDE datasets in PetaGraph that help inform this demonstration:
 
 ![summary_table.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/summary_table.png)
 
@@ -18,74 +20,15 @@ Our goal is to eventually build a user interface (UI) to allow for queries on an
 
 For this demonstration,  we'll be showing you the queries that will operate behind the UI.
 
+This project was brought about through CFDE support.
 
-## SUPPLEMENTAL INFO
 
-**Main Project GitHub** (updating often)
-
-[https://github.com/TaylorResearchLab/CFDIKG](https://github.com/TaylorResearchLab/CFDIKG)
-
-If you'd like access to the database to recreate this demonstration, please contact Deanne Taylor and Jonathan Silverstein.
-
-<A HREF="https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/Schema_CFDIKG_5-2022.md" target="new"> May 2022 Data Source Descriptions and Schema Reference</a> (right click to open in new window)
-
-<A HREF="https://neo4j.com/developer/cypher/guide-cypher-basics/" target="new"> Getting started with Cypher (neo4j) </a> (right click to open in new window)
-
-<A HREF="https://smart-api.info/ui/dea4bf91545a51b3dc415ba37e2a9e4e#/" target="new"> Python queries are based on the HuBMAP SMART API found here</A> (right click to open in new window)
-
-<A HREF="https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Demonstration_June2022/PetaGeneSABs.csv", target="new"> SAB list in PetaGraph</A> 
- 
 ## Introduction to PetaGraph, our experimental data-enriched version of the HuBMAP/UMLS database.
 
 PetaGraph's model operates on unified biomedical concepts.  There are multiple ways of classifying the same biomedical term, but in this model there is one central unifying concept per conceptual item, from multiple terminology systems. For example, a human gene concept from Gencode v37 can be represented by several IDs depending on the originating database, but they are all representing the same gene concept node.
 
-### Examples to try
 
-Queries into a neo4j database operate on Cypher, parallel to how relational databases use SQL.
-
-The schema structures data based on the idea of concept nodes as mentioned above. Concept nodes (shown here in orange) are those unifying principles that can support connections to multiple terminology systems (with IDs as "Codes"). In the example shown below, the central orange concept ID represents "acyclovir" which can have several IDs, found in databases such as ChEMBL, CHEBI, DrugBank, PubChem etc. 
-Here, we show the code node (CHEBI ID, purple), for acyclovir.  Here, a "preferred term" (brown) reports the preferred name for the drug.
-A similar structure is used for items such as gene names, ontologies, and other systems, as well as experimental data. 
-
-**Simple Example #1:**
-
-```graphql
-MATCH (a:Term)<--(b:Concept)
--->(c:Code)-[d:PT]->(a),
-(f:Definition)<--(b)-->
-(g:Semantic)-->(h:Semantic),
-(b)-[i:isa]->(j:Concept)
-WHERE b.CUI = d.CUI
-AND c.SAB = i.SAB
-RETURN * LIMIT 1
-```
-
-![example_dataset.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/example_dataset.png)
-
-**Simple Example #2:**  Learn about SABs (source abbreviations). 
-
-Let's select specific datasets by specifying the SAB (source abbreviation) property on the Code node. Here we match on a HPO Code node and its corresponding Concept node. 
-
-Other SABs to try are: HGNC (human genes), HGNC_HCOP (mouse genes), MP (mammalian phenotype), GTEX_EXP (GTEx expression data), GTEX_EQTL (GTEx eQTL data) 
-
- We can control how many ‘instances’ of the pattern are returned by using the LIMIT keyword. 
-
-```graphql
-MATCH (a:Concept)-[r:CODE]->(b:Code {SAB:"HPO"}) RETURN * LIMIT 5
-```
-
-**Simple Example #3:** 
-
-Get the preferred term of a concept
-
-```graphql
-MATCH (a:Concept{CUI:"C0001367"})-[:PREF_TERM]->(b:Term) RETURN *
-```
-
-
-## More Complex Queries
-
-### Basic "Level 1" queries
+### Basic "Level 1" queries on Petagraph
 
 1. Exploring GTEx experimental data.  
 
@@ -593,3 +536,23 @@ length(p) AS Shortest_Path_Length LIMIT 10
 ![graph.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph%201.png)
 
 Shows every gene (as Term nodes in blue) related to the HPO term (as Code node in orange), and finds the shortest paths (by Concept nodes — in purple) [Click for zoomable SVG, then right-click on new image and open in new window.](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/graph%201.svg)
+
+
+## SUPPLEMENTAL INFO
+
+**Main Project GitHub** (updating often)
+
+[https://github.com/TaylorResearchLab/CFDIKG](https://github.com/TaylorResearchLab/CFDIKG)
+
+If you'd like access to the database to recreate this demonstration, please contact Deanne Taylor and Jonathan Silverstein.
+
+<A HREF="https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/Schema_CFDIKG_5-2022.md" target="new"> May 2022 Data Source Descriptions and Schema Reference</a> (right click to open in new window)
+
+<A HREF="https://neo4j.com/developer/cypher/guide-cypher-basics/" target="new"> Getting started with Cypher (neo4j) </a> (right click to open in new window)
+
+<A HREF="https://smart-api.info/ui/dea4bf91545a51b3dc415ba37e2a9e4e#/" target="new"> Python queries are based on the HuBMAP SMART API found here</A> (right click to open in new window)
+
+<A HREF="https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Demonstration_June2022/PetaGeneSABs.csv", target="new"> SAB list in PetaGraph</A> 
+ 
+ 
+ 
