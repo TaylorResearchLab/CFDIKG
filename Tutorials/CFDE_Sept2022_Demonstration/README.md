@@ -11,6 +11,10 @@ The goal is to allow the actual data within CFDE to interoperate within a connec
 
 PetaGraph is populated with the HuBMAP UMLS ontology graph, and the Taylor group integrated several sources of CFDE data into the ontology graph. 
 
+![CFDE_Structure_Demo_Slide.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/CFDE_Structure_Demo_Slide.png)
+
+
+
 Here's numbers representing some of the CFDE datasets in PetaGraph that help inform this demonstration:
 
 ![summary_table.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/summary_table.png)
