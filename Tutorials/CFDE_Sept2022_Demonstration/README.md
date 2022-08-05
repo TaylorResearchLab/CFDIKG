@@ -10,26 +10,7 @@ Hello, my name is Deanne Taylor, and I'll be presenting on the CFDE collaboratio
 
 Our goal in this project was to develop a Knowledge Graph to integrate CFDE datasets at the level of the data points. This would allow biomedical researchers to ask questions of this interconnected data,  by utilizing simple, complex and artificial intelligence queries and analyses. 
 
-Jonathan Silverstein at the HuBMAP project developed an ontology (classification) graph based on the Unified Medical Language System (UMLS), and also included other ontology sources. This ontology graph is a collection of classification and annotation systems.  Myself and my group as part of the Kids First contribution, began adding Common Fund Data points into the annotation environment to create a knowledge graph system we call Petagraph.
-
-Another goal is to eventually build a user interface (UI) to allow for exploration and queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
-
-![CFDE_Structure_Demo_Slide.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/CFDE_Structure_Demo_Slide.png)
-
-Here's numbers representing some of the CFDE datasets in PetaGraph that help inform this demonstration:
-
-![summary_table.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/summary_table.png)
-
-
 ## This project was only made possible with CFDE support!
-
-
-## Introduction to PetaGraph, our experimental data-enriched version of the HuBMAP/UMLS database.
-
-For this demonstration,  we'll be showing you the queries that will operate behind the UI.
-
-
-PetaGraph's model operates on unified biomedical concepts.  There are multiple ways of classifying the same biomedical term, but in this model there is one central unifying concept per conceptual item, from multiple terminology systems. For example, a human gene concept from Gencode v37 can be represented by several IDs depending on the originating database, but they are all representing the same gene concept node.
 
 
 ### CFDE Queries on Petagraph
@@ -49,12 +30,12 @@ RETURN * LIMIT 1
 ![Protein_Glycan2.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/Protein_Glycan2.png)
 
 The glycan is attached to a O-link location on the protein, which is connected to the gene ID, and then to the HPO id.
-In the figure above you can see the identity of the glycan on the far right, shown by selecting it in the interface here.
+
+In the figure above you can see the identity of the glycan on the far right, shown by selecting it in the interface.
+
 Or you can create a table and see all the results --
 
-
-Table return of the above query.
-
+Table return of the above query:
 
 ```graphql
 //Returns a table (not a graphic view)
@@ -100,6 +81,20 @@ MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-
 WHERE gtex_term.lowerbound > MIN_EXP 
 RETURN DISTINCT ChEBITerm.name AS Compound, hgncTerm.name AS GENE, ub_term.name AS Tissue, gtex_term.lowerbound AS Expresseion_Level ORDER BY Expresseion_Level ASCENDING
 ```
+
+
+## Background
+
+Jonathan Silverstein at the HuBMAP project developed an ontology (classification) graph based on the Unified Medical Language System (UMLS), and also included other ontology sources. This ontology graph is a collection of classification and annotation systems.  Myself and my group as part of the Kids First contribution, began adding Common Fund Data points into the annotation environment to create a knowledge graph system we call Petagraph.
+
+Another goal is to eventually build a user interface (UI) to allow for exploration and queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
+
+![CFDE_Structure_Demo_Slide.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/CFDE_Structure_Demo_Slide.png)
+
+Here's numbers representing some of the CFDE datasets in PetaGraph that help inform this demonstration:
+
+![summary_table.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/summary_table.png)
+
 
 ## SUPPLEMENTAL INFO
 
