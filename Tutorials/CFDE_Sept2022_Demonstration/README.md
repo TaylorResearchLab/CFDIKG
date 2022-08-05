@@ -69,36 +69,37 @@ c.name AS Glycosylation_Type_Site_ProteinID,
 d.CODE AS Glycan
 ```
 
-Question 2. A researcher hypothesizes that HNRNPH2, a heterogeneous nuclear ribonucleoprotein that regulates RNA processing, may have some relationship to heart development.  How are any human phenotypes in Kids First related to HNRNPH2 in the knowledge graph?
-
-We start with Atrial Septal Defects in Kids First data. We would be able to iterate through every Kids First phenotype.
-
-Return the shortest path between an HPO term and a gene and return everything on the path and the path length, with and without using MSigDB. 
-Shortest paths aren't always the best paths, and there are queries that can be done ordering all paths by size, for example.
+Question 2: Given a subject ID in KF, find all the HPO terms for  that patient, and then find all genes associated with those HPO terms, then  find all cis-eQTLs related to those genes. Note that this query is not returning variants actually found within the subject, but rather potential locations to test for variants,  given the phenotypes associated with the subject.
 
 ```graphql
-//With MSigDB relatioships
-WITH 'HP:0001631' AS HPO_CODE, 'HNRNPH2' AS GENE_NAME
-MATCH (hpoCode:Code {CODE:HPO_CODE})<-[:CODE]-(hpoConcept:Concept), 
-(hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[:CODE]-(hgncConcept:Concept), 
-p = shortestPath((hgncConcept)-[*]->(hpoConcept))
-RETURN p, hgncCode, hgncTerm, hpoCode
+WITH 'PT_1J582GQE' AS KF_ID
+MATCH (kfCode:Code {SAB:'KF',CODE: KF_ID})-[r0:CODE]-(kfCUI:Concept)-[r1:patient_has_phenotype]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]-(hgncCUI:Concept)-[r3:gene_has_eqtl]-(gtexEqtlCUI:Concept)-[r4:CODE]-(gtexEqtlCode:Code)
+MATCH (hpoCUI)-[r5:CODE]-(hpoCode)
+MATCH (hgncCUI)-[r6:CODE]-(hgncCode {SAB:'HGNC'})-[r7:PT]-(hgncTerm:Term)
+MATCH (gtexEqtlCode)-[r8:on_chromosome]-(eqtl_chrom:Term)
+MATCH (gtexEqtlCode)-[r9:eqtl_location]-(eqtl_loc:Term)
+MATCH (gtexEqtlCode)-[r10:p_value]-(eqtl_pval:Term)
+WHERE eqtl_pval.upperbound < 1e-10
+MATCH (gtexEqtlCode)-[r11:rs_id_dbSNP151_GRCh38p7]-(eqtl_rsID:Term)
+RETURN KF_ID, hpoCode.CODE AS hpo_code, 
+hgncTerm.name AS hgnc_symbol,
+ eqtl_chrom.name AS eqtl_chromosome,
+ eqtl_loc.name AS location,
+ eqtl_rsID.name AS rsID, 
+ eqtl_pval.name AS pvalue LIMIT 100
 ```
+
+Question 3: Start with a compound in LINCs, find all human genes related to that compound and then all the tissues in GTEx with those genes TPM > a user-specified threshold.
 
 ```graphql
-//Without MSigDB relatioships
-WITH 'HP:0001631' AS HPO_CODE, 'HNRNPH2' AS GENE_NAME
-MATCH (hpoCode:Code {CODE:HPO_CODE})<-[:CODE]-(hpoConcept:Concept), 
-(hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[:CODE]-(hgncConcept:Concept), 
-p = shortestPath((hgncConcept)-[r*]->(hpoConcept)) WHERE NONE(R IN r WHERE R.SAB CONTAINS 'MSigDB')
-RETURN  p AS Path
+//Returns a table containing compund generic name correlated with genes with higher than threshold expression level in different tissues
+WITH 'mosapride' AS COMPOUND_NAME, 5 AS MIN_EXP 
+MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-[:CODE]-(ChEBIconcept:Concept)-[r1 {SAB:'LINCS L1000'}]->(hgncConcept:Concept)-[:gene_has_median_expression]-(gtex_exp_cui:Concept)-[:tissue_has_median_expression]-(ub_cui:Concept)-[:PREF_TERM]->(ub_term:Term),
+(gtex_exp_cui:Concept)-[:CODE]->(gtex_exp_code:Code {SAB:'GTEX_EXP'})-[]->(gtex_term:Term),
+(hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]-(hgncTerm:Term)
+WHERE gtex_term.lowerbound > MIN_EXP 
+RETURN DISTINCT ChEBITerm.name AS Compound, hgncTerm.name AS GENE, ub_term.name AS Tissue, gtex_term.lowerbound AS Expresseion_Level ORDER BY Expresseion_Level ASCENDING
 ```
-
-![hpo_to_gene_path.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/hpo_to_gene_path.png)
-
-Note “coexpressed_with” is based on GTEx (click on table result as SAB). Codes are orange, terms are Blue, and concept nodes are in purple.
-
-
 
 ## SUPPLEMENTAL INFO
 
