@@ -69,7 +69,7 @@ c.name AS Glycosylation_Type_Site_ProteinID,
 d.CODE AS Glycan
 ```
 
-Question 2: Given a subject ID in KF, find all the HPO terms for  that patient, and then find all genes associated with those HPO terms, then  find all cis-eQTLs related to those genes. Note that this query is not returning variants within the subject genotype, but rather potential genomic locations to test for variants.
+Question 2: A researcher wants to check all cis-eQTLs sites for possible germline variants changing gene expression in Kids First patients that may contribute to a birth defect or cancer phenotype.  Given a particular subject ID in Kids First,  find all the HPO terms for that subject, and then find all genes associated with those HPO terms, then find all cis-eQTLs that may regulate those genes' expression. Note that this query is not returning variants within the subject genotype, but rather potential genomic locations to test for variants.
 
 ```graphql
 WITH 'PT_1J582GQE' AS KF_ID
