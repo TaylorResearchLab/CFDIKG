@@ -2,6 +2,8 @@
 
 Deanne Taylor, Ben Stear, Taha Moheseni Ahooyi, Jonathan Silverstein
 
+Access this page at https://tinyurl.com/CFDE-Sept2022-KF-HuBMAP 
+
 ## Integrating Common Fund Data for Discovery
 
 For this tutorial/demonstration we'll be using a knowledge graph we're calling "PetaGraph."
