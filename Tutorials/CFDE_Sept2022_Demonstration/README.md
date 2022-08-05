@@ -6,30 +6,28 @@ Access this page at https://tinyurl.com/CFDE-Sept2022-KF-HuBMAP
 
 ## Integrating Common Fund Data for Discovery
 
-For this tutorial/demonstration we'll be using a knowledge graph we're calling "PetaGraph."
-It was developed as a collaboration between HuBMAP's Jonathan Silverstein and Deanne Taylor's group as part of Kids First.
+Hello, my name is Deanne Taylor, and I'll be presenting on the CFDE collaboration between HuBMAP and Kids First.
 
-The goal is to allow the actual data within CFDE to interoperate within a connected Knowledge Graph, so that plots, queries, and algorithms can be designed against it for biomedical reserach purposes.
+Our goal in this project was to develop a Knowledge Graph to integrate CFDE datasets at the level of the data points, to allow biomedical researchers to as questions of this interconnected data, by utilizing simple, complex and artificial intelligence queries and analyses. 
 
-PetaGraph is populated with the HuBMAP UMLS ontology graph, and the Taylor group integrated several sources of CFDE data into the ontology graph. 
+The HuBMAP project (Jonathan Silvestein) developed an ontology (classification) graph based on the Unified Medical Language Service (UMLS) plus some other ontology sources.  The Kids First project (Taylor group) then integrated Common Fund data into the ontology knowledge graph, to create a system we call Petagraph.
+
+Another goal is to eventually build a user interface (UI) to allow for exploration and queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
 
 ![CFDE_Structure_Demo_Slide.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/CFDE_Structure_Demo_Slide.png)
-
-
 
 Here's numbers representing some of the CFDE datasets in PetaGraph that help inform this demonstration:
 
 ![summary_table.png](https://github.com/TaylorResearchLab/CFDIKG/blob/master/Tutorials/CFDE_Hackathons/tutorial_images/summary_table.png)
 
 
+## This project was only made possible with CFDE support!
+
 
 ## Introduction to PetaGraph, our experimental data-enriched version of the HuBMAP/UMLS database.
 
-Our goal is to eventually build a user interface (UI) to allow for queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
-
 For this demonstration,  we'll be showing you the queries that will operate behind the UI.
 
-**This project was only made possible with CFDE support.**
 
 PetaGraph's model operates on unified biomedical concepts.  There are multiple ways of classifying the same biomedical term, but in this model there is one central unifying concept per conceptual item, from multiple terminology systems. For example, a human gene concept from Gencode v37 can be represented by several IDs depending on the originating database, but they are all representing the same gene concept node.
 
