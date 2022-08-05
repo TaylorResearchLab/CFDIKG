@@ -1,6 +1,6 @@
 # September 2022 CFDE Demonstration
 
-Deanne Taylor, Ben Stear, Taha Moheseni Ahooyi, Jonathan Silverstein
+Deanne Taylor, Ben Stear, Taha Mohseni Ahooyi, Jonathan Silverstein
 
 Access this page at https://tinyurl.com/CFDE-Sept2022-KF-HuBMAP 
 
