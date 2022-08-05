@@ -10,7 +10,7 @@ Hello, my name is Deanne Taylor, and I'll be presenting on the CFDE collaboratio
 
 Our goal in this project was to develop a Knowledge Graph to integrate CFDE datasets at the level of the data points. This would allow biomedical researchers to ask questions of this interconnected data,  by utilizing simple, complex and artificial intelligence queries and analyses. 
 
-Jonathan Silvestein at the HuBMAP project developed an ontology (classification) graph based on the Unified Medical Language System (UMLS), and also included other ontology sources. This ontology graph is a collection of classification and annotation systems.  Myself and my group as part of the Kids First contribution, began adding Common Fund Data points into the annotation environment to create a knowledge graph system we call Petagraph.
+Jonathan Silverstein at the HuBMAP project developed an ontology (classification) graph based on the Unified Medical Language System (UMLS), and also included other ontology sources. This ontology graph is a collection of classification and annotation systems.  Myself and my group as part of the Kids First contribution, began adding Common Fund Data points into the annotation environment to create a knowledge graph system we call Petagraph.
 
 Another goal is to eventually build a user interface (UI) to allow for exploration and queries on an integrated CFDE database, to be driven by a front-end web engine, so that users of any experience level will be able to use the interface.
 
@@ -35,7 +35,7 @@ PetaGraph's model operates on unified biomedical concepts.  There are multiple w
 ### CFDE Queries on Petagraph
 
 	
-Question 1: There is evidence that heart defects could be related to changes in developmental programs due to dysregulation of glycosylation.  What glycans are predicted to be found on proteins (and where on the proteins) from genes associated with a Kids First patient with a phenotype such as Atrial Septal Defect?
+Question 1: A researcher suspects that that some heart defects could be due to the dysregulation of glycosylation, leading to timing changes in developmental programs.  They want to know which glycosylation sites and which glycan types could be disrupted on specific proteins related to heart defects so they can go on to check Kids First genotypes?
 
 
 ```graphql
