@@ -2,7 +2,7 @@
 
 Deanne Taylor, Ben Stear, Taha Moheseni Ahooyi, Jonathan Silverstein
 
-## Building blocks of queries on a CFDE-data populated property graph
+## Integrating Common Fund Data for Discovery
 
 For this tutorial/demonstration we'll be using a knowledge graph we're calling "PetaGraph."
 It was developed as a collaboration between HuBMAP's Jonathan Silverstein and Deanne Taylor's group as part of Kids First.
