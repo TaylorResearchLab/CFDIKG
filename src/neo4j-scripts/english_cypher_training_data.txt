@@ -11,10 +11,6 @@ match (hgnc_hcop: Code {SAB : 'HGNC'})  return count(hgnc_hcop) as hgnc_hcop_cnt
 ## How many codes are there from the 'MP' dataset?
 match (mp: Code {SAB : 'MP'})  return count(mp) as mp_cnt 
 
-## ^ This pattern can be extended for any SAB
-
-
-
 # What phenotypes are related to <GENE>? (enter name of gene or HGNC code?) ex) HGNC:10593, HGNC:3756, HGNC:7584
 match (gene:Code {CODE:'HGNC:9787'})--(gene_C:Concept)-[r]-(hpo_C:Concept)-[c:CODE]-(hpo:Code {SAB: 'HPO'})-[]-(hpo_term:Term)  return distinct hpo_term.name
 
@@ -27,26 +23,21 @@ match (ub_code:Code {SAB:'UBERON',CODE:'0000947'})-[r0:CODE]-(ub_cui:Concept)-[r
 where gtex_term.lowerbound > .8
 return gtex_exp_code.CODE AS gtex, gtex_term.name AS exp limit 100
 
-
-
 # Return all tiissue codes associated with a HUBMAP dataset ID. (More dataset IDs: 2dca1bf5832a4102ba780e9e54f6c350, 8776e9183d5f85d90535a0b1b3b4e32a, 17be751d961c5baf6c1dbe2e70c5d93c)
 WITH '5ba6a5b81e95c93c26a33980f6e957d7' as study_id
 MATCH (tissue_code)-[:CODE]-(tissue_cui:Concept)-[r1:hubmap_dataset_contains_tissue]-(:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:study_id})
 RETURN DISTINCT tissue_code.CodeID
-
 
 # Return how many metadata Codes associated with a HUBMAP dataset
 WITH '5ba6a5b81e95c93c26a33980f6e957d7' as dataset_id // this is dataset_id,
 MATCH (meta_code:Code)-[r0:CODE]-(meta_cui:Concept)<-[r1]-(dataset_cui:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:dataset_id}) where not r1.SAB in ['HUBMAP_DATASET__TISSUE','HUBMAP_CLUSTER__HUBMAP_DATASET','HUBMAP_DONOR__HUBMAP_DATSET']
 RETURN  distinct meta_code.CodeID
 
-
 # Show a GTEX EXP Concept node, with its HGNC and UBERON Concept nodes connections, along with all three of their Code nodes
 match (gtex_exp:Concept)-[r0]-(gtex_exp_code:Code) where gtex_exp_code.SAB = 'GTEX_EXP' 
 match (gtex_exp)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code) where hgnc_code.SAB = 'HGNC'
 match (gtex_exp)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code) where ub_code.SAB = 'UBERON'
 return * limit 1
-
 
 # SHOW EQTL triple
 match (eqtl:Code {SAB:'GTEX_EQTL'})-[r]-(c:Concept)
@@ -56,12 +47,87 @@ match (c)-[*1]-(cc:Concept) return c,cc limit 3
 match (eqtl:Code {SAB:'GTEX_EXP'})-[r]-(c:Concept)
 match (c)-[*1]-(cc:Concept) return c,cc limit 2
 
-
-
 # How many genes in with expression greater than .8 are there in the heart/kidney/brain?
 # Return all genes in the heart/kidney/brain that have gene expresion greater than .8
 # Return all eQTLs for the genes in the heart with gene expression greater than .8
 # Return all eQTLs for gene HGNC:24102.
 
+
+######## August 23rd additions #######
+
+# Return all glycans from genes that are associated with a human phenotype (HPO) term
+MATCH (m:Code {CODE:'HP:0001631'})<-[:CODE]-(n:Concept)<-[r:isa*..1 {SAB:'HPO'}]-(o:Concept) WITH collect(n.CUI)+o.CUI AS T UNWIND T AS UT WITH collect(DISTINCT UT) AS PHS MATCH (q:Concept)-[:phenotype_associated_with_gene {SAB:'HGNC__HPO'}]->(t:Concept)-[:has_product]->(u:Concept)-[:has_site]->(v:Concept)-[:binds_glycan]->(w:Concept),
+(t)-[:CODE]->(r2:Code)-[:SYN]->(a:Term),
+(u)-[:CODE]->(b:Code),(v)-[:PREF_TERM]->(c:Term),
+(w)-[:CODE]->(d) WHERE q.CUI IN PHS 
+RETURN DISTINCT a.name AS Gene, 
+b.CODE AS UniProtKB_AC, 
+c.name AS Glycosylation_Type_Site_ProteinID, 
+d.CODE AS Glycan
+
+# Return generic names of compounds correlated with genes above threshold of 5
+WITH 'mosapride' AS COMPOUND_NAME, 5 AS MIN_EXP 
+MATCH (ChEBITerm:Term {name:COMPOUND_NAME})<-[]-(ChEBICode:Code {SAB:'CHEBI'})<-[:CODE]-(ChEBIconcept:Concept)-[r1 {SAB:'LINCS L1000'}]->(hgncConcept:Concept)-[:gene_has_median_expression]-(gtex_exp_cui:Concept)-[:tissue_has_median_expression]-(ub_cui:Concept)-[:PREF_TERM]->(ub_term:Term),
+(gtex_exp_cui:Concept)-[:CODE]->(gtex_exp_code:Code {SAB:'GTEX_EXP'})-[]->(gtex_term:Term),
+(hgncConcept:Concept)-[:CODE]->(hgncCode:Code {SAB:'HGNC'})-[:SYN]-(hgncTerm:Term)
+WHERE gtex_term.lowerbound > MIN_EXP 
+RETURN DISTINCT ChEBITerm.name AS Compound, hgncTerm.name AS GENE, ub_term.name AS Tissue, gtex_term.lowerbound AS Expresseion_Level ORDER BY Expresseion_Level ASCENDING
+
+
+# Given a Kids First patient ID, return all associated HPO terms as well as all associated genes and eqtls  
+WITH 'PT_1J582GQE' AS KF_ID
+MATCH (kfCode:Code {SAB:'KF',CODE: KF_ID})-[r0:CODE]-(kfCUI:Concept)-[r1:patient_has_phenotype]-(hpoCUI:Concept)-[r2:phenotype_associated_with_gene]-(hgncCUI:Concept)-[r3:gene_has_eqtl]-(gtexEqtlCUI:Concept)-[r4:CODE]-(gtexEqtlCode:Code)
+MATCH (hpoCUI)-[r5:CODE]-(hpoCode)
+MATCH (hgncCUI)-[r6:CODE]-(hgncCode {SAB:'HGNC'})-[r7:PT]-(hgncTerm:Term)
+MATCH (gtexEqtlCode)-[r8:on_chromosome]-(eqtl_chrom:Term)
+MATCH (gtexEqtlCode)-[r9:eqtl_location]-(eqtl_loc:Term)
+MATCH (gtexEqtlCode)-[r10:p_value]-(eqtl_pval:Term)
+WHERE eqtl_pval.upperbound < 1e-10
+MATCH (gtexEqtlCode)-[r11:rs_id_dbSNP151_GRCh38p7]-(eqtl_rsID:Term)
+RETURN KF_ID, hpoCode.CODE AS hpo_code, 
+hgncTerm.name AS hgnc_symbol,
+ eqtl_chrom.name AS eqtl_chromosome,
+ eqtl_loc.name AS location,
+ eqtl_rsID.name AS rsID, 
+ eqtl_pval.name AS pvalue LIMIT 100
+
+
+# Return an example of the basic schema of the graph
+MATCH (a:Term)<--(b:Concept)
+-->(c:Code)-[d:PT]->(a),
+(f:Definition)<--(b)-->
+(g:Semantic)-->(h:Semantic),
+(b)-[i:isa]->(j:Concept)
+WHERE b.CUI = d.CUI
+AND c.SAB = i.SAB
+RETURN * LIMIT 1
+
+# Return the preferred term of a concept
+MATCH (a:Concept{CUI:"C0001367"})-[:PREF_TERM]->(b:Term) RETURN *
+
+# Return the TPM for a tissue-gene pair 
+MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]-(gtex_term:Term)
+RETURN * LIMIT 1
+
+# Return the TPM for a tissue-gene pair and the gtex concept node
+MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})-[:TPM]-(gtex_term:Term)
+MATCH (gtex_cui)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code {SAB:'HGNC'})
+RETURN * LIMIT 1
+
+# Given an HGNC (gene) name, give the mouse gene name from HCOP
+WITH 'BRCA1' as gene_name
+MATCH (hgnc_term:Term {name:gene_name+' gene'})-[:MTH_ACR]-(hgnc_code:Code {SAB:'HGNC'})-[r1:CODE]-(hpo_concept)-[r2:has_human_ortholog]-(mouse_gene_concept:Concept)-[r3:CODE]-(mouse_gene_code:Code {SAB:'HGNC_HCOP'}) 
+RETURN *
+
+# Given an HPO code, return the corresponding MP code
+WITH 'HP:0001631' AS HPO_CODE
+MATCH (hpoTerm:Term)-[r0:PT]-(hpoCode:Code {CODE:HPO_CODE})-[r1:CODE]-(hpo_concept)-[r2:has_mouse_phenotype]-(mp_concept:Concept)-[r3:CODE]-(mp_code:Code {SAB:'MP'})-[r4:Term]-(mpTerm:Term)
+RETURN *
+
+
+# Given a gene name, return all LINCS L1000 compounds that have positive or negative correlated relatioships
+WITH 'A2M' AS GENE_NAME
+MATCH (hgncTerm:Term {name:GENE_NAME})<-[]-(hgncCode:Code {SAB:'HGNC'})<-[r1:CODE]-(hgnc_concept:Concept)-[r2 {SAB:'LINCS L1000'}]->(ChEBI_concept:Concept)-[r3:CODE]->(ChEBICode:Code {SAB:'CHEBI'}),(ChEBI_concept:Concept)-[:PREF_TERM]->(ChEBITerm:Term)
+RETURN * LIMIT 1
 
 
