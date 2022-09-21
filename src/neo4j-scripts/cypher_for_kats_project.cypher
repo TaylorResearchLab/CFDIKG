@@ -61,6 +61,19 @@ RETURN DISTINCT gene_code_1.CODE AS gene_1, chEBI_term.name AS edge, gene_code_2
 
 5) Return edge list of genes that share a pathway
 
+LOAD CSV WITH HEADERS FROM 'file:///Group5_hgnc.csv' AS file
+WITH  file WHERE file.hgnc_id IS NOT NULL
+WITH file.hgnc_id AS GENE_LIST
+MATCH (msigdb_concept_1:Concept)-[:CODE]-(msigdb_code_1:Code {SAB:'MSigDB_Systematic_Name'})-[r:PT]-(msigdb_term:Term)
+MATCH (gene_code_1:Code {SAB:'HGNC'})-[:CODE]-(gene_concept_1:Concept)-[a:has_signature_gene]-(msigdb_concept_1)-[b:has_signature_gene]-(gene_concept_2:Concept)-[:CODE]-(gene_code_2:Code {SAB:'HGNC'})
+WHERE gene_code_1.CODE  IN GENE_LIST AND gene_code_2.CODE  IN GENE_LIST AND  gene_code_1.CODE  <> gene_code_2.CODE
+RETURN DISTINCT gene_code_1.CODE AS gene_1, msigdb_term.name AS edge, gene_code_2.CODE AS gene_2 
+
+No results for any of the 5 gene groups
+
+
+
+
 
 
 
