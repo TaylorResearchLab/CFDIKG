@@ -1,1 +1,1 @@
-# Folder to store the actual python code for each cavatica app
+# Folder to store the python code for each cavatica app
