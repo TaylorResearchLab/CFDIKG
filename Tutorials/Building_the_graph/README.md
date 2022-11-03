@@ -5,6 +5,6 @@
 ## 1. Human - Mouse Ortholog Relationships
 #### Navigate to [HGNC's Ortholog Prediction Tool](https://www.genenames.org/tools/hcop/), scroll to the bottom and under 'Bulk Downloads' select  'Mouse' from the first drop down menu option and '15 column' from the second drop down menu option. Download this dataset. 
 
-# 
+# should we just store all the datasets on the cloud somewere so they wont have to download it themselves?
 
 
