@@ -25,4 +25,36 @@ RETURN sum(ortho), sum(eqtl),sum(exp),sum(mp),sum(hgnc),sum(hpo),sum(uberon),sum
 ### Stats for base UMLS-KG ###
 
 Nodes: 19,894,444
-Edges
+Edges: 52,087,930
+Relationship Types: 1102
+Property Keys: 11
+Node Label Types: 5 (Concepts, Codes, Terms, Definitions, Semantic)
+
+#### match (n) return distinct labels(n) as node_labels, count(n) as total_nodes
+Node Count by Label:  
+- Concepts: 4,612,422
+- Codes: 5,453,973
+- Terms: 9,803,663 
+- Defs: 24,259
+- Semantic: 127
+
+
+
+
+
+
+### Stats for the full Petagraph ###
+
+Nodes: 49,624,263
+Edges: 209,878,717
+Relationship Types: 1911
+Property Keys: 13 (the 2 extra properties are upperbound and lowerbound on the code nodes of the bins )
+Node Label Types: 5 (Concepts, Codes, Terms, Definitions, Semantic)
+
+#### match (n) return distinct labels(n) as node_labels, count(n) as total_nodes
+Node Count by Label:  
+- Concepts: 19,000,094
+- Codes: 19,889,354
+- Terms:  10,565,175
+- Defs: 169,513
+- Semantic: 127
