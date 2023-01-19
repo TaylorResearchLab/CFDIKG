@@ -17,7 +17,7 @@ Edges: 52,087,930
 Relationship Types: 1102
 Property Keys: 11
 Node Label Types: 5 (Concepts, Codes, Terms, Definitions, Semantic)
-
+CUI-CUI edges:
 #### match (n) return distinct labels(n) as node_labels, count(n) as total_nodes
 Node Count by Label:  
 - Concepts: 4,612,422
@@ -25,10 +25,6 @@ Node Count by Label:
 - Terms: 9,803,663 
 - Defs: 24,259
 - Semantic: 127
-
-
-
-
 
 
 ####################################
@@ -40,7 +36,7 @@ Edges: 209,878,717
 Relationship Types: 1911
 Property Keys: 13 (the 2 extra properties are upperbound and lowerbound on the code nodes of the bins )
 Node Label Types: 5 (Concepts, Codes, Terms, Definitions, Semantic)
-
+CUI-CUI edges:
 #### match (n) return distinct labels(n) as node_labels, count(n) as total_nodes
 Node Count by Label:  
 - Concepts: 19,000,094
