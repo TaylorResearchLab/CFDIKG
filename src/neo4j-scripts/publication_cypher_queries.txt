@@ -44,3 +44,16 @@ Node Count by Label:
 - Terms:  10,565,175
 - Defs: 169,513
 - Semantic: 127
+
+
+##########################################################
+############ Queries for the publication #################
+##########################################################
+
+
+MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})
+MATCH (gtex_cui)-[r01]-(tpm_cui:Concept)-[:CODE]-(tpm_code:Code {SAB:'EXP_BINS'})
+MATCH (gtex_cui)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code {SAB:'HGNC'})
+MATCH (gtex_cui)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code {SAB:'UBERON'}) 
+WHERE ub_code.CODE = '0002106'  AND tpm_code.upperbound > .1 
+RETURN hgnc_code.CODE AS gene, tpm_code.name AS TPM_bin
