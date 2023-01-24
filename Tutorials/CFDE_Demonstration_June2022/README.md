@@ -541,7 +541,7 @@ RETURN hgncConcept,hgncCode,hgncTerm,msigdbConcept,msigdbTerm,gtex_exp_cui,ubCon
 ubCode,ubTerm,hpoConcept,hpoCode LIMIT 100
 ```
 
-16. I hypothesize that HNRNPH2, a heterogeneous nuclear ribonucleoprotein that regulates RNA processing, may have some relationship to heart development. How is the human phenotype of Atrial Septal Defects related to LGR6 in the knowledge graph?
+16. I hypothesize that HNRNPH2, a heterogeneous nuclear ribonucleoprotein that regulates RNA processing, may have some relationship to heart development. How is the human phenotype of Atrial Septal Defects related to HNRNPH2 in the knowledge graph?
 
 Shortest path between an HPO term and a gene and return everything on the path and the path length, with and without using MSigDB. 
 Shortest paths aren't always the best paths, and there are queries that can be done ordering all paths by size, for example.
