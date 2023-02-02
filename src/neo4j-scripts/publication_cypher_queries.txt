@@ -51,7 +51,7 @@ Node Count by Label:
 ##########################################################
 
 QUERY 1.
-########### Return genes associated with an UBERON code that has a TPM above some threshold ##############
+########### Return gene expression data from GTEx genes associated with an UBERON code that have a TPM above some threshold ##############
 MATCH (gtex_cui:Concept)-[r0:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'})
 MATCH (gtex_cui)-[r01]-(tpm_cui:Concept)-[:CODE]-(tpm_code:Code {SAB:'EXP_BINS'})
 MATCH (gtex_cui)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code {SAB:'HGNC'})
@@ -59,8 +59,8 @@ MATCH (gtex_cui)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code {SAB:'UBERON'})
 WHERE ub_code.CODE = '0002106'  AND tpm_code.upperbound > .1 
 RETURN hgnc_code.CODE AS gene, tpm_code.name AS TPM_bin
 
-QUERY 2a.
-########## Return intersection of genes associated with multiple HPO codes ############         INCORRECT QUERY
+QUERY 2a. #shouldn't this be "all genes in OMIM or ..." (Deanne)
+########## Return intersection of all genes associated with multiple HPO codes ############         INCORRECT QUERY
 WITH  ["HP:0011567","HP:0001684","HP:0011643","HP:0010445","HP:0011994"] as phenos
 MATCH (hpoCode:Code {SAB:'HPO'})-[r1:CODE]-(hpo_concept:Concept)
 WHERE hpoCode.CODE in phenos
@@ -93,6 +93,13 @@ WHERE hpoTerm.name contains 'brain'
 RETURN distinct hpoCode.CODE as code , hpoTerm.name order by code
 
 QUERY 4.
+
 ########  Return genes/eqtls that are associated with the same human and mouse phenotype
+
+
+
+
+
+
 
 
