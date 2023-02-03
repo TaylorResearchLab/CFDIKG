@@ -76,7 +76,7 @@ QUERY 2b.
 
 
 QUERY 3.
-################### Return all genes that are highly expressed in the brain and that are pos/neg effected by a group of drugs
+################### Return all genes that are highly expressed in the brain and that are affected by a group of drugs
 MATCH (ChEBITerm:Term {name:'piroxicamum'})-[r0]-(ChEBICode:Code {SAB:'CHEBI'})-[r1:CODE]-(ChEBI_concept:Concept)-[:positively_correlated_with_chemical_or_drug]-(hgnc_concept:Concept)-[:CODE]-(hgnc_code:Code {SAB:'HGNC'})-[:PT]-(hgnc_term:Term)
 WITH hgnc_concept //  hgnc_code,hgnc_term   (hgnc_code)-[:CODE]-
 MATCH (hgnc_concept)-[`RO:0002206`]-(gtex_concept:Concept)-[:CODE]-(gtex_code:Code {SAB:'GTEX_EXP'}), (gtex_concept)-[:has_expression]-(exp_concept:Concept)-[:CODE]-(exp_code:Code {SAB:'EXP_BINS'})-[r2]-(exp_term:Term)
