@@ -1,0 +1,11 @@
+
+#### Link Prediction in Cypher ####
+
+MATCH (o1:Code {CODE:“HP:0001636”})<-[:CODE]-(c1:Concept), (o2:Code {SAB:“HGNC”})<-[:CODE]-(c2:Concept)-[:PREF_TERM]->(t2:Term) RETURN o1.CODE as HPO_TERM,t2.name as gene, SCORING AS score limit 10
+SCORING:
+gds.alpha.linkprediction.adamicAdar(c1, c2)
+gds.alpha.linkprediction.commonNeighbors(c1, c2)
+gds.alpha.linkprediction.preferentialAttachment(c1, c2)
+gds.alpha.linkprediction.resourceAllocation(c1, c2)
+gds.alpha.linkprediction.sameCommunity(c1, c2, ‘partition’)
+gds.alpha.linkprediction.totalNeighbors(c1, c2)
