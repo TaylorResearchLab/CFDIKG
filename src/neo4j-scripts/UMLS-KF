@@ -21,6 +21,30 @@ CREATE CONSTRAINT ON (n:NDC) ASSERT n.ATUI IS UNIQUE;
 CREATE CONSTRAINT ON (n:NDC) ASSERT n.NDC IS UNIQUE;
 CALL db.index.fulltext.createNodeIndex("Term_name",["Term"],["name"]);
 
+######### CONSTRAINTS AND INDEX FOR NEO4J 5.5+ ################
+######### (Replace ON with FOR and ASSERT with REQUIRE) #######
+//MATCH (n:Term) WHERE size((n)--())=0 DELETE (n);
+CREATE CONSTRAINT FOR (n:Semantic) REQUIRE n.TUI IS UNIQUE;
+CREATE CONSTRAINT FOR (n:Semantic) REQUIRE n.STN IS UNIQUE;
+CREATE CONSTRAINT FOR (n:Semantic) REQUIRE n.DEF IS UNIQUE;
+CREATE CONSTRAINT FOR (n:Semantic) REQUIRE n.name IS UNIQUE;
+CREATE CONSTRAINT FOR (n:Concept) REQUIRE n.CUI IS UNIQUE;
+CREATE CONSTRAINT FOR (n:Code) REQUIRE n.CodeID IS UNIQUE;
+CREATE INDEX FOR (n:Code) ON (n.SAB);
+CREATE INDEX FOR (n:Code) ON (n.CODE);
+CREATE CONSTRAINT FOR (n:Term) REQUIRE n.SUI IS UNIQUE;
+CREATE INDEX FOR (n:Term) ON (n.name);
+CREATE CONSTRAINT FOR (n:Definition) REQUIRE n.ATUI IS UNIQUE;
+CREATE INDEX FOR (n:Definition) ON (n.SAB);
+CREATE INDEX FOR (n:Definition) ON (n.DEF);
+CREATE CONSTRAINT FOR (n:NDC) REQUIRE n.ATUI IS UNIQUE;
+CREATE CONSTRAINT FOR (n:NDC) REQUIRE n.NDC IS UNIQUE;
+CALL db.index.fulltext.createNodeIndex("Term_name",["Term"],["name"]);
+
+
+
+#################################################################
+
 // Mutate GENE_LOCATIONs from Strings to Integers
 MATCH (t:Term)-[r:gene_start_position|gene_end_position]-(i:Code {SAB:'GENE_LOCATION'})
 SET t.name = toInteger(t.name);
