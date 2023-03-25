@@ -76,16 +76,43 @@ SET  t.upperbound = toFloat(bin[1]);
 
 # Find number of nodes from each SAB:
 
+############### SABs from Alans UBKG graph ############
+MATCH (c:Code)  
+WITH  
+  CASE WHEN (c.SAB = 'PATO') THEN 1 ELSE 0 END as PATO,  
+  CASE WHEN (c.SAB = 'UBERON') THEN 1 ELSE 0 END as UBERON,  
+  CASE WHEN (c.SAB = 'CL') THEN 1 ELSE 0 END as CL,  
+  CASE WHEN (c.SAB = 'DOID') THEN 1 ELSE 0 END as DOID,  
+  CASE WHEN (c.SAB = 'OBI') THEN 1 ELSE 0 END as OBI,  
+  CASE WHEN (c.SAB = 'OBIB') THEN 1 ELSE 0 END as OBIB,  
+  CASE WHEN (c.SAB = 'EDAM') THEN 1 ELSE 0 END as EDAM,  
+  CASE WHEN (c.SAB = 'HSAPDV') THEN 1 ELSE 0 END as HSAPDV,
+  CASE WHEN (c.SAB = 'SBO') THEN 1 ELSE 0 END as SBO,
+  CASE WHEN (c.SAB = 'MI') THEN 1 ELSE 0 END as MI,
+  CASE WHEN (c.SAB = 'CHEBI') THEN 1 ELSE 0 END as CHEBI,
+  CASE WHEN (c.SAB = 'MP') THEN 1 ELSE 0 END as MP,
+  CASE WHEN (c.SAB = 'ORDO') THEN 1 ELSE 0 END as ORDO,
+  CASE WHEN (c.SAB = 'UO') THEN 1 ELSE 0 END as UO,
+  CASE WHEN (c.SAB = 'UNIPROTKB') THEN 1 ELSE 0 END as UNIPROTKB,
+  CASE WHEN (c.SAB = 'HRAVS') THEN 1 ELSE 0 END as HRAVS,
+  CASE WHEN (c.SAB = 'HUBMAP') THEN 1 ELSE 0 END as HUBMAP,
+  CASE WHEN (c.SAB = 'CCF') THEN 1 ELSE 0 END as CCF,
+  CASE WHEN (c.SAB = 'MONDO') THEN 1 ELSE 0 END as MONDO,
+  CASE WHEN (c.SAB = 'EFO') THEN 1 ELSE 0 END as EFO,
+  CASE WHEN (c.SAB = 'SENNET') THEN 1 ELSE 0 END as SENNET,
+  CASE WHEN (c.SAB = 'AZ') THEN 1 ELSE 0 END as AZ,
+RETURN sum(PATO), sum(UBERON),sum(CL),sum(DOID),sum(OBI),sum(OBIB),sum(EDAM),sum(HSAPDV),sum(SBO),sum(MI),
+sum(CHEBI), sum(MP),sum(ORDO),sum(UO),sum(UNIPROTKB),sum(HRAVS),sum(HUBMAP),sum(CCF),sum(MONDO),sum(EFO),
+sum(SENNET), sum(AZ)
+
+############### my ontologies/mapping files
 MATCH (c:Code)  
 WITH  
   CASE WHEN (c.SAB = 'HGNC_HCOP') THEN 1 ELSE 0 END as ortho,  
   CASE WHEN (c.SAB = 'GTEX_EQTL') THEN 1 ELSE 0 END as eqtl,  
   CASE WHEN (c.SAB = 'GTEX_EXP') THEN 1 ELSE 0 END as exp,  
-  CASE WHEN (c.SAB = 'MP') THEN 1 ELSE 0 END as mp,  
   CASE WHEN (c.SAB = 'HGNC') THEN 1 ELSE 0 END as hgnc,  
   CASE WHEN (c.SAB = 'HPO') THEN 1 ELSE 0 END as hpo,  
-  CASE WHEN (c.SAB = 'UBERON') THEN 1 ELSE 0 END as uberon,  
-  CASE WHEN (c.SAB = 'DBSNP_151') THEN 1 ELSE 0 END as dbSNP,
   CASE WHEN (c.SAB = 'scHeart PMID: 31835037') THEN 1 ELSE 0 END as scHeart,
   CASE WHEN (c.SAB = 'HUBMAP') THEN 1 ELSE 0 END as hubmap
 RETURN sum(ortho), sum(eqtl),sum(exp),sum(mp),sum(hgnc),sum(hpo),sum(uberon),sum(dbSNP),sum(scHeart),sum(hubmap)
