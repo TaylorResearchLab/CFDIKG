@@ -1,0 +1,61 @@
+
+
+
+
+######################################
+##   QUICK, LIVE DEMO QUERIES       ##
+##  FOR THE NIH ALL HANDS MEETING   ##
+##    TUESDAY APRIL 4TH, 2023       ##
+######################################
+
+1. Search for gtex code and its TPM expression
+MATCH (gtex_code:Code {SAB:'GTEX_EXP'})-[r0:CODE]-(gtex_cui:Concept)-[r1:has_expression]-(exp_concept:Concept)-[r2:CODE]-(exp_code:Code{SAB:'EXP_BINS'} )
+RETURN * LIMIT 1
+
+
+2. + HGNC gene
+// Search for a GTEx node and its TPM node
+MATCH (gtex_code:Code {SAB:'GTEX_EXP'})-[r0:CODE]-(gtex_cui:Concept)-[r1:has_expression]-(exp_concept:Concept)-[r2:CODE]-(exp_code:Code{SAB:'EXP_BINS'} ) 
+// Add HGNC gene in
+MATCH (gtex_cui)-[r3:`RO:0002206`]-(hgnc_concept:Concept)-[r4:CODE]-(hgnc_code:Code {SAB:'HGNC'})
+RETURN * LIMIT 1
+
+
+3. + UBERON tissue
+// Match for a GTEx node and its TPM expression node
+MATCH (gtex_code:Code {SAB:'GTEX_EXP'})-[:CODE]-(gtex_cui:Concept)-[:has_expression]-(exp_concept:Concept)-[:CODE]-(exp_code:Code{SAB:'EXP_BINS'} ) 
+// Add HGNC gene Concept, Code and Term
+MATCH (gtex_cui)-[:`RO:0002206`]-(hgnc_concept:Concept)-[:CODE]-(hgnc_code:Code {SAB:'HGNC'})-[:PT]-(hgnc_Term:Term)
+// Add UBERON tissue Concept, Code and Term
+MATCH (gtex_cui)-[:`RO:0002206`]-(ub_concept:Concept)-[:CODE]-(ub_code:Code {SAB:'UBERON'})-[:SY]-(ub_Term:Term)
+RETURN * LIMIT 1
+
+
+4. Parameterize the search
+WITH 'cerebellum' as tissue_name,'OTX2' as gene_name
+// Match for a GTEx node and its TPM expression node
+MATCH (gtex_code:Code {SAB:'GTEX_EXP'})-[:CODE]-(gtex_cui:Concept)-[:has_expression]-(exp_concept:Concept)-[:CODE]-(exp_code:Code {SAB:'EXP_BINS'} ) 
+// Add HGNC gene Concept, Code and Term
+MATCH (gtex_cui)-[:`RO:0002206`]-(hgnc_concept:Concept)-[r0:CODE]-(hgnc_code:Code {SAB:'HGNC'})-[:ACR]-(hgnc_Term:Term {name:gene_name})
+// Add UBERON tissue Concept, Code and Term
+MATCH (gtex_cui)-[:`RO:0002206`]-(ub_concept:Concept)-[:CODE]-(ub_code:Code {SAB:'UBERON'})-[:PT]-(ub_Term:Term {name:tissue_name})
+RETURN * LIMIT 1
+
+
+5. Filter GTEX expression nodes by TPM in a tissue
+
+
+
+
+
+6. 
+WITH 'atrial septal defect' AS mp_term_name
+MATCH (mp_term:Term {name:mp_term_name})-[:PT]-(mp_code:Code {SAB:'MP'})-[r3:CODE]-(mp_concept:Concept)-[r2 {SAB:'HPO_MP'}]-(hpo_concept:Concept)-[r1:CODE]-(hpoCode:Code {SAB:'HPO'})
+MATCH (hpo_concept)-[r4]-(hgnc_concept:Concept)-[r5:CODE]-(hgncCode:Code {SAB:'HGNC'})-[:PT]-(hgnc_term:Term)
+RETURN distinct hgnc_term.name AS gene_name, hgncCode.CODE AS hgnc_code LIMIT 100
+
+
+
+
+bin/neo4j-admin database import full --nodes=import/movies.csv --nodes=import/actors.csv --relationships=import/roles.csv neo4j
+new commands for neo4j 5.0+
