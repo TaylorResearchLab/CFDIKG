@@ -72,7 +72,35 @@ MATCH (eqtl:Code {SAB:'scHeart PMID: 31835037'})-[p:log2fc]-(t:Term) WITH t,spli
 SET t.lowerbound = toFloat(bin[0]) 
 SET  t.upperbound = toFloat(bin[1]);
 
-################################################################################
+##########################################################################################
+############## Setting numerical properties w/ new graph structure, ######################
+#############   where numerical bins have their own CUI/Codes ############################
+##########################################################################################
+
+###### GTEX_EQTL  (P_VALUE)   what else uses pvals? scHeart
+
+MATCH (pval_node:Code {SAB:'P_VALUE_BINS'}) WITH pval_node, split(pval_node.CODE,',') AS bin
+SET pval_node.lowerbound = toFloat(bin[0]) 
+SET  pval_node.upperbound = toFloat(bin[1]);
+
+#### GTEX_EXP    (TPM)
+MATCH (exp_node:Code {SAB:'EXP_BINS'}) WITH exp_node ,split(exp_node.CODE,',') as bin 
+SET exp_node.lowerbound = toFloat(bin[0]) 
+SET  exp_node.upperbound = toFloat(bin[1]);
+
+##### scHeart ( log2fc, regular expression levels?)
+MATCH (log2_node:Code {SAB:'LOG2FC_BINS'}) WITH log2_node ,split(log2_node.CODE,',') as bin 
+SET log2_node.lowerbound = toFloat(bin[0]) 
+SET  log2_node.upperbound = toFloat(bin[1]);
+
+
+
+
+
+
+
+
+
 
 # Find number of nodes from each SAB:
 
