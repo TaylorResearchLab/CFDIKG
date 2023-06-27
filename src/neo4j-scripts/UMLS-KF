@@ -88,6 +88,13 @@ MATCH (exp_node:Code {SAB:'EXP_BINS'}) WITH exp_node ,split(exp_node.CODE,',') a
 SET exp_node.lowerbound = toFloat(bin[0]) 
 SET  exp_node.upperbound = toFloat(bin[1]);
 
+#### GTEXEXP (TPM) For dot seperated bin codes
+match (expbins_code:Code {SAB:'EXPBINS'})-[:CODE]-(expbins_cui:Concept)
+WITH expbins_code ,split(expbins_code.CODE,'.') as bin 
+set expbins_code.lowerbound = toFloat(bin[0]+'.'+bin[1])
+set expbins_code.upperbound = toFloat(bin[2]+'.'+bin[3])
+
+
 ##### scHeart ( log2fc, regular expression levels?)
 MATCH (log2_node:Code {SAB:'LOG2FC_BINS'}) WITH log2_node ,split(log2_node.CODE,',') as bin 
 SET log2_node.lowerbound = toFloat(bin[0]) 
